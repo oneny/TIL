@@ -136,9 +136,12 @@ div 태그 안에 코드를 작서하는 것이 아니라 script를 작성해 sc
       - js
         - index.js
         - views
+          - AbstractView.js
           - Dashboard.js
           - Posts.js
           - Settings.js
+          - NotFound.js
+          - PostView.js
   - server.js
   - node_modules
   - package-lock.json
@@ -293,6 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 > History.pushState() - MDN  
 > 세 번째 파라미터는 브라우저가 pushState() 호출 이후에 주어진 URL로 탐색하지 않는다.
+> 즉, API를 활용하여 페이지를 다시 로드하지 않고 URL을 탐색할 수 있다.
 
 - 페이지가 업로드됐을 때, 각각의 페이지들을 클릭할 때 마다 router() 함수를 실행시켜 해당 페이지에 대한 정보를 렌더링하는 것이다.
   - HTML이 모두 로드됐을 때 페이지를 보여주기 위한 이벤트 `DOMCOntentLoaded`를 사용
@@ -320,11 +324,32 @@ window.addEventListener("popstate", router);
 
 - Not Found도 만들어 봤다.
 
+#### 컴포넌트 틀 잡기(AbstractView.js)
+
+```javascript
+export default class {
+  constructor(params) {
+    this.params = params;
+  }
+
+  setTitle(title) {
+    document.title = title;
+  }
+
+  getHtml() {
+    return "";
+  }
+}
+```
+
 ```javascript
 // frontend/static/js/pages/Dashboard.js
-export default class {
-  constructor() {
-    document.title = "Dashboard";
+import AbstractView from "./AbstractView.js";
+
+export default class extends AbstractView {
+  constructor(params) {
+    super(params);
+    this.setTitle("Dashboard");
   }
 
   async getHtml() {
@@ -360,19 +385,21 @@ export default class {
 </details>
 
 <details>
-  <summary>Settings 페이지</summary>
+  <summary>NotFound 페이지</summary>
 
 ```javascript
-// frontend/static/js/pages/Settings.js
-export default class {
-  constructor() {
-    document.title = "Settings";
+import AbstractView from "./AbstractView.js";
+
+export default class extends AbstractView {
+  constructor(params) {
+    super(params);
+    this.setTitle("404 Not Found");
   }
 
   async getHtml() {
     return `
-    <h1>This is Settings</h1>
-  `;
+      <h1>404 Not Found</h1>
+    `;
   }
 }
 ```
@@ -509,4 +536,147 @@ a {
   color: #009579;
 }
 ```
+
 </details>
+
+## Client Side URL Params 추가하기
+
+### 동적 라우팅
+
+위에서 바뀌는 라우트에 따라 적절한 뷰를 그릴 수 있지만 리액트에서 했던 것처럼 `/:id`같은 동적라우팅 처리하는 코드를 작성해보자.
+
+```javascript
+// index.js에 정규식 객체 생성
+const pathToRegex = (path) =>
+  new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
+
+console.log(pathToRegex("/posts/:id")); // /^\/posts\/(.+)$/
+```
+
+#### `potentialMatches` 함수 수정
+
+```javascript
+const potentialMathches = routes.map((route) => {
+    return {
+      route,
+      result: location.pathname.match(pathToRegex(route.path));
+    };
+  });
+"/post/2".match(/^\/1posts\/(.+)$/); // 일치하지 않으면 null 반환
+"/posts/2".match(/^\/posts\/(.+)$/); // ["/posts/2", "2", index: 0, ...]
+"/posts/2/4".match(/^\/posts\/(.+)\/(.+)$/); // ["/posts/2/4", "2", "4", ...]
+```
+
+- `match` 메서드는 배열을 반환하는데, 정규식과 문자열이 일치하면 전체 문자열을 배열의 첫 번째 요소로 가진다.
+- 만약 정규식에 `()`로 감싸진 부분이 있다면 이를 **_캡쳐링 그룹_** 이라고 하는데 캡쳐링 그룹에 해당하는 문자열이 두 번째 요소로 들어간다.
+  - 만약 일치하지 않는다면 null 값을 반환한다.
+- 이를 이용하면 동적라우팅에서 매번 변화하는 패스파라미터 부분을 분리하기 쉽다.
+  - 캡쳐링 그룹 더 알아가기 : [rhostem님의 포스터](https://blog.rhostem.com/posts/2018-11-11-regex-capture-group)
+
+### view에 파라미터를 가져오는 함수 작성
+
+```javascript
+const getParams = (match) => {
+  // ["/posts/2", "2", ...]에서 id값에 해당하는 두 번째 값을 가져옴
+  const values = match.result.slice(1);
+
+  const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
+    (result) => result[1]
+  );
+
+  console.log(Array.from(match.route.path.matchAll(/:(\w+)/g)));
+  return {};
+};
+
+// routes 배열에 { path: "/posts/:id/:decode", view: Posts } 엘리먼트를 추가하고,
+// /posts/2/4로 이 함수를 console로 찍어내면 배열은 다음과 같다.
+[[":id", "id", ...], [":decode", "decode", ...]]
+// 각 1번 인덱스의 값만 가져와서 새로운 keys 배열을 만든다
+// return 부분에 다음과 같이 수정한다.
+
+return Object.fromEntries(keys.map((key, i) => {
+    return [key, value[i]];
+  })); // { id: 2, decode: 4}
+```
+
+<details>
+  <summary><b>완성된 index.js</b></summary>
+
+  ```javascript
+import Dashboard from "./views/Dashboard.js";
+import Posts from "./views/Posts.js";
+import Settings from "./views/Settings.js";
+import NotFound from "./views/NotFound.js";
+import PostView from "./views/PostView.js";
+
+const pathToRegex = (path) =>
+  new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
+
+const getParams = (match) => {
+  // ["/posts/2", "2", ...]에서 id값에 해당하는 두 번째 값을 가져옴
+  const values = match.result.slice(1);
+
+  const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
+    (result) => result[1]
+  );
+
+  return Object.fromEntries(
+    keys.map((key, i) => {
+      return [key, values[i]];
+    })
+  );
+};
+
+const navigateTo = (url) => {
+  history.pushState(null, null, url);
+  router();
+};
+
+const router = async () => {
+  // /posts/:id
+  const routes = [
+    { path: "/", view: Dashboard },
+    { path: "/posts", view: Posts },
+    { path: "/posts/:id", view: PostView },
+    { path: "/settings", view: Settings },
+  ];
+
+  // Test each route for potential match
+  const potentialMathches = routes.map((route) => {
+    return {
+      route,
+      result: location.pathname.match(pathToRegex(route.path)),
+    };
+  });
+
+  // isMatch가 true인 것 반환하여 match 할당
+  let match = potentialMathches.find(
+    (potentialMathch) => potentialMathch.result !== null
+  );
+
+  let view;
+  if (!match) {
+    view = new NotFound();
+  } else {
+    view = new match.route.view(getParams(match));
+  }
+
+  document.querySelector("#root").innerHTML = await view.getHtml();
+};
+
+window.addEventListener("popstate", router);
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.addEventListener("click", (e) => {
+    if (e.target.matches("[data-link]")) {
+      e.preventDefault();
+      navigateTo(e.target.href);
+    }
+  });
+
+  router();
+});
+```
+</details>
+
+
