@@ -295,12 +295,12 @@ document.addEventListener("DOMContentLoaded", () => {
 ```
 
 > History.pushState() - MDN  
-> 세 번째 파라미터는 브라우저가 pushState() 호출 이후에 주어진 URL로 탐색하지 않는다.
+> 세 번째 파라미터는 브라우저가 pushState() 호출 이후에 주어진 URL로 탐색하지 않는다.  
 > 즉, API를 활용하여 페이지를 다시 로드하지 않고 URL을 탐색할 수 있다.
 
 - 페이지가 업로드됐을 때, 각각의 페이지들을 클릭할 때 마다 router() 함수를 실행시켜 해당 페이지에 대한 정보를 렌더링하는 것이다.
   - HTML이 모두 로드됐을 때 페이지를 보여주기 위한 이벤트 `DOMCOntentLoaded`를 사용
-- `click` 이벤트를 등록하고 `a`태그의 `data-link` 라는 속성이 있는 곳에서만 동작하도록 서렂
+- `click` 이벤트를 등록하고 `a`태그의 `data-link` 라는 속성이 있는 곳에서만 동작하도록 설정
 - `history.pushState`를 사용해서 url을 변경할 수 있게 만들어준다.
   - `a`태그로 페이지를 이동해도 새로고침이 아닌 바로 console.log(match.route.view())가 실행되는 것 확인이 가능하다.
   - 정확히 말하자면 페이지 이동 보다는 이동한 것처럼 만든 눈속임이다.
