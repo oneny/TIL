@@ -75,7 +75,33 @@
 - [10. Object 오브젝트(ES5 기준)](#10-object-오브젝트es5-기준)
   - [ES5 Object 함수](#es5-object-함수)
   - [프로퍼티 디스크립터](#프로퍼티-디스크립터)
+  - [디스크립터 타입 인식 기준](#디스크립터-타입-인식-기준)
+  - [프로퍼티 디스크립터 목적](#프로퍼티-디스크립터-목적)
+  - [value 속성](#value-속성)
+  - [writable 속성](#writable-속성)
+  - [configurable 속성](#configurable-속성)
+  - [get/set 속성](#getset-속성)
   - [defineProperty()](#defineproperty)
+  - [defineProperties()](#defineproperties)
+  - [getPrototypeOf()](#getprototypeof)
+  - [getOwnPropertyNames](#getownpropertynames)
+  - [keys()](#keys)
+  - [getOwnPropertyDescriptor](#getownpropertydescriptor)
+  - [preventExtensions](#preventextensions)
+  - [isExtensible()](#isextensible)
+  - [Seal()](#seal)
+  - [isSeal()](#isseal)
+  - [freeze()](#freeze)
+  - [isFrozen()](#isfrozen)
+- [11. JSON 오브젝트](#11-json-오브젝트)
+  - [JSON 오브젝트 개요](#json-오브젝트-개요)
+  - [stringify()](#stringify)
+  - [parse()](#parse)
+- [12. Date 오브젝트](#12-date-오브젝트)
+  - [Date 오브젝트 개요](#date-오브젝트-개요)
+  - [시간값 표시 기준](#시간값-표시-기준)
+  - [시간의 문자열 형태](#시간의-문자열-형태)
+  - [Date 오브젝트 프로퍼티 리스트](#date-오브젝트-프로퍼티-리스트)
 
 ## 1. 기본 문법
 
@@ -797,13 +823,574 @@ console.log(result); // 12
 
 ### 프로퍼티 디스크립터
 
-| 이름         | 개요                                      |
-| ------------ | ----------------------------------------- |
-| value        | [[Value]], 설정한 값                      |
-| writable     | [[Writable]], 값 변경 가능 여부           |
-| get          | [[Get]], 값 반환 프로퍼티 함수            |
-| set          | [[Set]], 값 설정 프로퍼티 함수            |
-| enumerable   | [[Enumerable]], 프로퍼티 열거 가능 여부   |
-| configurable | [[Configurable]], 프로퍼티 삭제 가능 여부 |
+| [타입  | 이름         | 속성값                                                     | 디폴트 값 |
+| ------ | ------------ | ---------------------------------------------------------- | --------- |
+| 데이터 | value        | [[Value]], 설정한 값(JS 지원 데이터 타입)                  | undefined |
+| 데이터 | writable     | [[Writable]], 값 변경 가능 여부(true, false)               | false     |
+| 액세스 | get          | [[Get]], 값 반환 프로퍼티 함수(Function Object, undefined) | undefined |
+| 액세스 | set          | [[Set]], 값 설정 프로퍼티 함수(Function Object, undefined) | undefined |
+| 공용   | enumerable   | [[Enumerable]], 프로퍼티 열거 가능 여부(true, false)       | false     |
+| 공용   | configurable | [[Configurable]], 프로퍼티 삭제 가능 여부(true, false)     | false     |
+
+- 프로퍼티 디스크립터
+  - 프로퍼티의 속성 이름과 속성 값을 정의한다.
+- 디스크립터 타입 분류
+  - <b>데이터</b> 프로퍼티 디스크립터
+  - <b>액세스</b> 프로퍼티 디스크립터
+  - <b>공용</b> 프로퍼티 디스크립터
+  - 디스크립터 타입에 속한 속성만 같이 사용할 수 있다.
+    - value와 writable은 같이 작성 가능, value와 get, set은 같이 작성할 수 없다.
+    - 공용은 말 그대로 공용으로 get, enumerable 같이 작성할 수 있다.
+
+### 디스크립터 타입 인식 기준
+
+1. 먼저 value 또는 writable 작성 체크
+2. 작성되어 있으면 `데이터 프로퍼티 디스크립터` 타입으로 인식
+3. 작성되어 있지 않으면 `액세스 프로퍼티 디스크립터` 타입으로 인식
+4. 데이터와 액세스 프로퍼티 디스크립터를 함께 작성할 수 없으므로 구분 가능
+
+#### 프로퍼티 디스크립터 목적
+
+- 주된 목적: 데이터를 보호할 수 있다.
+  - enumerable: false 같은 상태로 설정하면 열거할 수 없도록 설정할 수 있다.
+
+### value 속성
+
+- 프로퍼티 값을 { value: "JS북" } 형태로 작성
+  - value 속성을 get/set 속성과 같이 작성 불가
+  ```javascript
+  // Uncaught SyntaxError: Unexpted token 'get'
+  var obj = {};
+  Object.defineProperty(obj, "book", {
+    value: "JS북",
+    get: function () {},
+  });
+  ```
+
+### writable 속성
+
+- 프로퍼티 값 변경 여부 설정
+
+```javascript
+// 프로퍼티 변경 가능
+var obj = {};
+Object.defineProperty(obj, "book", {
+  value: "JS책",
+  writable: true, // 변경 가능
+});
+obj.book = "변경 가능";
+console.log(obj.book); // 변경 가능
+
+// 프로퍼티 변경 불가(디폴트 값)
+var obj2 = {};
+Object.defineProperty(obj2, "book", {
+  value: "JS책",
+  writable: false, // 변경 가능
+});
+obj2.book = "변경 불가";
+console.log(obj2.book); // JS 책
+```
+
+### configurable 속성
+
+- 프로퍼티 삭제 가능 여부 설정
+
+```javascript
+// 프로퍼티 삭제 가능(configurable: true)
+var obj = {};
+Object.defineProperty(obj, "book", {
+  value: "JS책",
+  configurable: true, // 변경 가능
+});
+delete obj.book;
+console.log(obj.book); // undefined
+
+// 프로퍼티 삭제 불가(configurable: false)
+var obj2 = {};
+Object.defineProperty(obj2, "book", {
+  value: "JS책",
+  configurable: false, // 변경 가능
+});
+delete obj2.book;
+console.log(obj2.book); // JS 책
+```
+
+### get/set 속성
+
+```javascript
+var obj = {},
+  data = {};
+Object.defineProperty(obj, "book", {
+  set: function (param) {
+    data.title = param;
+  },
+  get: function (param) {
+    return data.title;
+  },
+});
+obj.book = "JS책";
+console.log(obj.book); // JS책
+console.log(data); // { title: "JS책" }
+```
+
+- value 속성이 없기 때문에 set 속성을 호출하게 되는데 이것이 setter
+  - obj.book의 set 함수를 호출하면서 "JS책"을 파라미터 값으로 넘겨줌
+  - data 오브젝트의 title 프로퍼티에 "JS책"을 설정
+- value 속성이 없으므로 get 속성을 호출하게 되는데 이것이 getter
+  - obj.book의 get 함수를 호출하면 get 함수에서 data.title 값을 반환
+  - setter에서 설정한 "JS책"이 반환된다.
 
 ### defineProperty()
+
+- 대상 오브젝트에 프로퍼티 추가 또는 프로퍼티 속성을 변경할 수 있다.
+- 프로퍼티마다 상태를 가지고 있다.
+  - 상태란? 변경/삭제/열람 가능 여부 -> true or false
+  - 상태가 가능일 때만 처리할 수 있음
+
+```javascript
+var obj = {}; // 디폴트 속성은 변경/삭제/열거 모두 가능한 상태
+Object.defineProperty(obj, "book", {
+  value: "JS북",
+  enumerable: true,
+});
+console.log(obj); // { book: "JS북" }
+```
+
+- 첫 번째 파라미터에 프로퍼티를 추가할 객체 작성
+- 두 번째 파라미터에 프로퍼티 이름을 작성
+- 세 번째 파라미터에 value는 프로퍼티 값, enumerable 같은 속성을 설정할 수 있다.
+
+### defineProperties()
+
+```javascript
+var obj = {};
+Object.defineProperties(obj, {
+  soccer: {
+    value: "축구",
+    enumerable: true,
+  },
+  basketball: {
+    value: "야구",
+    enumerable: false,
+  },
+});
+for (var name in obj) {
+  console.log(name, ":", obj[name]);
+}
+// soccer: 축구
+```
+
+### getPrototypeOf()
+
+- 파라미터의 prototype에 연결된 프로퍼티 반환
+
+```javascript
+function Book(point) {
+  this.point = point;
+}
+Book.prototype.getPoint = function () {};
+Book.prototype.setPoint = function () {};
+var obj = new Book(100);
+
+var result = Object.getPrototypeOf(obj);
+for (var key in result) {
+  console.log(key, ":", result[key]);
+}
+// getPoint: function() {}
+// setPoint: function() {}
+```
+
+### getOwnPropertyNames()
+
+- 오브젝트의 프로퍼티 이름을 배열로 반환
+  - 자신이 만든 프로퍼티가 대상으로 다른 오브젝트에서 받은 프로퍼티는 제외된다.
+
+```javascript
+var obj = {};
+Object.defineProperties(obj, {
+  book: { value: "책" },
+  point: { value: 123 },
+});
+var names = Object.getOwnPropertyNames(obj); // obj의 프로퍼티의 이름을 읽어들인다.
+for (let name of names) {
+  console.log(name);
+}
+
+// book
+// point
+```
+
+### keys()
+
+- 열거 가능 프로퍼티 이름 반환
+  - 열거 가능 여부 체크할 수 있다.
+
+```javascript
+var obj = {};
+Object.defineProperties(obj, {
+  book: {
+    value: "책",
+    enumerable: true,
+  },
+  point: { value: 123 },
+});
+for (var name of Object.keys(obj)) {
+  console.log(name);
+}
+// book
+// point는 enumerable: false(디폴트값)이므로 반환되지 않는다.
+```
+
+### getOwnPropertyDescriptor()
+
+- 프로퍼티 디스크립터의 속성 이름, 값 반환한다.
+  - 다른 오브젝트에서 받은 프로퍼티는 제외
+
+```javascript
+var obj = {};
+Object.defineProperty(obj, "book", {
+  value: "책",
+  writable: true,
+  enumerable: true,
+});
+var desc = Object.getOwnPropertyDescriptor(obj, "book");
+for (var key in desc) {
+  console.log(key, ":", desc[key]);
+}
+// value:책
+// writable:true
+// enumerable:true
+// configurable:false
+```
+
+### preventExtensions()
+
+- 오브젝트에 프로퍼티 추가 금지 설정
+- 프로퍼티 삭제, 변경은 가능하다.
+- 목적: 오브젝트 자체에 추가를 할 수 없게 막아 놓으면 데이터를 보호할 수 있다.
+  - 단, 추가 금지를 설정한 후에는 추가 기능으로 변경 불가하다.
+
+```javascript
+var obj = {};
+Object.preventExtensions(obj);
+try {
+  Object.defineProperty(obj, "book", {
+    value: "책",
+  });
+} catch (e) {
+  console.log("추가 불가");
+}
+// 추가 불가
+```
+
+### isExtensible()
+
+- 오브젝트에 프로퍼티 추가 금지 여부 반환
+
+```javascript
+var obj = {};
+Object.defineProperty(obj, "book", {
+  value: "책",
+});
+console.log(Object.isExtensible(obj)); // true
+Object.preventExtensions(obj);
+console.log(Object.isExtensible(obj)); // false
+```
+
+### seal()
+
+- 오브젝트에 프로퍼티 추가, 삭제 금지 설정
+  - 추가 금지는 오브젝트 단위로 설정하고, 삭제 금지는 프로퍼티 단위로 설정한다.
+  - 추가는 금지를 하더라도 변경은 할 수 있다.
+
+```javascript
+var obj = {};
+Object.defineProperty(obj, "book", {
+  value: "책",
+  writable: true,
+});
+Object.seal(obj);
+try {
+  Object.defineProperty(obj, "sports", {
+    value: "스포츠",
+  });
+} catch (e) {
+  console.log("추가 불가");
+}
+// 추가 불가
+```
+
+### isSeal()
+
+- 오브젝트에 프로퍼티 추가, 삭제 금지 여부 반환
+
+```javascript
+var obj = {};
+Object.defineProperty(obj, "book", {
+  value: "책",
+  writable: true,
+});
+console.log(Object.isSealed(obj)); // false -> 추가, 삭제 가능
+Object.seal(obj);
+console.log(Object.isSealed(obj)); // true -> 추가, 삭제 금지
+console.log(Object.isExtensible(obj)); // false -> 추가 금지
+```
+
+### freeze()
+
+- 오브젝트에 프로퍼티 추가, 삭제 변경 금지 설정
+
+```javascript
+var obj = {};
+Object.defineProperty(obj, "book", {
+  value: "책",
+  writable: true,
+});
+console.log(Object.isSealed(obj)); // false -> 추가, 삭제 가능
+Object.seal(obj);
+console.log(Object.isSealed(obj)); // true -> 추가, 삭제 금지
+console.log(Object.isExtensible(obj)); // false -> 추가 금지
+```
+
+### isFrozen()
+
+- 오브젝트에 프로퍼티 추가, 삭제, 변경 금지 여부 반환
+
+```javascript
+var obj = {};
+Object.defineProperty(obj, "book", {
+  value: "JS책",
+  writable: true,
+});
+console.log(Object.isFrozen(obj)); // false -> 프로퍼티 추가, 삭제, 변경 가능
+
+Object.freeze(obj);
+console.log(Object.isFrozen(obj)); // true -> 프로퍼티 추가, 삭제, 변경 불가능
+console.log(Object.isSealed(obj)); // true -> 프로퍼티 추가, 삭제 불가능
+console.log(Object.isExtensible(obj)); // false -> 프로퍼티 추가 불가능
+```
+
+## 11. JSON 오브젝트
+
+### JSON 오브젝트 개요
+
+- JavaScript Object Notation
+  - 빌트인 오브젝트이지만 함수 2개라 인스턴스로 생성할 필요 없어 new 연산자로 인스턴스 생성 불가
+- JSON 주요기능
+  - 데이터 송수신의 변환 기준
+  - 텍스트이므로 전송 속도가 빠르다.
+    - 나오기 전에는 XML을 사용했지만 텍스트가 아니라 오브젝트여서 JSON에 비해 무겁고 느렸다.
+  - 파일 확장자: json, txt 도 사용가능
+
+### stringify()
+
+- JS 타입을 JSON 타입의 문자열로 변환
+
+```javascript
+var value = {
+  book: "책",
+  title: 123,
+};
+var result = JSON.stringify(value);
+console.log(result); // { "book": "책", "title": 123 }
+
+var array = ["book", "책", 123];
+console.log(JSON.stringify(array)); // ["book", "책", 123]
+
+// 특수한 값 변환
+console.log(JSON.stringify([Infinity, NaN, null])); // [null, null, null]
+console.log(JSON.stringify([true, false])); // [true, false]
+
+// undefined 변환
+console.log(JSON.stringify(undefined)); // undefined
+console.log(JSON.stringify([undefined])); // [null]
+console.log(JSON.stringify({ value: undefined })); // {}
+```
+
+- 숫자는 변환하지 않는다.
+- 특수한 값이 아니라면 ""안에 작성되어 문자열 형태로 변환된다.
+  - Infinity, NaN, null은 null로 변환
+- true, false는 변환하지 않는다.
+
+* undefined는 작성하는 곳에 따라 다르게 변환된다.
+  - 값 하나이면 그대로 변환
+  - 배열 안에 있으면 null로 변환
+  - 프로퍼티 값이면 프로퍼티를 제외시킨다. 프로퍼티 이름도 없어지므로 주의해야 한다!
+
+```javascript
+// 두 번째 파라미터에 콜백함수 작성
+var data = { book: "책", point: 55 };
+function replace(key, value) {
+  return key === "point" ? 11 : value;
+}
+var result = JSON.stringify(data, replace);
+console.log(result); // { "book": "책", "point": 11 }
+```
+
+- 콜백함수에서 key는 첫 번째 파라미터로, value는 두 번째 파라미터로 설정돼서 함수 실한 후 결과값을 설정한다.
+
+```javascript
+// 세 번째 파라미터에 줄 분리 작성
+var data = { sports: "soccer", time: 90 };
+var result = JSON.stringify(data, "", "\n");
+console.log(result);
+/*
+	[실행 결과]
+	{
+	"sports":"soccer",
+	"time":90
+	}
+*/
+var data = { sports: "soccer", time: 90 };
+var result = JSON.stringify(data, "", 4);
+console.log(result);
+/*
+	[실행 결과]
+	{
+	    "sports":"soccer",
+	    "time":90
+	}
+*/
+// 문자 앞에 삽입할 문자 작성
+var data = { sports: "soccer", time: 90 };
+var result = JSON.stringify(data, "", "##");
+console.log(result);
+/*
+	[실행 결과]
+	{
+	##"sports":"soccer",
+	##"time":90
+	}
+*/
+```
+
+- 가독성을 위해 사람들이 데이터를 보기 쉽게 하기 위한 것으로 줄을 분리하여 표시할 수 있다.
+
+### parse()
+
+- JSON 타입을 JS 타입으로 변환한다.
+
+```javascript
+var value = "123";
+try {
+  var reusult = JSON.parse(value);
+} catch (e) {
+  console.log("JSON 파싱 에러");
+}
+console.log(result); // 123
+console.log(typeof result); // number
+
+// Object에 작성
+var value = '{"point": "123"}';
+try {
+	var result = JSON.parse(value);
+} catch(e) {
+	console.log("JSON 파싱 에러");
+}
+console.log(result); // {point: "123"}
+
+// 두 번째 파라미터 작성
+var data = '{"book": "책", "movie": "영화"};
+var check = function(key, value) {
+	return key === "book" ? "JS책" : value;
+};
+var result = JSON.parse(data, check);
+console.log(result); // {book: "JS책", movie: "영화"}
+```
+
+- 작성된 String 타입의 숫자는 number 타입으로 변환되지 않는다.
+- 두 번째 파라미터에 콜백함수를 작성하면 파싱한 오브젝트를 프로퍼티 단위로 하나씩 읽어가면서 두 번째 파라미터의 함수를 실행한다.
+
+## 12. Date 오브젝트
+
+### Date 오브젝트 개요
+
+- 년월일, 시분초, 밀리초(Milisecond) 제공
+  - 시간값(Time Value)이라고 부른다.
+- UTC(Universal Time Coordinated) 기준
+  - 1970년 1월 1일 기준으로 밀리초를 제공 → 남는 초는 무시
+
+### 시간값 표시 기준
+
+```javascript
+var obj = new Date(1970, 1, 1, 1, 1, 1, 1);
+console.log(obj.toLocaleString()); // 1970. 2. 1. 오전 1:01:01
+console.log(obj.valueOf()); // 2649661001
+```
+
+### 시간의 문자열 형태
+
+| 형태 | 개요                                                              |
+| ---- | ----------------------------------------------------------------- |
+|      | 2015-11-30T09:12:34.123                                           |
+| YYYY | 그레고리력(Gregorian Calendar)으로 0000 ~ 9999년의 10진수         |
+| -    | 하이픈                                                            |
+| MM   | 월, 00에서 11까지                                                 |
+| -    | 하이픈                                                            |
+| DD   | 일, 01에서 31까지                                                 |
+| T    | 시간을 나타내는 문자                                              |
+| HH   | 시, 오전 0시부터 경과 시간. 00에서 24까지 두 자리로 1시간 단위 값 |
+| :    | 콜론                                                              |
+| mm   | 분, 00에서 59까지                                                 |
+| :    | 콜론                                                              |
+| ss   | 초, 00에서 59까지                                                 |
+| .    | 초와 밀리초 구분                                                  |
+| sss  | 밀리초, 3자리로 표시                                              |
+| Z    | 타임존(Time Zone). + 또는 - 로 연결하고 HH:mm 형태로도 표시       |
+
+### Date 오브젝트 프로퍼티 리스트
+
+| 이름                  | 개요                                                      |
+| --------------------- | --------------------------------------------------------- |
+| new Date()            | 인스턴스 생성                                             |
+| <b>Date 함수</b>      |
+| Date()                | 현재 시각 반환                                            |
+| Date.parse()          | 문자열 값을 밀리초로 변환                                 |
+| Date.UTC()            | UTC 기준 밀로초로 변환                                    |
+| Date.now()            | 현재 시각을 밀리초로 반환                                 |
+| <b>Date.prototype</b> |
+| constructor           | 생성자                                                    |
+| toString()            | 일자와 시간을 변환해서 문자열로 반환                      |
+| toUTCString()         | UTC 일자와 시간 반환                                      |
+| toSOSString()         | "ISO 8601 확장 형식의 간호솨 버전"형태로 일자와 시간 반환 |
+| toDateString()        | 연월일과 요일을 사람이 읽기 쉬운 형태로 반환              |
+| toTimeString()        | 시분초와 타임존을 사람이 읽기 쉬운 형태로 반환            |
+| toLocaleString()      | 일자와 시간을 지역 언어로 반환                            |
+| toLocaleDateString()  | 연월일을 지역 언어로 변환                                 |
+| toLocaleTimeString()  | 시분초와 오전/오후를 지역 언어로 반환                     |
+| toJSON                | JSON.stringify()와 연동하여 JSON 형태의 일자, 시간 설정   |
+
+| 이름                  | 개요          | 이름                        | 개요                               |
+| --------------------- | ------------- | --------------------------- | ---------------------------------- |
+| <b>Date.prototype</b> |
+| getTime()             | 시간값 반환   | valueOf()                   | 프리미티브 시간값 반환             |
+| getFullYear()         | 연도 반환     | getYear()                   | 세기 구분과 연도 2자리 반환        |
+| getMonth()            | 월 반환       | getDate()                   | 일 반환                            |
+| getDay()              | 요일 반환     | getHours()                  | 시 반환                            |
+| getMinutes()          | 분 반환       | get TimezoneOffset()        | UTC와 지역 시간 차이를 분으로 반환 |
+| getSeconds()          | 초 반환       | getMiliseconds()밀리초 반환 |
+| getUTCFullYear()      | UTC 연도 반환 | getUTCMonth()               | UTC 월 반환                        |
+| getUTCDate()          | UTC 일 반환   | getUTCDay()                 | UTC 요일 반환                      |
+| getUTCHours()         | UTC 시 반환   | getUTCMinutes()             | UTC 분 반환                        |
+| getUTCSeconds()       | UTC 초 반환   | getUTCMiliseconds()         | UTC 밀리초 반환                    |
+
+# 13. Math 오븓젝트
+
+- 수학 계산용 오브젝트
+  - 상수, 절대값, 사인, 탄젠트 등
+- prototype이 없으므로 new 연산자로 인스턴스 생성이 불가능하다.
+  - 따라서 메서드가 아닌 함수 형태
+
+### Math 함수 리스트
+
+| 이름     | 개요                          | 이름    | 개요                                 |
+| -------- | ----------------------------- | ------- | ------------------------------------ |
+| abs()    | 절대값 반환                   | acos()  | 아크 코사인(arc cosine()             |
+| floor()  | 소수 이하 버림, 정수값 반환   | sin()   | 사인(sine)                           |
+| ceil()   | 소수 이하 올림, 정수값 반환   | asin()  | 아크 사인(arc sine)                  |
+| round()  | 소수 이하 반올림, 정수값 반환 | tan()   | 탄젠트(tangent)                      |
+| max()    | 최댓값                        | atan()  | 아크 탄젠트(arc tangent)             |
+| min()    | 최솟값                        | atan2() | x, y 좌표의 아크 탄젠트(arc tangent) |
+| random() | 0에서 1 미만 난수             | sqrt()  | 제곱근                               |
+| pow()    | x의 y지승 값                  | exp()   | 자연로그 상수(e)의 제곱근            |
+| cos()    | 코사인(cosine)                | log()   | 자연로그 값                          |
