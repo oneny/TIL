@@ -13,7 +13,7 @@
   - [ES3: Scope Chain](#es3-scope-chain)
     - [ES5에서 Scope Chain](#es5에서-scope-chain)
   - [정적 환경(Lexical Environment)](#정적-환경lexical-environment)
-  - [var 키워드 문제](#var-키워드-문제)
+  - [var 키워드 사용하지 않았을 때의 문제](#var-키워드-사용하지-않았을-때의-문제)
 - [02. Function 오브젝트](#02-function-오브젝트)
   - [함수 실행 환경 인식](#함수-실행-환경-인식)
   - [함수 실행 환경 저장](#함수-실행-환경-저장)
@@ -32,6 +32,30 @@
   - [글로벌 오브젝트](#글로벌-오브젝트)
   - [글로벌 스코프](#글로벌-스코프)
 - [04. Execution Context](#04-execution-context)
+  - [실행 콘텍스트](#실행-콘텍스트)
+  - [실행 콘텍스트 상태 컴포넌트](#실행-콘텍스트-상태-컴포넌트)
+  - [렉시컬 환경 컴포넌트](#렉시컬-환경-컴포넌트)
+  - [렉시컬 환경 컴포넌트 구성 및 설정](#렉시컬-환경-컴포넌트-구성-및-설정)
+  - [외부 렉시컬 환경 참조](#외부-렉시컬-환경-참조)
+  - [변수 환경 컴포넌트](#변수-환경-컴포넌트)
+  - [콘텍스트 실행 과정](#콘텍스트-실행-과정)
+  - [환경 레코드 구성](#환경-레코드-구성)
+    - [선언적 환경 레코드](#선언적-환경-레코드)
+    - [오브젝트 환경 레코드](#오브젝트-환경-레코드)
+    - [글로벌 환경](#글로벌-환경)
+  - [this 바인딩 컴포넌트](#this-바인딩-컴포넌트)
+  - [this 바인딩 컴포넌트 설정 및 사용 과정](#this-바인딩-컴포넌트-설정-및-사용-과정)
+  - [호출 스택](#호출-스택)
+- [05. Function Instance](#05-function-instance)
+  - [Function 인스턴스 생성](#function-인스턴스-생성)
+  - [생성자 함수](#생성자-함수)
+  - [인스턴스 생성 과정](#인스턴스-생성-과정)
+  - [constructor 프로퍼티](#constructor-프로퍼티)
+    - [constructor 비교](#constructor-비교)
+  - [prototype 오브젝트 목적](#prototype-오브젝트-목적)
+  - [인스턴스 상속](#인스턴스-상속)
+  - [인스턴스 프로퍼티 우선 사용](#인스턴스-프로퍼티-우선-사용)
+- [06. this](#06-this)
 
 ## 01. ES3/ES5 스펙의 아키텍처
 
@@ -225,13 +249,15 @@ console.log(getPoint()); // 200
 - 함수 밖에 있는 변수와 ㅎ마수, 함수 안에 있는 변수와 함수릃 하나의 렉시컬 정적 개념으로 사용할 수 있다.
   - 즉, 하나의 콘텍스트!
 
-### var 키워드 문제
+### var 키워드 사용하지 않았을 때의 문제
 
 - 함수에서 var 키워드를 사용하지 않고 변수를 선언하면 글로벌 오브젝트에 설정된다.
   - 함수 안에 몇 단게 내려가서 거기서 var 키워드를 사용하지 않고 변수를 선언하면 몇 단게 위에 있는 글로벌 오브젝트에 설정되어 버린다.
     - Scope Chain이 적용되어 버린다.
   - 렉시컬 환경 구조에 맞지 않다.
     - 함수 밖에 있는 것과 함수 안에 있는 것으로 두 개 단계의 계층만 갖고 있는데 몇 단계 올리는 것은 위배된다.
+  - 함수 안에서 var 키워드를 사용하면 함수 안에서 작동되는 로컬 변수가 되지만 호이스팅이 발생한다.
+    - 그리고 글로벌 오브젝트 안에서 작성한다면 var 변수 또한 글로벌 변수가 되어 window 오브젝트에 설정된다.
 - ES5 해결 방법
   - `"use strict"` 사용
   - var 키워드를 사용하지 않고 변수를 선언하면 에러 발생시킨다.
@@ -504,17 +530,20 @@ function music(title) {
 - LEC는 정적 환경이지만 더 깊이 들어가면 글로벌 환경, 동적 환경을 같이 사용할 수 있다.
 
 ### 렉시컬 환경 컴포넌트
-* 함수와 변수의 식별자 해결을 위한 환경 설정
-* 함수 초기화 단계에서 해석한 함수와 변수를 { name: value } 형태로 저장한다.
-  * 변수는 name과 undefined로 저장
-  * 함수 선언문은 name과 function 오브젝트로 저장
-* 함수 밖의 함수와 변수 참조 환경 설정
-  * 즉, 내가 속한 오브젝트의 환경을 컴포넌트에 설정하는 것
-  * 렉시컬 환경 컴포넌트 안에서 함수 밖의 함수와 변ㅅ를 사용할 수 있게 된다.
-* 위의 과정을 통해 하나의 콘텍스트가 되는 것이다.
-  * 함수 안에 있는 변수/함수 + 함수 밖에 있는 변수/함수를 하나의 묶음으로 `렉시컬 환경 컴포넌트`에 만들어 버린다.
-  * 이것은 심플해지고 엔진이 처리하는데 속도가 빨라져 효율이 좋다.
+
+- 함수와 변수의 식별자 해결을 위한 환경 설정
+- 함수 초기화 단계에서 해석한 함수와 변수를 { name: value } 형태로 저장한다.
+  - 변수는 name과 undefined로 저장
+  - 함수 선언문은 name과 function 오브젝트로 저장
+- 함수 밖의 함수와 변수 참조 환경 설정
+  - 즉, 내가 속한 오브젝트의 환경을 컴포넌트에 설정하는 것
+  - 렉시컬 환경 컴포넌트 안에서 함수 밖의 함수와 변ㅅ를 사용할 수 있게 된다.
+- 위의 과정을 통해 하나의 콘텍스트가 되는 것이다.
+  - 함수 안에 있는 변수/함수 + 함수 밖에 있는 변수/함수를 하나의 묶음으로 `렉시컬 환경 컴포넌트`에 만들어 버린다.
+  - 이것은 심플해지고 엔진이 처리하는데 속도가 빨라져 효율이 좋다.
+
 ### 렉시컬 환경 컴포넌트 구성 및 설정
+
 ```javascript
 실행 콘텍스트(EC): {
   렉시컬 환경 컴포넌트(LEC): {
@@ -529,23 +558,26 @@ function music(title) {
   // ...
 }
 ```
-* 렉시컬 환경 컴포넌트 생성
-  * 생성 시점: function, try-catch를 만났을 때 생성한다.
-* 컴포넌트 구성
-  * 환경 레코드(ER: Environment Record)
-  * 외부 렉시컬 환경 참조(OLER: Outer Lexical Environment Reference)
-* 환경 레코드에 함수 안의 함수와 변수를 기록한다.
-* 외부 렉시컬 환경 참조에 function 오브젝트의 내부 프로퍼티인 [[Scope]]를 설정
-  * 함수 밖의 함수와 변수를 기록한다.
-* 렉시컬 환경 컴포넌트 관점에서 보면 환경 레코드, 외부 렉시컬 환경 참조 모두 하나의 오브젝트에 속한다.
-  * 따라서 하나의 콘텍스트 개념을 사용할 수 있어 프로퍼티 액세스하듯 함수 안과 밖의 함수와 변수를 사용할 수 있따.
+
+- 렉시컬 환경 컴포넌트 생성
+  - 생성 시점: function, try-catch를 만났을 때 생성한다.
+- 컴포넌트 구성
+  - 환경 레코드(ER: Environment Record)
+  - 외부 렉시컬 환경 참조(OLER: Outer Lexical Environment Reference)
+- 환경 레코드에 함수 안의 함수와 변수를 기록한다.
+- 외부 렉시컬 환경 참조에 function 오브젝트의 내부 프로퍼티인 [[Scope]]를 설정
+  - 함수 밖의 함수와 변수를 기록한다.
+- 렉시컬 환경 컴포넌트 관점에서 보면 환경 레코드, 외부 렉시컬 환경 참조 모두 하나의 오브젝트에 속한다.
+  - 따라서 하나의 콘텍스트 개념을 사용할 수 있어 프로퍼티 액세스하듯 함수 안과 밖의 함수와 변수를 사용할 수 있따.
 
 ### 외부 렉시컬 환경 참조
-* 스코프와 실행 중인 함수가 Context 형태이므로 스코프의 변수와 함수를 별도의 처리 없이 즉시 사용할 수 있다.
-* 실행 콘텍스트에서 함수 안과 밖의 함수, 변수를 사용할 수 있으므로
-  * <b>함수와 변수를 찾기 위해 실행 콘텍스트를 벗어나지 않아도 된다.</b>
+
+- 스코프와 실행 중인 함수가 Context 형태이므로 스코프의 변수와 함수를 별도의 처리 없이 즉시 사용할 수 있다.
+- 실행 콘텍스트에서 함수 안과 밖의 함수, 변수를 사용할 수 있으므로
+  - <b>함수와 변수를 찾기 위해 실행 콘텍스트를 벗어나지 않아도 된다.</b>
 
 ### 변수 환경 컴포넌트
+
 ```javascript
 실행 콘텍스트(EC): {
   렉시컬 환경 컴포넌트(LEC): {},
@@ -553,12 +585,713 @@ function music(title) {
   this 바인딩 컴포넌트(TBC): {}
 }
 ```
-* 렉시컬 환경 컴포넌트와 같은 레벨
-* 실행 콘텍스트 초기화 단계에서 렉시컬 환경 컴포넌트와 같게 설정한다.
-* 이렇게 하는 이유는? <b>초깃값 복원</b>할 때 사용하기 위한 것!
-* 함수 코드가 실행되면 실행 결과를 렉시컬 환경 컴포넌트에 설정한다.
-  * 변수에다가 값을 할당하면 현재 초깃값 상태에서는 변수 이름과 undefined로 설정되어 있기 때문에 값이 변경되었다고 볼 수 있다
-    * 변경된 값이 렉시컬 환경 컴포넌트에 설정된다.
-  * 한 번만 변경하게 되면 렉시컬 환경 컴포넌트(LEC)와 변수 환경 컴포넌트(VEC)는 다르게 된다.
-  * 나중에 가서 렉시컬 환경 컴포넌트에 있는 것을 지우고 초기 환경으로 바꿀 때 변수 환경 컴포넌트로 리프레시 시킨다.
-* 즉, 초깃값이 변하게 되므로 이를 유지하기 위한 것이다!
+
+- 렉시컬 환경 컴포넌트와 같은 레벨
+- 실행 콘텍스트 초기화 단계에서 렉시컬 환경 컴포넌트와 같게 설정한다.
+- 이렇게 하는 이유는? <b>초깃값 복원</b>할 때 사용하기 위한 것!
+- 함수 코드가 실행되면 실행 결과를 렉시컬 환경 컴포넌트에 설정한다.
+  - 변수에다가 값을 할당하면 현재 초깃값 상태에서는 변수 이름과 undefined로 설정되어 있기 때문에 값이 변경되었다고 볼 수 있다
+    - 변경된 값이 렉시컬 환경 컴포넌트에 설정된다.
+  - 한 번만 변경하게 되면 렉시컬 환경 컴포넌트(LEC)와 변수 환경 컴포넌트(VEC)는 다르게 된다.
+  - 나중에 가서 렉시컬 환경 컴포넌트에 있는 것을 지우고 초기 환경으로 바꿀 때 변수 환경 컴포넌트로 리프레시 시킨다.
+- 즉, 초깃값이 변하게 되므로 이를 유지하기 위한 것이다!
+
+### 콘텍스트 실행 과정
+
+```javascript
+var base = 200;
+function getPoint(bonus) {
+  var point = 100;
+  return point + base + bonus;
+}
+console.log(getPoint(70)); // 370
+```
+
+- getPoint 오브젝트의 [[Scope]]에 글로벌 오브젝트 설정
+- 마지막 줄에서 getPoint() 함수 호출하면 엔진은 실행 콘텍스트를 생성하고 실행 콘텍스트 안으로 이동한다.
+
+#### 준비 단계
+
+- 컴포넌트를 생성하여 실행 콘텍스트에 첨부한다.
+  - 렉시컬 환경 컴포넌트
+  - 변수 환경 컴포넌트
+  - this 바인딩 컴포넌트
+- 환경 레코드를 생성하여 렉시컬 환경 컴포넌트에 첨부한다.
+  - 나중에 실행하는 과정에서 함수 안의 함수, 변수를 바인딩한다.
+- 외부 렉시컬 환경 참조를 생성하여 렉시컬 환경 컴포넌트에 첨부하고
+  - getPoint function 오브젝트가 스코프로 설정된 [[Scope]]로 참조한다.
+
+```
+// 지금까지의 모습
+실행 콘텍스트(EC): {
+  렉시컬 환경 컴포넌트(LEC): {
+    환경 레코드(ER): {},
+    외부 렉시컬 환경 참조(OLER): {
+      base: 200
+    }
+  },
+  변수 환경 컴포넌트(VEC): {},
+  this 바인딩 컴포넌트(TBC): {}
+}
+```
+
+#### 초기화 단계
+
+- 호출한 함수의 파라미터 값을 호출된 함수의 파라미터 이름에 매핑
+  - 70을 bonus에 매핑시킨다.
+  - 환경 레코드에 작성한다.
+    - 함수 선언문이나 변수에 초깃값을 설정하기 전에 함
+- 함수 선언문을 function 오브젝트로 생성한다.
+- 함수 표현식과 변수에 초깃값을 설정한다.
+- 여기까지는 외부에 아래와 같은 실행 상태를 제공하지 않는다.
+  - 그래서 이 상태에서는 개발자가 자바스크립트 코드로 실행 상태의 값을 설정하거나 다른 처리가 불가능
+
+```
+실행 콘텍스트(EC): {
+  렉시컬 환경 컴포넌트(LEC): {
+    환경 레코드(ER): {
+      bonus: 70,
+      point: undefined
+    },
+    외부 렉시컬 환경 참조(OLER): {
+      base: 200
+    }
+  },
+  변수 환경 컴포넌트(VEC): {},
+  this 바인딩 컴포넌트(TBC): {}
+}
+```
+
+#### 실행 단계
+
+- 다시 올라가 함수 안의 코드를 실행한다
+  - var point = 100;
+- 실행 콘텍스트 안에서 관련된 함수와 변수를 사용할 수 있다.
+
+```
+실행 콘텍스트(EC): {
+  렉시컬 환경 컴포넌트(LEC): {
+    환경 레코드(ER): {
+      bonus: 70,
+      point: 100
+    },
+    외부 렉시컬 환경 참조(OLER): {
+      base: 200
+    }
+  },
+  변수 환경 컴포넌트(VEC): {},
+  this 바인딩 컴포넌트(TBC): {}
+}
+```
+
+- return 문을 만나서 표현식을 평가하면 point 변수를 식별자 해결하는데 환경 레코드 안의 값으로 100을 설정한다.
+  - base 변수는 함수 밖에 있는 변수, 함수를 참조하는 외부 렉시컬 환경 참조의 값으로 200이 설정된다.
+  - bonuse는 파라미터 값으로 설정된다.
+  - point + base + bonus = 370이 리턴(반환)된다.
+- 위의 과정처럼 실행 콘텍스트 -> 렉시컬 환경 (컴포넌트) 안에서 모든 것을 처리하므로 엔진 처리 속도가 빠르다.
+
+### 환경 레코드 구성
+
+```
+실행 콘텍스트(EC): {
+  렉시컬 환경 컴포넌트(LEC): {
+    환경 레코드(ER): {
+      선언적 환경 레코드(DER): {
+        point: 123
+      },
+      오브젝트 환경 레코드(OER): {}
+    },
+    외부 렉시컬 환경 참조(OLER): {}
+  },
+  변수 환경 컴포넌트(VEC): {},
+  this 바인딩 컴포넌트(TBC): {}
+}
+```
+
+- 환경 레코드를 구분하는 이유
+  - 기록 대상에 따라 다르기 때문이다.
+  - 기록 대상에 따라 `선언적 환경 레코드(DER)`, `오브젝트 환경 레코드(OER)`에 기록한다.
+
+* 정적인 것은 `선언적 환경 레코드`에 저장하고, 동적인 것은 `오브젝트 환경 레코드`에 저장한다.
+
+#### 선언적 환경 레코드
+
+- DER: Declaritive Environment Record
+- function, 변수, catch 문에서 사용
+- 위에서 환경 레코드에 설정하였는데 실제로는 DER에 저장된다.
+
+#### 오브젝트 환경 레코드
+
+- OER: Object Environment Record
+- 글로벌 함수와 변수, with 문에서 사용한다.
+- 정적이 아니라 동적이기 때문이다.
+
+#### 글로벌 환경
+
+```
+실행 콘텍스트(EC): {
+  글로벌 환경(GE): {
+    환경 레코드(ER): {
+      오브젝트 환경 레코드(OER): 글로벌 오브젝트
+    },
+    외부 렉시컬 환경 참조(OLER): null
+  }
+}
+```
+
+- Global Environment
+  - 글로벌 오브젝트에서 사용한다.
+  - 렉시컬 환경 컴포넌트와 형태가 같다.
+    - 선언적 환경 레코드는 없다.
+    - 정적이 아닌 동적으로 반영한다.
+    - 그 외에 처리 방법은 같다.
+- 동적으로 함수와 변수 바인딩한다.
+  - 함수에서 var 키워드를 사용하지 않고 변수를 선언하면 글로벌 오브젝트에 설정되기 때문이다.
+    - 정적으로 저장하는 것과는 달리 계층적으로 엄청 밑에 있어도 var 키워드를 사용하지 않으면 글로벌 오브제그가 되기 때문에 정적 개념이 깨지게 된다.
+  - 글로벌 오브젝트는 소스 전체에서 하나만 있기 때문에 글로벌 환경을 하나만 만들어 놓으면 어느 코드에서든지 환경 레코드에 동적으로 저장할 수 있다.
+  - 이런 이유로 오브젝트 환경 레코드 사용한다.
+- 글로벌 오브젝트는 어디에 속하지 않기 때문에 외부 렉시컬 환경 참조값은 null
+
+### this 바인딩 컴포넌트
+
+- 목적
+  - this로 함수를 호출한 오브젝트의 프로퍼티에 액세스(접근)
+  - this.propertyName 형태로 액세스할 수 있도록 this로 액세스할 오브젝트를 바인딩시켜 놓은 것!
+- 액세스 매커니즘
+  - obj.book() 형태에서 this는 obj를 참조할 수 있도록 this 바인딩 컴포넌트에 obj을 바인딩시켜 놓는다.
+- obj의 프로퍼티가 변경되면 `동적`으로 참조
+  - 설정, 할당이 아닌 말 그대로 `참조`이기 때문이다.
+
+### this 바인딩 컴포넌트 설정 및 사용 과정
+
+- getPoint() 함수에서 100이 반환되는 과정
+
+```javascript
+var obj = { point: 100 };
+obj.getPoint = function () {
+  return this.point;
+};
+console.log(obj.getPoint());
+```
+
+```
+실행 콘텍스트(EC): {
+  렉시컬 환경 컴포넌트(LEC): {
+    환경 레코드(ER): {
+      선언적 환경 레코드(DER): {},
+      오브젝트 환경 레코드(OER): {}
+    },
+    외부 렉시컬 환경 참조: {}
+  },
+  변수 환경 컴포넌트: {},
+  this 바인딩 컴포넌트(TBC): {
+    point: 100,
+    getPoint: function() {}
+  }
+}
+```
+
+#### 준비 단계
+
+- 마지막 줄에서 obj.getPoint() 함수 호출
+- 실행 콘텍스트 생성
+- 3 개의 컴포넌트 생성
+  - 렉시컬/변수 환경 컴포너트, this 바인딩 컴포넌트
+- this 바인딩 컴포넌트에 getPoint()에서 this로 obj의 프로퍼티를 참조해서 사용할 수 있도록 바인딩
+  - 함수를 호출사는 시점에 this로 바인딩, 묶어 놓음
+  - 따라서, 함수 안에서 바로 obj를 참조할 수 있게 된다.
+
+#### 초기화 단계
+
+- 함수 안에 파라미터, 함수 표현식, 변수 초기화하지만 선언된 것이 없다.
+
+#### 실행 단계
+
+- return this.point;
+  - return 문을 만나 표현식을 평가 -> this.point로 값을 구한다.
+- this 바인딩 컴포넌트에서 point 검색
+  - getPoint() 함수를 호출하는 오브젝트가 this 바인딩 컴포넌트에 설정(참조)된 상태
+  - 따라서 this는 obj.getPoint() 함수가 호출되었을 때 바인딩 시켜놓은 것이다.
+- this 바인딩 컴포넌트에 point 프로퍼티가 있으므로 100을 반환한다.
+
+### 호출 스택
+
+- Call Stack
+  - 실행 콘텍스트의
+    논리적 구조
+- FILO(First-in Last-out) 순서
+  - 함수가 호출되면 스택의 가장 위에 실행 콘텍스트가 위치하게 된다.
+  - 다시 함수 안에서 함수를 호출하면 호출된 함수의 실행 콘텍스트가 스택의 가장 위에 놓이게 된다.
+  - 함수가 종료되면 스택에서 빠져 나온다
+  - FILO 순서를 가질 수 있는 이유는 JS는 `싱글 스레드`이기 때문이다.
+
+## 05. Function Instance
+
+### Function 인스턴스 생성
+
+```javascript
+function Book(point) {
+  this.point = point;
+}
+Book.prototype.getPoint = function () {
+  return this.point + 200;
+};
+var obj = new Book(100);
+console.log(obj.point); // 100
+console.log(obj.getPoint()); // 300
+```
+
+- function Book(point) {}
+  - Book 오브젝트를 생성한다.
+  - 엔진이 자동으로 Book.prototype(\* { key: value } 형태)을 만든다.
+    - 따라서 점(.)을 사용하여 프로퍼티를 연결할 수 있다.
+- Book.prototype.getPoint = function() {}
+  - Book.prototype에 getPoint를 연결하고 function(){}을 할당한다.
+  - 프로퍼티 관점에서 getPoint는 프로퍼티 이름, function(){}은 프로퍼티 값
+- var obj = new Book(100);
+  - Book()을 실행하며 인스턴스를 생성하고 생성한 인스턴스에 point 값을 설정한다.
+  - 이 때 this는 생성한 인스턴스를 참조한다. -> { point: 100 } 형태로 저장됨
+- Book.prototype에 연결된 모든 프로퍼티(메서드)를 생성한 인스턴스에 할당한다.
+  - { getPoint: function() {} } 형태
+- cosole.log(obj.getPoint());
+  - obj 인스턴스의 메서드를 호출한다.(\* prototype은 작성하지 않아도 된다.)
+- return this.point + 200에서 this가 obj 인스턴스를 참조하므로 100 + 200 반환
+
+### 생성자 함수
+
+- new 연산자와 함께 인스턴스를 생성하는 함수
+  - new Book()에서 Book()이 생성자 함수
+- new 연산자
+  - 인스턴스 생성을 제어하고, 생성자 함수를 호출한다.
+- 생성자 함수
+  - 인스턴스 생성하고 반환한다.
+  - 인스턴스에 초깃값을 설정한다.
+- new 연산자가 생성자 함수를 호출하면 생성자 함수에서 인스턴스를 생성하고 반환하면 new 연산자는 이것을 받아서 반환한다.
+
+### 인스턴스 생성 과정
+
+```javascript
+function Book(point) {
+  this.point = point;
+}
+Book.prototype.getPoint = function () {
+  return this.point;
+};
+var bookObj = new Book(10);
+```
+
+```
+Book 인스턴스: {
+	point: 10,
+	[[Prototype]]: {
+		constructor: Book,
+		getPoint: function() {},
+		[[Prototype]]: Object
+	}
+}
+```
+
+- new Book(10)을 실행하면 Book 오브젝트의 [[Construct]] 호출하여 파라미터 값을 [[Construct]]로 넘겨준다.
+  - 인스턴스 프로퍼티로 설정된다(\* { point: 10 } 형태)
+- [[Construct]]는 빈 Object를 생성하고 이것이 인스턴스이다!
+  - 현재는 빈 오브젝트이며 이제부터 하나씩 채워간다.
+- 오브젝트에 내부 처리용 프로퍼티를 설정한다.
+  - 공통 프로퍼티와 선택적 프로퍼티
+  - 오브젝트의 [[Class]]에 "Object"를 설정한다.
+  - 따라서 생성한 인스턴스 타입은 Object
+- Book.prototype에 연결된 프로퍼티(메서드)를 생성한 인스턴스의 [[Prototype]]에 설정한다.
+  - 외부 프로퍼티인 constructor도 같이 설정된다.
+
+### constructor 프로퍼티
+
+- 생성하는 function 오브젝트를 참조한다.
+  - function 오브젝트르 생성할 때 설정되며
+  - prototype이 Book function 오브젝트에 연결되고 prototype에 constructor가 연결되어 있다.
+  - 이 때, constructor의 값은 Book function 오브젝트 전체를 참조한다.
+
+#### constructor 비교
+
+```javascript
+// constructor 비교
+var Book = function () {};
+var result = Book === Book.prototype.constructor;
+console.log("1: " + result); // 1: true
+
+var obj = new Book();
+console.log("2: " + (Book === obj.constructor)); // 2: true
+console.log("3: " + typeof Book); // 3: function
+console.log("4: " + typeof obj); // 4: object
+```
+
+- Book === Book.prototype.constructor
+  - 실행 결과 1번이 true가 출력된 것은 Book 오브젝트와 Book.prototype.constructor가 타입까지 같다는 뜻
+  - Book 오브젝트를 생성할 때 Book.prototype.constructor가 Book 오브젝트 "전체"를 참조하기 때문이다.
+- Book === obj.constructor
+  - obj의 constructor가 Book 오브젝트를 참조하므로 실행 결과 2번에 true가 출력된다.
+- typeof Book;
+  - Book 오브젝트의 타입은 function
+- typeof obj;
+  - obj 인스턴스의 타입은 object
+  - 즉, function 오브젝트를 인스턴스로 생성했더니 `object`로 타입이 변경된 것을 확인할 수 있다.
+  - 이것은 [[Construct]]가 실행될 때 생성한 오브젝트의 [[Class]]에 "Object"를 설정하기 때문이다.
+- 오브젝트 타입이 바뀐다는 것은 오브젝트의 성격과 목적이 바뀐 것을 의미하고 prototype에 많은 메서드들이 연결되어 있다는 것!
+
+### prototype 오브젝트 목적
+
+- prototype 확장
+  - prototype에 프로퍼티(메서드)를 연결하여 prototype를 확장한다
+- 프로퍼티 공유
+  - 생성한 인스턴스에서 원본 prototype의 프로퍼티를 공유한다.
+  - `복사`가 아닌 `공유`의 개념인 이유
+    - 복사한다면 메모리에 부담이 가게 되므로 원본 prototype의 메서드들을 공유하여 사용한다.
+- 인스턴스 상속
+  - function 인스턴스를 연결하여 상속할 수 있다.
+
+### 인스턴스 상속
+
+```javascript
+// 인스턴스 상속
+function Book(title) {
+  this.title = title;
+}
+Book.prototype.getTitle = function () {
+  return this.title;
+};
+function Point(title) {
+  // call() 함수를 호출하여 파라미터 값을 넘겨줘서 파라미터 값을 this로 참조하는 현재 인스턴스에다가 할당
+  Book.call(this, title); // super 생성자 호출
+}
+// Object.create() 함수를 호출하여 Book.prototye에 연결된 메소드들을 Point.prototype에 할당(연결)
+// 하위클래스(Point)는 상위클래스(Book)를 확장
+Point.prototype = Object.create(Book.prototype, {}); // 두 번째 파라미터는 Point.prototype이 갖는 메소드 작성
+var obj = new Point("자바스크립트"); // new 연산자로 Point() 생성자 함수 호출
+console.log(obj.getTitle());
+console.log(obj instanceof Book); // true
+console.log(obj instanceof Point); // true
+console.log(typeof Point); // function
+console.log(typeof obj); // object
+```
+
+- ES5에서 상속하는 방법은 새로운 function 인스턴스를 생성하여 상위 function 인스턴스를 정하고 그의 prototype을 연결시킨다.
+  - ES5 상속은 OOP의 상속 기능 부족으로 ES6의 Class로 상속하여 사용한다.
+  ```javascript
+  // ES6 Class 상속
+  class Book {
+    constructor(title) {
+      this.title = title;
+    }
+    getTitle() {
+      return this.title;
+    }
+  }
+  class Point extends Book {
+    // 내부에서는 prototype 확장
+    constructor(title) {
+      super(title);
+    }
+  }
+  const obj = new Point("자바스크립트");
+  console.log(obj.getTitle()); // 자바스크립트
+  ```
+
+### 인스턴스 프로퍼티 우선 사용
+
+```javascript
+function Book(point) {
+  this.point = point;
+}
+Book.prototype.getPoint = function () {
+  return 100;
+};
+var obj = new Book(200);
+obj.getPoint = function () {
+  return this.point;
+};
+console.log(obj.getPoint()); // 200
+```
+
+```
+// obj 형태
+obj: {
+  getPoint: function() {},
+  point: 200,
+  [[Prototype]]: {
+    getPoint: function() {},
+    constructor: Book(point),
+    [[Prototype]]: Object
+  }
+}
+```
+
+- 생성한 인스턴스(obj)에 바로 getPoint 즉, 인스턴스 프로퍼티가 있으므로 100이 아닌 200을 반환한다.
+  - 즉, 한 단계 더 들어간 prototype의 getPoint() 메서드가 아닌 인스턴스에 연결한 프로퍼티를 먼저 사용한다.
+  - 인스턴스 프로퍼티는 공유되지 않는다.
+
+## 06. this
+
+### this 개요
+
+- 함수가 되든 이벤트 핸들러 함수가 되든 함수 앞에 작성한 오브젝트를 함수 안에서 this로 참조한다.
+
+### this와 글로벌 오브젝트
+
+- 글로벌 오브젝트에서 this는 글로벌 오브젝트 참조한다.
+  - 글로벌 함수를 호출할 때는 함수 앞에서다가 글로벌 오브젝트를 작성할 수 없고 묵시적으로 간주한다.
+  - 글로벌 함수에서 this는 글로벌 오브젝트를 참조한다.
+- this와 window 오브젝트
+  - window는 JS에서 만든 것이 아니며 글로벌 오브젝트의 스코프도 아니다.
+  - 하지만, window와 글로벌 오브젝트를 같은 선상에서 사용한다.
+  - `Host 오브젝트` 개념 사용하낟.
+
+```javascript
+// this와 window 참조
+console.log(this === window); // true
+```
+
+- true가 출력된다는 것은 값과 타입이 같다는 것
+  - 글로벌 오브젝트에서 this는 window를 참조한다는 것을 알 수 있다.
+
+```javascript
+var value = 100;
+console.log("window:", window.value); // window: 100
+console.log("this:", this.value); // this: 100
+console.log("global:", value); // 100
+```
+
+- var value = 100; => value는 글로벌 변수
+- this.value
+  - this가 글로벌 오브젝트를 참조하므로 this.value 형태로 글로벌 변수 사용 가능하다.
+  - 그리고, window가 글로벌 오브젝트를 참조하므로 value를 사용할 수 있다.
+  - window 오브젝트와 같이 다른 오브젝트를 마치 내 것처럼 사용하는 개념 -> `Host 오브젝트`
+    - `Host 오브젝트` 개념으로 글로벌 오브젝트를 참조하는 this와 window가 같은 선상에서 사용
+
+### this와 window 오브젝트
+
+```javascript
+// this와 window
+window.onload = function () {
+  console.log(this === window); // true
+};
+
+// this로 지역 변수 액세스
+window.onload = function () {
+  var value = 100;
+  console.log(this.value); // undefined
+};
+```
+
+- var value는 onload 핸들러 함수의 지역(로컬) 변수가 되므로
+- this 바인딩 컴포넌트는 window 오브젝트를 참조하고 있어 value 값이 없으므로 undefined가 출력된다.
+- this.value = 100; 형태로 값 할당
+  ```javascript
+  // this로 값 할당
+  window.onload = function () {
+    this.value = 100;
+    console.log(window.value); // 100
+  };
+  ```
+  - this.value = 100;은 this가 window 오브젝트를 참조하므로 글로벌 변수가 된다.
+  - 따라서 window.value로 접근이 가능하다.
+
+### this와 strict 모드
+
+- 오브젝트.함수이름() 형태로 함수를 호출한다.
+  - 글로벌 오브젝트는 오브젝트 이름이 없으므로 함수 이름만 작성하여 호출
+
+* strict 모드에서는 window.book()처럼 book() 앞에 window를 글로벌 오브젝트로 무조건 작성해야 한다.
+* 함수 앞에 오브젝트를 작성하지 않으면
+  - this 바인딩 컴포넌트에 undefined가 설정되고 this로 window(글로벌 오브젝트)를 참조할 수 없다.
+
+```javascript
+function book() {
+  "use strict";
+  return this;
+}
+console.log(book()); // undefined
+```
+
+- 위 코드처럼 호출하는 book() 함수 앞에 오브젝트를 작성하지 않으면 즉, window.book() 작성하지 않으면
+  - this 바인딩 컴포넌트에 undefined가 설정되기 때문에 return this에서 undefined를 반환한다.
+
+```javascript
+// window 오브젝트 작성
+function book() {
+  "use strict";
+  return this;
+}
+var obj = window.book();
+console.log(obj === window); // true
+```
+
+- 호출하는 book() 함수 앞에 window 오브젝트 작성
+- book() 함수가 글로벌 함수가 되므로 return this에서 window를 반환한다.
+
+### this 참조 오브젝트
+
+> 함수는 자신을 호출한 바로 앞에 작성한 오브젝트를 함수 안에서 this로 참조한다.  
+> 즉, 자신만의 this가 있는 것! -> 나중에 화살표 함수(Arrow Function)과의 차이점
+
+```javascript
+var book = {
+  point: 100,
+  member: {
+    point: 200,
+    get: function () {
+      console.log(this === book.member); // true
+      console.log(this.point); // 200
+    },
+  },
+};
+book.member.get();
+```
+
+- this가 참조하는 오브젝트
+- 마지막 줄에서 book.member.get()을 호출하면 this가 book이 아닌 member 오브젝트를 참조한다.
+  - book은 get()을 호출하는 경로 역할
+- console.log(this === book.member)
+  - 따라서 실행 결과 true가 출력되며 this가 book.member를 참조하기 때문에 this 바인딩 컴포넌트에 book.member 오브젝트가 설정(참조)된다.
+- console.log(this.point);
+  - this가 book.member를 참조하므로 book.member.point 프로퍼티 값인 200을 출력한다.
+
+### this와 인스턴스
+
+- 인스턴스 목적? 인스턴스마다 **_고유 값 유지_**
+- 인스턴스에서 this의 목적
+  - this로 인스턴스를 참조하여 this.name 형태로 프로퍼티에 접근한다.
+  - name의 값이 function 오브젝트이면 name은 메서드 이름이 되고
+  - name의 값이 number 타입이면 name은 프로퍼티 이름이 되는 식으로 접근할 수 있다.
+- [[Prototype]] 프로퍼티 접근
+  - new 연산자로 인스턴스를 생성하면 prototype에 연결된 프로퍼티가 인스턴스의 [[Prototype]]에 첨주된다.
+  - this.method() 형태로 [[Prototype]]에 첨부된 메서드를 호출할 수 있다.
+- 여기서 prototype에 연결된 메서드는 모든 인스턴스에서 `공유`할 수 있고, 인스턴스마다 고유값을 유지한다.
+  - 일관된 환경에서 값만 다르게 가져가겠다는 시맨틱! -> 즉, 데이터 중심의 처리
+
+```javascript
+// this와 인스턴스
+var book = {}; // book 오브젝트 생성
+book.Point = function (point) {
+  // book.Point로 생성자 함수를 선언
+  this.point = point;
+};
+// prototype에 getPoint 메소드 생성
+book.Point.prototype.getPoint = function () {
+  console.log(this.point);
+};
+var obj = new book.Point(100); // book.Point() 생성자 함수를 호출하여 인스턴스 생성
+obj.getPoint(); // 100
+```
+
+- var obj = new book.Point();
+  - book.Point 인스턴스를 생성한다.
+- this.point = point;
+  - 파라미터 값으로 넘겨준 100을 this로 참조하는 인스턴스의 point 이름의 프로퍼티 값으로 할당한다.
+  - this가 <b>생성한 인스턴스를 참조</b>하므로 point는 인스턴스 프로퍼티가 된다.
+  - 이 논리로 <b>인스턴스마다 프로퍼티 이름과 값을 유지</b>할 수 있다!
+- obj.getPoint()
+  - obj 인스턴스의 getPoint() 메서드를 호출한다.
+
+* console.log(this.point);
+  - obj.getPoint()로 호출되어 해당 코드가 실행되는데 이 떄, this는 getPoint() 앞에 작성하 obj 인스턴스를 참조한다.
+
+### this와 call()
+
+| 구분     | 타입     | 데이터(값)                                  |
+| -------- | -------- | ------------------------------------------- |
+| object   | Function | 호출할 함수 이름                            |
+| 파라미터 | object   | this로 참조할 오브젝트                      |
+| 파라미터 | Any      | 파라미터opt, 콤마(,)로 구분, 다수 작성 가능 |
+| 반환     | Any      | 호출된 함수에서 반환한 값                   |
+
+- getTotal.call(this, 10, 20);
+  - 함수명.call() 형태
+  - 첫 번째는 파라미터 값으로 넘어가지 않고 두 번째부터 넘어간다.
+  - getTotal() 함수에 10과 20이 파라미터 값으로 넘어간다.
+- 첫 번째 파라미터에 호출된 함수에서 this로 참조할 오브젝트 작성한다.
+  - 호출된 함수에서 this로 참조할 오브젝트 작성한다.
+  - this 이외에 다른 오브젝트 사용 가능하다.
+  - 첫 번째 파라미터에 작성된 오브젝트가 this 바인딩 컴포넌트에 바인딩된다.
+
+#### this 사용
+
+```javascript
+// this와 call()
+"use strict";
+var value = 100;
+function get(param) {
+  return param + this.value; // 첫 번째 파라미터에 작성한 오브젝트를 참조
+}
+var result = get.call(this, 20);
+console.log(result); // 120
+
+// call()을 사용하지 않는다면
+("use strict");
+var value = 100;
+function get(param) {
+  return param + this.value; // 첫 번째 파라미터에 작성한 오브젝트를 참조
+}
+var result = get(20);
+console.log(result); // get 함수 안의 this가 undefined를 참조
+```
+
+- get.call(this, 20);
+  - 첫 번째 파라미터에 this 작성하면 글로벌 오브젝트 참조 -> window 오브젝트 참조
+- return param + this.value
+  - this가 글로벌 오브젝트를 참조하므로 120 반환
+- 만약 get(20)으로 작성한다면 strict 환경에서 get 앞에 오브젝트트를 작성하지 않았으므로 window가 아닌 undefined를 참조해서 에러가 발생한다.
+
+#### object 사용 예제
+
+```javascript
+// 오브젝트 사용
+var get = function (value) {
+  return this.base * this.rate + value;
+};
+var value = { base: 20, rate: 30 };
+var result = get.call(value, 50);
+console.log(result); // 650
+```
+
+- this로 참조할 오브젝트를 변경할 수 있는 것이 call()의 특징이다.
+- var result = get.call(value, 50);
+  - this는 value 오브젝트를 참조하므로 650이 반환된다.
+
+#### 숫자 작성 예제
+
+```javascript
+// 숫자 작성
+function get() {
+  return this.valueOf();
+}
+var result = get.call(123);
+console.log(result); // 123
+```
+
+- var result = get.call(123)
+  - this가 오브젝트를 참조하므로 숫자(123)를 작성하면 에러가 발생하지만
+  - 값(123) 타입에 해당하는 Number 인스턴스를 생성하고 123을 프리미티브 값으로 설정한다.
+  - 따라서 this가 Number 인스턴스를 참조하게 된다.
+- 별로 사용하지는 않는 유형
+
+#### this 참조 변경
+
+```javascript
+// this 참조 변경
+var book = {
+  value: 123,
+  point: {
+    value: 456,
+    get: function () {
+      console.log(this.value);
+    },
+  },
+};
+book.point.get.call(book); // 123
+book.point.get.call(book.point); // 456
+```
+
+- book.point.get.call(book);
+  - book.point의 get() 호출
+  - get()에서 this로 book 오브젝트를 참조하여 this.value는 123을 출력한다.
+- book.point.get.call(book.point);
+  - book.point의 get() 호출
+  - get()에서 this로 book.point 오브젝트를 참조하므로 456이 출력된다.
