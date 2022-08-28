@@ -1295,3 +1295,70 @@ book.point.get.call(book.point); // 456
 - book.point.get.call(book.point);
   - book.point의 get() 호출
   - get()에서 this로 book.point 오브젝트를 참조하므로 456이 출력된다.
+
+### this와 apply()
+
+- getTotal.apply(this, [10, 20])
+  - 함수 호출 방법은 call()과 같으며 파라미터가 배열인 것이 다르다.
+  - [10, 20]을 파라미터 값으로 넘겨준다.
+- 두 번째 파라미터 수가 `유동적`일 때 사용한다.
+  - call()은 파라미터 수가 `고정`일 때 사용한다.
+
+#### this와 arguments
+
+```javascript
+var obj = { 0: 10, 1: 20, 2: 30 };
+var data = [4, 5, 6];
+
+function get() {
+  for (k = 0; k < arguments.length; k++) {
+    console.log(arguments[k] + this[k]);
+  }
+}
+get.apply(obj, data);
+// 14
+// 25
+// 36
+```
+
+- get.apply(obj, data)
+  - get() 함수에서 obj를 this로 참조한다.
+- 두 번째 파라미터 [4, 5, 6]을 arguments를 사용하여 계산한다.
+  - 파라미터 수가 유동적이므로 arguments 프로퍼티를 이용하는 것이 편리하다.
+- get()의 함수 코드는 바뀌지 않으며 넘겨 주는 파라미터 값과 this로 참조할 오브젝트만 변경하면 된다.
+
+### this와 콜백 함수
+
+```javascript
+var obj = { value: 100 };
+var data = [5, 6, 7];
+
+function callback(elements, index, data) {
+  return element + this.value;
+}
+function get(data) {
+  return data.map(callback, obj);
+}
+var result = get(data);
+console.log(result); // [105, 106, 107]
+```
+
+- ES5의 map(), forEach()처럼 콜백 함수가 있는 메서드는 두 번째 파라미터에 this로 참조할 오브젝트를 작성할 수 있다.
+- data.map(callback, obj)
+  - function callback() {} -> map에서 호출하는 콜백 함수
+  - map의 첫 번째 파라미터의 callback 함수 코드 내용을 바로 작성
+  - map의 두 번째 파라미터에 `콜백함수에서 this로 참조할` obj를 작성
+  - map 메서드에서 최종적으로 반환할 배열은 [105, 106, 107]
+
+### this와 bind()
+
+- bind 메서드는 두 번에 나누어 처리한다. <-> 일반적으로 함수는 호출하면 바로 실행
+  - function 오브젝트 생성
+  - 생성한 function 오브젝트를 함수로 호출
+    - 각각의 단계에서 bind가 발생하기 때문에 내부 프로퍼티에 필요한 데이터를 저장한다.
+- 파라미터
+  - 1번째 파라미터에 함수에서 `this로 참조할 오브젝트`
+  - 2번째 파라미터에 `호출된 함수의 파라미터 값`
+  - 즉, 파라미터 값과 this로 참조할 오브젝트를 묶는 것! -> 호출된 함수는 bind된 환경을 사용해서 실행한다.
+- 생성한 function을 호출할 때에도 파라미터 작성 가능하다.
+  - <b>두 개의 파라미터를 병합하여 사용한다.</b>
