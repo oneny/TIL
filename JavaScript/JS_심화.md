@@ -1362,3 +1362,78 @@ console.log(result); // [105, 106, 107]
   - 즉, 파라미터 값과 this로 참조할 오브젝트를 묶는 것! -> 호출된 함수는 bind된 환경을 사용해서 실행한다.
 - 생성한 function을 호출할 때에도 파라미터 작성 가능하다.
   - <b>두 개의 파라미터를 병합하여 사용한다.</b>
+
+#### function 오브젝트 생성, 호출
+
+```javascript
+var book = {
+  point: 123,
+  get: function () {
+    return this.point;
+  },
+};
+var obj = book.get.bind(book);
+console.log(typeof obj); // function
+var result = obj();
+console.log(result); // 123
+```
+
+* var obj = book.get.bind(book);
+  * book.get()을 호출하지 않고 function 오브젝트를 생성하여 반환한다.
+  * 생성한 function 오브젝트를 생성한 오브젝트의 내부 프로퍼티인 [[TargetFunction]]에 설정
+  * 처리를 나누어서 하므로 저장 필요
+* console.log(typeof obj);
+  * obj의 타입은 function 오브젝트
+  * 즉, book.get.bind(book)이 만든 것은 function 오브젝트
+* bind()의 첫 번째 파라미터
+  * get() 함수에서 this로 참조할 오브젝트 작성 -> get 함수 안에서 this로 book 오브젝트 참조
+    * get() 앞에 작성한 오브젝트를 this로 참조하는 것이 아니다!!!
+  * 파라미터를 작성하지 않으면 get() 함수 앞에 작성한 오브젝트를 참조하는 것이 아닌 `undefiend`로 설정된다.
+    * 이것이 바로 `바인딩` -> 따라서 첫 번째 파라미터는 필수라고 할 수 있다.
+  * 처리가 분리되어 분리되기 때문에 저장하기 위해 생성한 function 오브젝트의 [[BoundThis]]에 설정한다
+    * obj() 함수가 호출되었을 때 무엇이 참조되었는지 알기 위해 내부 프로퍼티에 저장이 필요하다.
+* var result = obj();
+  * bind()로 생성한 function 오브젝트 호출 -> 이 때, book.get() 함수가 호출된다.
+* console.log(result);
+  * this.point를 반환하는데 아까 말했던 this는 book을 참조하므로
+  * book.point 값인 123을 반환한다.
+
+### 파라미터 병합
+```javascript
+var book = {
+  get: function() {
+    return Array.prototype.slice.call(arguments);
+  }
+};
+var obj = book.get.bind(this, 10, 20);
+var result = obj(30, 40);
+console.log(result); // [10, 20, 30, 40]
+```
+
+* var obj = book.get.bind(this, 10, 20);
+  * book.get() 함수를 bind시킴
+  * 두 번째, 세 번째 파라미터에 값을 작성했으며 book.get()의 파리미터 값으로 넘겨준다.
+  * 이것을 function 오브젝트의 [[BoundArguments]]에 설정한다.
+* get() 함수에 파라미터 이름을 작성하지 않고 arguments 사용한다.
+  * return Array.prototype.slice.call(arguments);
+    * arguments는 {0: 10, 1: 20, ..}와 같은 프로퍼티 형태로 저장한다.
+    * slice()는 인덱스 범위의 엘리먼트를 배열로 반환한다.
+    * 인덱스를 작성하지 않으면 arguments 전체 반환
+* var result = obj(30, 40);
+  * book.get() 함수가 호출되며 book.get.bind(this, 10, 20);에서 10과 20을 [10, 20] 형태로 반환
+  * 여기에 obj(30, 40)의 30과 40을 병합(첨부)하여 반환한다.
+
+### bind() 활용, 이벤트 처리
+```javascript
+var book = {
+  myPoint: 100,
+  setEvent: function() {
+    var node = document.getElement
+  }
+}
+```
+
+### bind() 활용, 이벤트 처리
+```javascript
+
+```
