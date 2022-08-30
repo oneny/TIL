@@ -1435,5 +1435,10 @@ var book = {
 
 ### bind() 활용, 이벤트 처리
 ```javascript
-
+var book = {
+  myPoint: 100,
+  setEvent: function() {
+    
+  }
+}
 ```
