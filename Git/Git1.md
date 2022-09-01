@@ -356,7 +356,7 @@ git commit -m "FIRST COMMIT"
     - David
   ```
 
-#### `git statua`로 확인
+#### `git status`로 확인
 
 - 파일의 추가(untracked files), 변경(modified), 삭제(deleted) 모두 내역으로 확인 가능
 
@@ -605,7 +605,7 @@ git switch add-coach
 - `git switch add-coach`: `add-coach` 브랜치 이동
   - `checkout` 명령어가 Git 2.23 버전부터 `switch`, `resotre`로 분리됨
     - checkout이 하는 일이 너무 다양해서 용도별로 분리함
-    - 브랜치 이동: `switch`
+    - 브랜치 간 이동: `switch`
 
 #### 브랜치 생성과 동시에 이동하기
 
@@ -623,6 +623,8 @@ git branch -D (강제삭제할 브랜치명)
 ```
 
 - 지워질 브랜치에만 있는 내용의 커밋이 있을 경우 즉, 다른 브랜치로 가져오지 않은 내용이 있는 브랜치를 지울 때는 `-d` 대신 `-D`로 강제 삭제해야 한다.
+- `merge`나 `rebase`가 된 브랜치의 경우는 즉 해당 브랜치의 사항들이 전부 다른 브랜치로 적용되어 있기 때문에 삭제할 때 `-d`로만 해서 가능하지만,
+- `merge`나 `rebase`되지 않은 브랜치는 필요한 브랜치를 실수로 삭제하는 것을 방지하기 위해 기본적으로 막는다.
 
 #### 브랜치 이름 바꾸기
 
@@ -641,9 +643,11 @@ git branch -m (기존 브랜치명) (새 브랜치명)
 
 ### add-coach 브랜치
 
-- 주의사항
+- 🚨 주의사항 🚨
+
   - coach와 manager 사이에 한 줄 공백이 있도록 설정
   - 이후의 실습에서 사소한 차이로 충돌이 발생할 수도 있다.
+
 - Tigers의 매니저 정보 아래 `coach: Grace` 추가
   - 커밋 메시지: `Add Coach Grace to Tigers`
 - Leopards의 매니저 정보 아래 `coach: Oscar` 추가
@@ -703,34 +707,57 @@ o        Add team Pumas
 |  |
 |  o     Add Coach Grace to Tigers
 |  |
-|  o  o  'main' Add Freddie to Panthers
+|  |  o  'main' Add Freddie to Panthers
 |  |  |
 |  |  o  Add Olivia to Leopards
 | /  /
 o        Replace Cheetas with Panthers
+o        Add team Cheetas
 ```
 
 ## branch 합치기
 
+```
+      / o - o - o  <- 'add-coach'      \ (merge, add-coach)
+- o - o - o <- 'main'                  - o     ( - o - o)
+      \ o - o <- 'new-teams'                   (rebase, new-teams 브랜치 사라짐)
+```
+
 ### 서로 다른 branch를 합치는 두 가지 방법
 
-- `merge`: 두 브랜치를 한 커밋에 이어붙인다.
+- `merge`: <b>두 브랜치를 한 커밋에 이어붙인다.</b>
   - 브랜치 사용내역을 남길 필요가 있을 때 적합한 방식이다.
   - 다른 형태의 merge에 대해서도 이후 다루게 될 것이다.
+  - 새로 생기는 커밋에는 원래 브랜치(main)에 병합될 브랜치(add-coach)에서 작업했던 모든 변화들이 한꺼번에 적용한다.
 - `rebase`: 브랜치를 다른 브랜치에 이어붙인다.
   - 한 줄로 깔끔히 정리된 내역을 유지하기 원할 때 적합하다.
   - 이미 팀원과 공유된 커밋들에 대해서는 사용하지 않는 것이 좋다.
+  - 브랜치의 마디, 커밋들(new-teams)을 대상 브랜치(main)로 옮겨붙인다.
+    - 마치 메인 브랜치에다가 new-teams 브랜치의 커밋들을 하나하나 추가한 것처럼 된다.
+- `merge`나 `rebase`하거나 둘 결과물은 같은 것 아닌가?
+  - 결국 모든 브랜치에서의 작업 결과물이 마지막에 모이는 것이기 때문에 같은 것 아닌가?
+  - 차이가 있다면 <b>히스토리, 내역</b>
+    - rebase를 한 뒤의 히스토리는 깔끔하게 한 줄로 정리되지만,
+    - merge는 위 예시처럼 브랜치의 흔적을 남긴다.
+      - 많은 브랜치가사용되는 프로젝트에서는 프로젝트의 진행 내역들을 보고 파악하기가 매우 복잡해질 수 있다.
+  - 브랜치의 사용 내역들을 남겨둘 필요가 있다면 `merge`
+  - 그 보다는 히스토리를 깔끔하게 만드는게 중요하다면 `rebase`가 적절한 선택이다.
+    - 이미 팀원들 간에 공유된 커밋들에 대해서는 `rebase`를 사용하지 않는 것이 좋다.
+    - 같이 일 하는 도중 공유된 커밋에 한 줄로 일이 틀어질 소지가 될 수도 있다.
 
 ### `merge`로 합치기
 
 - `add-coach` 브랜치를 `main` 브랜치로 <b>merge</b>
-  - `main` 브랜치로 이동
+  - 주 브랜치인 `main` 브랜치로 이동
   - 아래의 명령어로 병합
   ```bash
   git merge add-coach
   ```
   - `:wq`로 자동입력된 커밋 메시지 저장하여 마무리
   - 소스트리에서 확인
+- 결과
+  - `3 files changed, 6 insertions(+)` 메시지를 볼 수 있다.
+  - coach가 `main`에 적용된 것을 확인할 수 있다.
 
 #### `merge`는 `reset`으로 되돌리기 가능
 
@@ -748,23 +775,41 @@ git branch -d add-coach
 ### `rebase`로 합치기
 
 - `new-teams` 브랜치를 `main` 브랜치로 <b>rebase</b>
+
   - `new-teams` 브랜치로 이동
-    - `merge`때와는 반대!!!!!!!!!!!!!!!!!!!!
+    - `merge`때와는 반대와는 반대로 `new-teams`에서 `main`을 활용한다.
   - 아래의 명령어로 병합
+
   ```bash
   git rebase main
   ```
+
   - 소스트리에서 상태 확인
-    - `main` 브랜치는 뒤쳐져 있는 상황
-- `main` 브랜치로 이동 후 아래 명령어로 `new-teams`의 시점으로 <b>fast-forward</b>
+
+    - 🚨 `main` 브랜치는 뒤쳐져 있는 상황 🚨
+
+    ```
+    - o - o - o - o
+             main   new-teams(new-teams가 두 작업 앞 선 상황)
+
+    main은 rebase한다고 해서 그 가지의 끝까지 가지 않는다.
+    ```
+
+- `main` 브랜치로 이동 후 아래 명령어로 `new-teams`의 시점으로 <b>fast-forward</b>하여 해결
   ```bash
   git merge new-teams
   ```
-  - `new-teams` 브랜치 삭제
+  ```
+               main
+  - o - o - o - o
+             new-teams
+  ```
+  - `new-teams` 브랜치 삭제 -> `git branch -d new-teams`
 
 ## 충돌 해결하기
 
-- 파일의 같은 위치에 다른 내용이 입력된 상황
+> 같은 파일의 같은 줄의 서로 다른 내용을 입력된 상황  
+> 컴퓨터는 둘 중 어느 것을 채택해야 할 지 모르기 때문에 충돌이 발생한다.
 
 ### 상황 만들기
 
@@ -789,7 +834,18 @@ git branch -d add-coach
 `git merge conflict-1`로 병합을 시도하면 충돌 발생
 
 - 오류 메시지와 `git status` 확인
-- VS Code에서 해당 부분 확인
+  - 오류 메시지: Merge conflict in tigers.yaml
+- VS Code에서 해당 부분 확인(VS Code의 기능 중 하나)
+  ```
+  <<<<<<< HEAD
+  manager: Kenneth
+  =======
+  manager: Deborah
+  >>>>>>> conflict-1
+  ```
+  - 이전 VS Code에서는 해당 충돌 부분 위에 선택 가능한 버튼들이 있었는데 현재 버전에서는 나타나지 않는다.
+  - 충돌시 직접 해당 부분을 직접 타이핑해서 수정한 다음 `merge`를 계속 진행하면 된다.
+  - `manager: Deborah`만 남기고 `git add .` -> `git commit` -> `:wq` 순서로 명령하면 `Merge branch 'conflict-1'` 커밋 생긴다.
 - 당장 충돌 해결이 어여울 경우 아래 명령어로 `merge` 중단
   ```bash
   git merge --abort
@@ -800,6 +856,8 @@ git branch -d add-coach
 
 - `conflict-2`에서 `git rebase main`로 리베이스 시도하면 충돌 발생
   - 오류 메시지와 `git status` 확인
+    - Unmerged paths: `both modified: leopards.yaml` 메시지 확인할 수 있다.
+    - 이러한 오류는 개발자 본인이 충돌나는 부분을 해결하라는 메시지!
   - VS Code에서 해당 부분 확인
 - 당장 충돌 해결이 어려울 경우 아래 명령어로 `rebase` 중단
   ```bash
@@ -816,16 +874,39 @@ git branch -d add-coach
   git rebase --continue
   ```
 
+  - 한 번으로 끝나지 않을 수 있기 때문에 해당 명령어 실행
   - 충돌이 모두 해결될 때까지 반복
 
-- `main`에서 `git merge conflict-2`로 마무리
+- `main`에서 `git merge conflict-2`로 마무리(main은 뒤쳐져 있기 때문에)
 - `conflict-1`, `conflict-2` 삭제
+  ```
+  o     "conflict-2" Edit Leopards
+  |
+  o     "main" Merge branch 'conflict-1'
+  | \
+  |  o  "conflict-1" Edit Tigers
+  o  |  Edit Tigers, Leopards, Panthers
+  | /
+  o     Add team Jaguars
+  ```
+  - <b>두 마디짜리 브랜치를 rebase 했는데 결과에는 왜 한 마디만 추가되어 있을까?</b>
+    - 충돌 해결 중 두 번째 것에서는 current, 즉 main 브랜치 것(Shirley)을 채택했기 때문에 (즉, rebase가 의미가 없어졌으므로) 커밋으로 추가할 필요가 없어졌기 때문이다.
+    - 만약 conflict-2 브랜치 것을 채택한다면 가지는 두 개 생긴다.
 
 # GitHub 사용하기
 
 ### [github.com](https://www.github.com) 살펴보기
 
 - Git으로 관리되는 프로젝트의 원격 저장소
+  - Git으로 관리하는 모든 프로젝트들을 온라인 공간에 공유해서 프로젝트 구성원들이 함꼐 소프트웨어를 만들어갈 수 있도록 도와주는 서비스
+- 일반 클라우드와 깃헙 차이
+  - 일반 클라우드
+    - 구성원들이 한 번에 한 명씩만 작업을 해서 업로드하는 경우라면 문제가 없지만, 그렇게 되면 팀원이 많은 것이 의미가 없다.
+  - 깃헙 등의 온라인 Git 저장소
+    - 모든 업로드와 다운로드를 커밋 단위로 주고 받는다.
+    - 모든 팀원들이 같은 시간에 동시에 작업을 할 수 있도록 지원하는데 한 사람이 버전을 최신화(커밋)하면 다음 사람이 완료된 작업을 커밋해서 올리기 위해서는 반드시 최신 커밋을 먼저 다운받고 자기 컴퓨터에 적용부터 하도록 강제된다.
+    - 커밋 상에 충돌사항이 있다면 그것도 자기 컴퓨터에서 해결!
+  - 즉, GitHub가 교통정리를 하면서 서로의 작업을 덮어씌우는 등의 문제를 방지하면서 협업을 할 수 있도록 도와준다.
 - 오픈소스의 성지
   - Git, VS Code, Tensorflow, React 등 살펴보기
 
@@ -852,18 +933,18 @@ git branch -d add-coach
       - 아직 맥에서(GitHub 사이트가 아닌 터미널 등에서) Github 로그인을 해보지 않은 경우
       - 그대로 다음 강을 진행하면 `push` 명령어 사용시 터미널에서 토큰을 요구할 것
       - 그 때, 토큰을 입력하면 키체인에 해당 항목이 생기고 토큰도 자동등록될 것이다.
-    - 소스트리에도 추가(맥에서 소스트리에 계정 설정하기)
-      - `설정` > `계정` 탭 > `추가` 버튼
-      - 인증방식은 `베이직`, 프로토콜은 `HTTPS`로 설정
-      - 사용자명(GitHub 아이디)와 암호(토큰) 설정
-      - 해당 사이트 참조: [맥에서 소스트리에 계정 설정](#=https://www.yalco.kr/@git-github/4-2/)
-    - GitHub에 새 <b>Repository</b> 생성
-      - `Public`: 모두에게 보일 수 있는 프로젝트
-      - `Private`: 허용된 인원만 볼 수 있는 프로젝트
-    - 협업할 팀원 추가
-      - 레포지토리의 `Settings` - `Collaborators`
-        - `Manage Access`가 `Collaborators`로 바뀌었다.
-      - `Add people`
+  - 소스트리에도 추가(맥에서 소스트리에 계정 설정하기)
+    - `설정` > `계정` 탭 > `추가` 버튼
+    - 인증방식은 `베이직`, 프로토콜은 `HTTPS`로 설정
+    - 사용자명(GitHub 아이디)와 암호(토큰) 설정
+    - 해당 사이트 참조: [맥에서 소스트리에 계정 설정](https://www.yalco.kr/@git-github/4-2/)
+  - GitHub에 새 <b>Repository</b> 생성
+    - `Public`: 모두에게 보일 수 있는 프로젝트
+    - `Private`: 허용된 인원만 볼 수 있는 프로젝트
+  - 협업할 팀원 추가
+    - 레포지토리의 `Settings` - `Collaborators`
+      - `Manage Access`가 `Collaborators`로 바뀌었다.
+    - `Add people`
 
 ## 원격 저장소 사용하기
 
@@ -877,17 +958,26 @@ git branch -d add-coach
 git remote add origin (원격 저장소 주소)
 ```
 
+- git의 `remote` 즉, 원격 저장소 중 하나인 `origin`에 해당 주소를 추가(`add`)하겠다는 명령어
 - 로컬의 Git 저장소에 원격 저장소로의 연결 추가
   - 원격 저장소 이름에 흔히 `origin` 사용. 다른 것으로 수정 가능.
-  ```bash
-  git branch -M main
-  ```
+
+```bash
+git branch -M main
+```
+
 - GitHub 권장 - 기본 브랜치명을 `main`으로
-  ```bash
-  git push -u origin main
-  ```
+
+```bash
+git push -u origin main
+```
+
+- git에서 `push`는 내 컴퓨터에 있는 커밋 내역들 중에 아직 원격 저장소에 없는 것들을 업로드해줌
 - 로컬 저장소의 커밋 내역들 원격으로 `push`(업로드)
-  - `-u` 또는 `--set-upstream`: 현재 브랜치와 명시된 원격 브랜치 기본 연결
+- `-u` 또는 `--set-upstream`: 현재 브랜치와 명시된 원격 브랜치 기본 연결
+  - `-u origin main`: 어느 원격의 어느 브랜치에다가 `push`할 것인가를 `-u` 뒤에 설정한다.
+  - 명시해주는 이유: 한 프로젝트 안에서 원격 저장소를 여러 개 둘 수 있기 때문이다.
+  - `git remote (-v)`: 원격의 목록을 확인할 수 있는 명령어
 
 ### GitHub의 해당 레포지토리 페이지 새로고침하여 살펴보기
 
@@ -904,7 +994,8 @@ git remote add origin (원격 저장소 주소)
 ### GitHub에서 프로젝트 다운받기
 
 - `Download ZIP`: 파일들만 다운받음, Git 관리내역 제외
-- `Git clone`: Git 관리내역 포함 다운로드
+  - 협업할 때 사용하는 방법은 아님
+- `git clone`: Git 관리내역 포함 다운로드
 
 #### 터미널이나 Git Bash에서 대상 폴더 이동후
 
@@ -921,11 +1012,17 @@ git clone (원격 저장소 주소)
 
 - Leopards의 `members`에 `Evie` 추가
   - 커밋 메시지: `Add Evie to Leopards`
+  ```
+  o  "main(1개 앞)" Add Evie to Leopards
+  |
+  o  "origin/main" Merge branch 'conflict'
+  ```
+  - 원격(`origin`)에 있는 `main` 브랜치는 하나가 뒤쳐진 상황
 - 아래 명령어로 push
   ```bash
   git push
   ```
-  - 이미 `git push -u origin main`으로 대상 원격 브랜치가 지정되었기 때문에 가능하다.
+  - 💡 이미 `git push -u origin main`으로 대상 원격 브랜치가 지정되었기 때문에 가능!
 - GitHub 페이지에서 확인
   - GitHub의 파일들과 커밋 내역 확인
 
@@ -941,19 +1038,41 @@ git clone (원격 저장소 주소)
 
 ### `pull`할 것이 있을 때 `push`를 하면?
 
-- 로컬에서 Leopards의 `manager`를 `Doli`로 수정
+- 자신의 커밋은 깃헙에 올리가지 않은 상태이고, 다른 팀원들은 커밋을 올려 pull을 받아야 하는 상황
+
+- 로컬에서 Leopards의 `manager`를 `Dooli`로 수정
   - 커밋 메시지: `Edit Leopards manager`
 - GitHub에서 Leopards의 `coach`를 `Lupi`로 수정
   - 커밋 메시지: `Edit Leopards coach`
 - push 해보기
   - 원격에 먼저 적용된 새 버전이 있으므로 적용 불가
+    - 현재 자신의 깃 저장소는 원격저장소보다 뒤쳐져 있기 때문에 원격 저장소에 push하기 위해서는 자신의 내역이 원격 저장소의 최신내역과 맞춰져있어야 한다.
   - pull 해서 원격의 버전을 받아온 다음 push 가능
-- `push`할 것이 있을 시 `pull`하는 두 가지 방법
-  - `git pull --no-rebase` - `merge` 방식
-    - 소스트리에서 확인해보기
-    - `reset`으로 되돌린 다음 아래 방식도 해보기
-  - `git pull --rebase` - `rebase` 방식
-    - `pull` 상의 `rebase`는 다름(협업시 사용 OK)
+
+#### `push`할 것이 있을 시 `pull`하는 두 가지 방법
+
+- `git pull --no-rebase` <= `merge` 방식
+- 소스트리에서 확인해보기
+  ```
+  o      "main" Merge branch 'main' of https;//github.com/.../git-practice
+  | \
+  |  o   "origin/main" Edit Leopards coach
+  o  |   Edit Leopards manager
+  | /
+  o     Add Evie to Leopards
+  ```
+  - 로컬 브랜치(main)와 원격 저장소(origin/main)을 어긋난 시간선을 다르게 보고 두 갈래로 나뉜 후 모아준다.
+  - 그리고 `merge` 방식이므로 main 브랜치의 leopards.yaml에 `manager: Dooli`와 `coach: Lupi`로 변경됨
+- `git pull --rebase` - `rebase` 방식
+  - 로컬의 main 브랜치 뒤에 원격 저장소(origin)의 main 브랜치가 뒤로 와서 한 줄이 된다.
+  - `pull` 상의 `rebase`는 다름(협업시 사용 OK)
+  ```
+  o "main" Edit Leopard manager
+  |
+  o "origin/main" Edit Leopard coach
+  |
+  o Add Evie to Leopards
+  ```
 - push하기
 
 #### 이 부분에서 충돌이 발생했다면?
@@ -977,8 +1096,26 @@ git clone (원격 저장소 주소)
   - 커밋 메시지: `Add Arachi to Panthers`
 - pull하여 충돌상황 마주하기
   - `--no-rebase`와 `--rebase` 모두 해 볼 것
+    - `--no-rebase`경우는 충돌하는 둘 중 하나를 선택하여 두 가지에서 하나로 모인다.
+    - `--rebase` 경우는 원격 저장소(origin)의 main브랜치 것(Arachi)을 선택하면 커밋이 하나만 추가된다.
+      ```
+      o "main" "origin/main" Add Arachi to Panthers
+      |
+      ```
+      - 로컬의 main 브랜치 것은 필요없어지기 때문에 사라졌다고 보면 된다.
+    - 로컬의 main 브랜치 것(Maruchi)를 선택하면 커밋이 두 개 생긴다.
+      ```
+      o "main" Add Maruchi to Panthers
+      |
+      o "origin/main" Add Arachi to Panthers
+      ```
 
 ### 로컬의 내역 강제 push해보기
+
+- 로컬의 커밋 내역들이 원격 저장소의 커밋 내역보다 뒤쳐져 있는 경우에는 push할 수 없지만,
+- 원격에 올라간 내역들이 뭔가 잘못돼서 로컬에 있는 것들로 강제로 맞춰줄 때에는 강제로 맞춰줄 수 있다.
+  - 이 떄, 원격 저장소에 있는 커밋 내역들은 사라진다.
+  - 협업할 때 합의안되면 쓰면 안된다.
 
 1. 로컬의 내역 충돌 전으로 `reset`
 2. 아래 명령어로 원격에 강제 적용
@@ -993,33 +1130,44 @@ git push --force
 
 - `from-local` 브랜치 만들기
 - 아래 명령어로 원격에 `push`
-  - 아래와 같이 대상을 명시하라는 메시지가 나타난다.
+
   ```bash
   git push
   ```
-  - 아래 명령어로 원격의 브랜치 명시 및 기본설정
+
+  - `git push --set-upstream origin from-local`와 같이 대상을 명시하라는 메시지가 뜬다.
+    - git이 `from-local` 브랜치를 어디에다가 `push`해야하는지 모르기 때문에 에러 발생
+    - 그래서 `origin`이라는 원격에 `from-local`이라는 브랜치를 만들라는 의미의 메시지
+    - `--set-upstream`을 `-u`으로 축약 가능
+
+- 아래 명령어로 원격의 브랜치 명시 및 기본설정
   ```bash
   git push -u origin from-local
   ```
-- 브랜치 목록 살펴보기
-  - GitHub에서 목록 보기
-  - 아래 명령어로 로컬과 원격의 브랜치들 확인
+  - 원격 저장소인 GitHub에 from-local 브랜치가 올라온 것을 확인할 수 있다.
+- 로컬과 원격의 브랜치 목록 확인하기
   ```bash
   git branch --all
+  git branch -a
   ```
+  - GitHub에서 목록 보기
+  - `git branch`는 로컬의 브랜치만 볼 수 있다.
 
 ### 원격의 브랜치 로컬에 받아오기
 
 - GitHub에서 `from-remote` 브랜치 만들기
-  - `git branch -a`에서 현재는 보이지 않는다.
+  - 로컬의 git이 원격의 변화들을 업데이트받지 않았기 때문에 `git branch -a`에서 현재는 보이지 않는다.
 - 아래 명령어로 원격의 변경사항 확인
   ```bash
   git fetch
   ```
+  - `git branch -a`로 확인
 - 아래 명령어로 로컬에 같은 이름의 브랜치를 생성하여 연결하고 `switch`
   ```bash
   git switch -t origin/from-remote
   ```
+  - 로컬로 `from-remote`라는 브랜치를 복사한 다음에 이후로도 계속 로컬의 `from-remote` 브랜치는 원격 저장소와 연결하는 명령어
+  - `git push -u`하는 것과 비슷한 개념
 
 ### 원격의 브랜치 삭제
 
@@ -1029,10 +1177,32 @@ git push (원격 이름) --delete (원격의 브랜치명)
 
 # 05. Git 보다 깊이 알기
 
+## Git을 특별하게 만드는 것
+
+- <b>스냅샷</b>을 사용한다.
+  - [관련 공식문서 내용](https://git-scm.com/book/ko/v2/%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0-Git-%EA%B8%B0%EC%B4%88)
+  - SVN 등: 델타 방식
+    - 각 파일이 생겨난 버전에 해당 파일 전체가 저장이 되고 이후 이 파일에 수정이 가해질 때는 그 변경점들이 저장된다.
+    - 해당 버전의 파일의 내용은 이전 변화들을 누적해서 계산이 된다.
+  - Git: 스냅샷 방식
+    - 새로운 버전이 만들어질 때 해당 버전에서의 각 파일이, 최종 상태 그대로 저장하는 방식
+    - 이전 버전에서부터 변화가 없는 파일은 이전 버전의 파일 그대로 연결해서 가져온다.
+    - 변화가 있는 파일의 경우 최종 파일 내용이 그대로 저장이 된다.
+  - 커밋이 몇 만개있는 레포지토리를 델타 방식으로 다룬다면
+- 중앙집중식 버전 관리가 아닌 <b>분산 버전 관리</b>이다.
+  - 중앙집중식 버전 관리
+    - CVS나 Subversion 등의 VCS는 원격 서버에 모든 관리 내역들이 저장된다.
+    - 그리고 여기에 참여하는 인원들의 컴퓨터 즉 로컬에는 중앙에서 현 버전 것으로 다운받는 파일들로만 작업을 할 수 있다. -> 원격 저장소에 의존적
+  - 분산 버전 관리
+    - 원격에 있는 것을 ZIP 다운로드 말고 clone 명령어를 써가지고 받아오면
+    - 로컬에 파일들 뿐만 아니라 전체 Git 커밋이랑 브랜치들까지 받아져가지고 인터넷 연결상태랑 상관없이 로컬에서 자유롭게 작업을 할 수 있다.
+
 ## Git의 3가지 공간
 
+> Git에서는 파일의 상태를 3가지로 분류한다.
+
 ```
-'Working directory'      'Staging area'       'Repository'
+"Working directory"      "Staging area"       "Repository"
     Untracked
                    add =>            commit =>
     Tracked                                        |
@@ -1045,20 +1215,22 @@ git push (원격 이름) --delete (원격의 브랜치명)
 
 ### Working directory
 
-- `untracked`: Add된 적 없는 파일, ignore된 파일
-- `tracked`: Add된 적 있고 변경내역이 있는 파일
-- `git add` 명령어로 Staging area로 이동
+- 레포지토리의 파일들에 대해 수정사항이 생거나, 새로운 파일이 생기면 `Working directory`에 위치하게 된다.
+  - `untracked`: Add된 적 없는 파일, ignore된 파일
+  - `tracked`: Add된 적 있고 변경내역이 있는 파일
+  - `git add` 명령어로 Staging area로 이동
 
 ### Staging area
 
-- 커밋을 위한 준비 단계
+- 커밋을 해서 레포지토리에 들어가기 전인 준비 단계
   - 예시: 작업을 위해 선택된 파일들
 - `git commit` 명령어로 repository로 이동한다.
 
 ### Repository
 
 - `.git directory`라고도 불린다.
-- 커밋된 상태
+- 커밋된 상태 즉, <b>이미 어떤 버전에 들어있는 상태</b>이다.
+- GitHub에서 저장소를 하나 만들때 `Repository`라고 하는 이유는 이미 커밋이 된 상태의 파일들이 올라오기 때문이다.
 
 ### 그릇에 비유한 Git 개념
 
@@ -1085,13 +1257,16 @@ git push (원격 이름) --delete (원격의 브랜치명)
   - 파일의 삭제가 `working directory`에 있다.
   - `git reset --hard`로 복원
 - `git rm tigers.yaml`로 삭제하고 `git status`로 살펴보기
-  - 파일의 삭제가 `Staging area`에 있음
+  - 파일의 삭제가 `Staging area`에 있음 -> 바로 커밋을 위한 준비단계에 있음
   - `git reset --hard`로 복원
 
 ### git mv
 
 - `tigers.yaml`를 `zzamtigers.yaml`로 이름변경 뒤 `git status`로 살펴보기
+  - `untracked` 목록에 zzamtigers.yaml이 있고, `tracked` 목록에 `deleted: tigers.yaml`이 있다.
+  - `git add .`해서 Staging area에 올려야 `renamed: tigers.yaml -> zzamtigers.yaml`로 표시가 뜬다.
 - 복원 후 `git mv tigers.yaml zzamtigers.yaml`로 실행 뒤 비교
+  - 바로 `Staging area`에 있음
 
 ### 파일을 `staging area`에서 `working directory`로
 
@@ -1100,48 +1275,56 @@ git restore --staged (파일명)
 ```
 
 - `--staged`를 빼면 `working directory`에서도 제거
-- 예전: `git reset HEAD (파일명)`
+  - 즉, 수정한 변화 자체를 되돌리겠다는 의미 -> 해당 파일을 `Repository`에 두겠다는 말
+  - 예전: `git reset HEAD (파일명)`
 
 ### `reset`의 세 가지 옵션
 
 - --soft: `repository`에서 `staging area`로 이동
+  - `Repository`에서만 제거하고 `Staging area`에 남겨둔다.
+  - 즉, commit은 안됐지만 add가 된 상태로 둔다.
 - --mixed(default): `repository`에서 `working directory`로 이동
+  - `Working directory`에 남겨둔다.
+  - 파일 자체는 변화시키지 않고, `Staging area`에서 제거한다.
 - --hard: 수정사항 완전히 삭제
+  - `Working directory`에서 한 작업들까지 모두 날려버리겠다는 의미
 
 ## HEAD
 
-- 압축 푼 뒤 VS Code로 `git-heads`(폴더 안 폴더 주의) 폴더 열기
-
-```
-        main   'delta-branch'
--o - o - o - o - o - o
-   \ o - o 'alpha-branch'
-   \ o - o 'beta-branch'
-```
-
 ### Git의 HEAD
 
-현재 속한 브랜치의 가장 최신 커밋
-
-- switch로 브랜치 이동해보기
-  - `main`과 `delta-branch`
+- <b>현재 속한 브랜치의 가장 최신 커밋</b>
+  - 가지의 맨 끝단
 
 ### `checkout`으로 앞뒤 이동해보기
 
-```bash
-git checkout HEAD^
-```
+- 커밋 내역들은 그대로 두고 파일들의 상태만 뒤로 옮기는 즉, 시간선을 바꾸지 않고 그냥 과거로만 돌아가는 방법이 있다.
+
+  - `checkout` 사용, `reset/revert`와는 다르다.
+
+  ```bash
+  git checkout HEAD^
+  ```
 
 - `^` 또는 `~`: 갯수만큼 이전으로 이동
   - `git checkout HEAD^^^`, `git checkout HEAD~5`
 - `커밋 해시`를 사용해서도 이동 가능
   - `git checkout (커밋해시)`
 - `git checkout -`: (이동을) 한 단계 되돌리기
+  - `ctrl + z`같은 느낌
+
+#### checkout과 HEAD
+
+- HEAD가 각 브랜치의 가장 최신 커밋인데 `checkout`으로 과거로 돌아가면 해당 상태에 `HEAD` 표시가 되어있다.
+  - <b>즉, 어떠한 브랜치도 아닌 익명의 다른 브랜치를 하나 만들어서 와있는 것!</b>
+  - `git branch`로 확인하면 `(HEAD detached at 0000)`라는 익명 브랜치가 생성됨
+  - `git switch`로 다른 브랜치의 HEAD로 이동하면 익명 브랜치는 사라짐
+  - `git switch -c`로 익명 브랜치에 이름을 줘서 브랜치 생성과 동시에 그 브랜치로 이동할 수 있다.
 
 ### HEAD 사용하여 reset하기
 
 ```bash
-git reset HEAD(원하는 단계) (옵션)
+git reset (reset옵션) HEAD(원하는 단계)
 ```
 
 ## fetch vs pull
@@ -1467,16 +1650,16 @@ git commit --amend -m 'Add members to Panthers and Pumas'
   | s, squash | 이전 커밋에 합치기 |
 
 ### 다음의 수정사항들 진행해보기
-* `횻홍`을 `버그 수정`으로 변경
-  * `r` 명령어 사용
-* `뻘짓` 커밋 삭제
-  * `d` 명령어 사용
-* 결전의 찜질망 항목들 합치기
-  * 첫 항목 뒤로 `s` 명령어 사용
-  * 메시지 수정 후 저장
-* `캐릭터 귤맨 추가`, `시작메뉴 디자인 변경` 항목 나누기
-  * `e` 명령어로 수정 시작
-  * `git reset HEAD~`
-  * 변화들을 따로 스테이지 및 커밋
-  * `git rebase --continue`
 
+- `횻홍`을 `버그 수정`으로 변경
+  - `r` 명령어 사용
+- `뻘짓` 커밋 삭제
+  - `d` 명령어 사용
+- 결전의 찜질망 항목들 합치기
+  - 첫 항목 뒤로 `s` 명령어 사용
+  - 메시지 수정 후 저장
+- `캐릭터 귤맨 추가`, `시작메뉴 디자인 변경` 항목 나누기
+  - `e` 명령어로 수정 시작
+  - `git reset HEAD~`
+  - 변화들을 따로 스테이지 및 커밋
+  - `git rebase --continue`
