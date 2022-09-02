@@ -89,8 +89,22 @@
     - [설정값 확인](#설정값-확인)
     - [유용한 설정들](#유용한-설정들)
     - [단축키 설정](#단축키-설정)
-- [07.]
-
+- [07. 프로답게 커밋 관리하기](#07-프로답게-커밋-관리하기)
+  - [어떻게 커밋하는게 좋을까요?](#어떻게-커밋하는게-좋을까요)
+    - [작업을 커밋할 때 권장사항](#작업을-커밋할-때-권장사항)
+    - [커밋 메시지 컨벤션](#커밋-메시지-컨벤션)
+    - [Type](#type)
+  - [보다 세심하게 스테이징하고 커밋하기](#보다-세심하게-스테이징하고-커밋하기)
+    - [내용 확인하며 hunk별로 스테이징하기](#내용-확인하며-hunk별로-스테이징하기)
+    - [변경사항을 확인하고 커밋하기](#변경사항을-확인하고-커밋하기)
+  - [커밋하기 애매한 변화 치워두기](#커밋하기-애매한-변화-치워두기)
+    - [변경사항 및 Stash 사용](#변경사항-및-stash-사용)
+    - [Stash 사용법 정리](#stash-사용법-정리)
+  - [커밋 수정하기](#커밋-수정하기)
+    - [git commit --amend](#git-commit---amend)
+  - [과거의 커밋들을 수정, 삭제, 병합, 분할하기](#과거의-커밋들을-수정-삭제-병합-분할하기)
+    - [git rebase -i (대상 바로 이전 커밋)](#git-rebase--i-대상-바로-이전-커밋)
+    - [다음의 수정사항들 진행해보기](#다음의-수정사항들-진행해보기)
 # 01. Git 시작하기
 
 ## Git & GitHub을 알아야 하는 이유
@@ -107,7 +121,7 @@
 
 #### 소스코드는 자산
 
-프로그래머에게 코드는 자산이기 때문에 소스코드를 관리할 줄 알아야 한다. 그러한 코드들을 그냥 내 컴퓨터에 저장하여 파일이 날라갈 경우 프로젝트들의 기록이 전부 날라가는 것이다. 따라서 `코딩을 할 때마다 기록하고 저장하고 관리하는 습관`을 들이는 것이 개발자로서 갖춰야할 픽수역량이다.
+프로그래머에게 코드는 자산이기 때문에 소스코드를 관리할 줄 알아야 한다. 그러한 코드들을 그냥 내 컴퓨터에 저장하여 파일이 날라갈 경우 프로젝트들의 기록이 전부 날라가는 것이다. 따라서 `코딩을 할 때마다 기록하고 저장하고 관리하는 습관`을 들이는 것이 개발자로서 갖춰야할 필수역량이다.
 
 #### 개발은 함께!
 
@@ -1337,15 +1351,22 @@ git reset (reset옵션) HEAD(원하는 단계)
 ### `fetch`한 내역 적용 전 살펴보기
 
 - 원격의 `main` 브랜치에 커밋 추가
+  - tigers.yaml에 fetch: this 아무렇게나 작성
   - `git checkout origin/main`으로 확인해보기
+    - `switch`가 아닌 `checkout`으로 사용해야된다.
+    - 아직 원격에서 최신 상태를 받아오지 않았으므로 반영되지 않는다.
 - 원격의 변경사항 `fetch`
   - `git checkout origin/main`으로 확인해보기
+    - 원격에서 수정한 내역이 반영되어있는 것을 확인할 수 있다.
   - `pull`로 적용
 
 ### 원격의 새 브랜치 확인
 
 - `git checkout origin/(브랜치명)`
+  - 해당 원격 브랜치로 이동해서 상태만 보고올 수 있다.
 - `git switch -t origin/(브랜치명)`
+  - 원격의 브랜치명부터 최신 관리내역까지 같은 로컬의 브랜치가 생성됨
+  - 그리고 그 둘이 연결되어서 커밋들을 주고 받을 수 있다.
 
 # 06. Git 보다 잘 활용하기
 
@@ -1353,35 +1374,41 @@ git reset (reset옵션) HEAD(원하는 단계)
 
 ### git help
 
-- Git 사용 중 모르는 부분이 있을 때 도움을 받을 수 있는 기능
+- 기본적인 명령어들과 설명을 보여주며 사용 중 모르는 부분을 도움받을 수 있다.
   ```bash
   git help
   ```
-- 기본적인 명령어들과 설명
+- Git의 모든 명령어들
   ```bash
   git help -a
   ```
-  - Git의 모든 명령어들
   - `j`로 내리기, `k`로 올리기, `:q`로 닫기
 - 해당 명령어의 설명과 옵션 보기
+  ```bash
+  git (명령어) -h
+  ```
+- 해당 명령어의 설명과 옵션 웹사이트에서 보기
   ```bash
   git help (명령어)
   git (명령어) --help
   ```
-  - 해당 명령어의 설명과 옵션 웹사이트에서 보기
   - 웹에서 열리지 않을 시 끝에 `-w`를 붙여 명시
 
 ### Git 문서
 
 - [Git 문서 보기](https://git-scm.com/docs)
 - [Pro Git 책 보기](https://git-scm.com/book/ko/v2)
+- 구글에 <b>Git Cheat Sheet</b> 검색
 
 ## Git의 각종 설정
 
-### global 설정과 local 설정
+### git config
+
+#### global 설정과 local 설정
 
 - config를 `--global`과 함께 지정하면 전역으로 설정된다.
   - 특정 프로젝트만의 `user.name`과 `user.email` 지정해보기
+  - `git config user.name (이름)`, `git config user.email (이메일)`
 
 ### 설정값 확인
 
@@ -1394,6 +1421,7 @@ git config --global core.editor "code --wait"
 - `git config (global) --list`: 현재 모든 설정값 보기
 - `git config (global) -e`: 에디터에서 보기 (기본: vi)
 - `git config --global core.editor "code --wait"`: 기본 에디터 수정
+  - 맥의 경우: `git config --global core.editor "/Applications/Visual\ Studio\ Code.app/Contents/MacOS/Electron"`
   - 또는 `code` 자리에 원하는 편집 프로그램의 .exe파일 경로 연결
   - `--wait`: 에디터에서 수정하는 동안 CLI를 정지
   - `git commit` 등의 편집도 지정된 에디터에서 열게 된다.
@@ -1422,7 +1450,9 @@ git config --global push.default current
 ```
 
 - `git config --global core.autocrlf (윈도우: true/ 맥: input)`: 줄바꿈 호환 문제 해결
-- `git config pull.rebase (false or true)`: `pull` 기본 전략 `merge` 또는 `rebase`로 설정
+  - 윈도우, 맥 경우 줄바꿈에서 엔터를 칠 때 컴퓨터가 인식하는 방식이 다르기 때문에 설정
+- `git config pull.rebase (false or true)`
+  - `pull` 기본 전략: false -> `merge` 또는 true -> `rebase`로 설정
 - `git config --global init.defaultBranch main`: 기본 브랜치명
 - `git config --global push.default current`: push시 로컬과 동일한 브랜치명으로
 
@@ -1435,6 +1465,7 @@ git config --global alias.(단축키) "명령어"
 ```
 
 - 예시: `git config --global alias.cam "commit -am"`
+  - 그 다음부터는 `git cam "메시지"`로 명령어를 실행할 수 있다.
 
 # 07. 프로답게 커밋 관리하기
 
@@ -1450,7 +1481,7 @@ git config --global alias.(단축키) "명령어"
 ### 커밋 메시지 컨벤션
 
 - 널리 사용되는 커밋 메시지 작성방식
-
+  - body, footer가 필요한 경우 `git commit`으로 해당 커밋 vi 화면에서 작성
   ```
   type: subject
 
@@ -1471,6 +1502,8 @@ feat: 압축파일 미리보기 기능 추가
 다음과 같이 압축파일 미리보기를 할 수 있도록 함
   - 마우스 오른쪽 클릭
   - 윈도우 탐색기 또는 맥 파인더의 미리보기 창
+
+Closes #125
 ```
 
 ### Type
@@ -1524,10 +1557,10 @@ feat: 압축파일 미리보기 기능 추가
 ```bash
 git add -p
 ```
-
-- 옵션 설명을 보려면 `?` 입력 후 엔터
-- `y` 또는 `n`로 각 헝크 선택
-- 일부만 스테이징하고 진행해보기
+- `(1/2) Stage this hunk [y,n,q,a,d,j,J,g,/,s,e,?]?` 메시지가 뜬다.
+  - 옵션 설명을 보려면 `?` 입력 후 엔터
+  - `y` 또는 `n`로 각 헝크 선택
+  - 일부만 스테이징하고 진행해보기
 - `git stats`와 소스트리로 확인
 
 ### 변경사항을 확인하고 커밋하기
@@ -1535,14 +1568,19 @@ git add -p
 ```bash
 git commit -v
 ```
-
-- `j`, `k`로 스크롤하며 내용 확인
+- 커밋과 아래 `diff` 확인하기를 같이 할 수 있다.
+  - `j`, `k`로 스크롤하며 내용 확인
 - `git diff --staged`와 비교
+  - 이번 커밋에 담길 변경사항들을 볼 수 있다.
 - 커밋 후 남은 헝크를 다른 버전으로 커밋해보기
 
 ## 커밋하기 애매한 변화 치워두기
 
 ### 변경사항 및 Stash 사용
+
+- 커밋은 한 작업이 완료되었을 때 하는데
+- 급하게 오류를 수정하거나 처리해달라는 주문이 들어올 때 커밋을 사용할 수 없고 난감한 상황이 발생한다.
+- 그럴때 하던 작업을 깃에서 다른 공간에 치워둘 수 있는 기능이 `Stash`
 
 #### 변경사항 만들기
 

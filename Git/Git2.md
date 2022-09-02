@@ -27,13 +27,14 @@
 ### git clean
 
 - Git에서 추적하지 않는 파일들 삭제
-  |옵션|설명|
-  |--|--|
-  |-n|삭제될 파일들 보여주기|
-  |-i|인터렉티브 모드 시작|
-  |-d|폴더 포함|
-  |-f|강제로 바로 지워버리기|
-  |-x| `.gitignore`에 등록된 파일들도 삭제|
+
+  | 옵션 | 설명                                |
+  | ---- | ----------------------------------- |
+  | -n   | 삭제될 파일들 보여주기              |
+  | -i   | 인터렉티브 모드 시작                |
+  | -d   | 폴더 포함                           |
+  | -f   | 강제로 바로 지워버리기              |
+  | -x   | `.gitignore`에 등록된 파일들도 삭제 |
 
 * 위의 옵션들을 조합하여 사용한다.
 
@@ -91,13 +92,13 @@ git reflog
 - 특정 시점을 키워드로 저장하고 싶을 때
 - 커밋에 버전 정보를 붙이고자 할 때
   - [VS Code 레포지토리 예시](https://github.com/microsoft/vscode)
-
-💡 [Semantic Versioning 정보](https://semver.org/lang/ko/)
+- 태그를 다는 형식으로는 `Semantic Versioning`이 널리 쓰인다.  
+  💡 [Semantic Versioning 정보](https://semver.org/lang/ko/)
 
 ### 태그 달아보기
 
 |태그 종류|설명|
-|lightweight|특정 커밋을 가리키는 용도|
+|lightweight|특정 커밋을 가리키는 용도(한 마디로 태크만 붙이는 것!)|
 |annotated|작성자 정보와 날짜, 메시지, GPG 서명 포함 가능|
 
 #### 마지막 커밋 태그 달기(lightweight)
@@ -117,6 +118,8 @@ git tag
 ```bash
 git show v2.0.0
 ```
+
+- 해당 커밋의 어떤 작업이 이루어졌는지 확인할 수 있다.
 
 #### 태그 삭제
 
@@ -153,6 +156,7 @@ git tag (태그명) (커밋 해시) -m (메시지)
 
 ```bash
 git tag -l 'v1.*'
+git tag -l '*0'
 ```
 
 #### 원하는 버전으로 체크아웃
@@ -181,12 +185,6 @@ git push (원격명) (태그명)
 git push --delete (원격명) (태그명)
 ```
 
-#### 로컬 태그 원격에서 삭제
-
-```bash
-git push --delete (원격명) (태그명)
-```
-
 #### 로컬의 모든 태그 원격에 올리기
 
 ```bash
@@ -195,7 +193,8 @@ git push --tags
 
 ### GitHub의 release
 
-- 다운로드 가능한 배포판 기능
+- 태그가 붙은 버전들에 대해서 사용자에게 레포지토리 페이지에서 다운로드할 수 있도록 릴리즈 버전을 지원한다.
+  - 다운로드 가능한 배포판 기능
 - [네이버 나눔고딕 코딩글꼴 예시](https://github.com/naver/nanumfont)
 
 #### 릴리즈 만들어보기
@@ -209,6 +208,41 @@ git push --tags
 > Git에서 `merge`가 이뤄지는 두 방식 <b>Fastforward</b>와 <b>3-way-merge</b>를 비교한다.
 
 # 10. Branch 보다 깊이 알기
+
+## Fastforward vs 3-way merge
+
+> Git이 merge를 하는 두 가지 전략
+
+### 3-way merge
+
+```
+       "B"
+      - o -
+    /       \
+- o - o - o - o (merge)
+         "A"
+```
+
+- 위에서 살펴본 `merge` 실습할 때 말 그대로 병합되는 모양
+- 두 브랜치를 병합할 때, 두 커밋 모두에 속한 어떤 파일들이 양쪽에서 내용이 다른 경우
+  - Git은 그 파일들 각각 `B 브랜치에서 변경된 것인지`, `A 브랜치에서 변경된 것인지`, `양쪽 모두에서 변경돼서 충돌이 일어나고 있는 상황인지`를 판단해야 한다.
+  - 두 커밋만 보고는 알 수 없기 때문에 두 브랜치의 공통 조상이 되는 커밋의 내용과 둘을 대조하기 때문에 3-way(공통 조상, A, B)라고 하는 것이다.
+
+### Fast forward
+
+```
+        o - o "B"
+       /
+- o - o "A"
+```
+
+- 두 브랜치가 공통 커밋을 조상으로 갖고 있는데 한 쪽 브랜치(`B`)에만 이후의 커밋이 있을 때 그 상태에서 그 둘을 병합하기 위한 다른 커밋을 만들지 않고, `A` 브랜치의 헤드를 `B` 브랜치까지 옮기는 방식
+  - 새로운 커밋으로 병합해서 만들어봤자 B 최신 커밋 상태 그대로 일 테니깐!
+  - 즉, A 브랜치의 헤드를 `fast foward` -> 빨리감기 해버리는 것이 더 효율적이다!
+    - 그리고 병합된 브랜치는 없애면 된다.
+- 단점: 작업을 하고 나서 어떤 브랜치를 사용했고 언제 병합했는지 기록이 남지 않는다.
+  - 원 브랜치에 변화가 없어도 `fast-forward`하지않고, 병합 커밋을 만들어서 `merge`하려면
+  - `git merge --no--ff (병합할 브랜치명)` 실행
 
 ## 다른 브랜치에서 원하는 커밋만 따오기
 
@@ -723,3 +757,59 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
   - 커밋 후 pull하여 로컬에서 확인
 
 ### GitHub Actions 체험해보기
+
+#### PR시마다 코드 테스트 후 실패시 자동 close
+
+- `.githu/workflows/test.yaml` 살펴보기
+- 코드 수정(성공&실패)하여 `main` 브랜치로 PR 날려보기
+
+## GitHub 추가 팁
+
+### OctoTree
+
+- GitHub 레포지토리의 디렉토리를 보다 편하게 브라우징
+- 크롬 익스텐션 (엣지에서 사용 가능)
+
+### GitHub CLI
+
+- GitHub 작업 전용 CLI 툴
+  - [사이트 바로가기](https://cli.github.com/)
+
+### 주요 명령어
+
+- <b>로그인/로그아웃</b>
+  ```bash
+  git auth (login/logout)
+  ```
+- <b>레포지토리들 보기</b>
+  ```bash
+  git repo list
+  ```
+- <b>프로젝트 클론</b>
+  ```bash
+  git repo clone (사용자명)/(레포지토리명)
+  ```
+- <b>프로젝트 생성/삭제</b>
+  ```bash
+  gh repo (create/delete)
+  ```
+- <b>이슈 목록 보기</b>
+  ```bash
+  gh issue list
+  ```
+- <b>이슈 열람/닫기</b>
+  ```bash
+  git issue (view/close) (이슈 번호)
+  ```
+- <b>이슈 생성</b>
+  ```bash
+  git issue create
+  ```
+- <b>풀 리퀘스트 만들기/목록 보기</b>
+  ```bash
+  git pr (create/list)
+  ```
+- <b>풀 리퀘스트 보기/코멘트/닫기/병합</b>
+  ```bash
+  git pr (view/comment/close/merge) (PR 번호)
+  ```
