@@ -178,7 +178,7 @@ git config --global init.defaultBranch main
   git init
   ```
 - 폴더에 숨김모드로 존재하기 때문에 단축키로 숨김파일 볼 수 있도록 설정하면 .git 폴더 확인 가능
-  - 맥 경우 <b>`command` + `shift` + .</b>
+  - 맥 경우 <b>`command` + `shift` + `.`</b>
   - .git 폴더에 프로젝트 관리내역이 저장된다.
   - .git 폴더를 지우면 Git 관리내역이 삭제된다. -> Git이 관리하고 있지 않은 상태로 돌아간다.
 - 파일 생성1, 2
@@ -466,7 +466,7 @@ members:
 
 #### revert
 
-- 되돌리기원하는 시점의 커밋을 거꾸로 실행한다.
+- 되돌리기 원하는 시점의 커밋을 거꾸로 실행한다.
   ```
   o - Replace Cheetas with Panthers
   o Replace Cheetas with Panthers
@@ -1346,7 +1346,7 @@ git reset (reset옵션) HEAD(원하는 단계)
 ### fetch와 pull의 차이
 
 - `fetch`: 원격 저장소의 최신 커밋을 로컬로 가져오기만 함
-- `pull`: 원격 저장소의 최신 커밋을 로컬로 가져와 `merge` 또는 `rebase`
+- `pull`: 원격g`merge` 또는 `rebase`
 
 ### `fetch`한 내역 적용 전 살펴보기
 

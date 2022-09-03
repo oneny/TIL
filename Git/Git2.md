@@ -272,13 +272,20 @@ git push --tags
 git cherry-pick (체리의 해시)
 ```
 
-- `fruit` 브랜치의 `Cherry`와는 <b>별개의 커밋</b>
+```
+- o --- o --- o --- o --- o "main"
+ F.C. Apple Carrot Onion Cherry
+```
+
+- 즉, 특정 커밋만 복제해서 가져오는 것이라고 생각하면 된다.
 
 ### 다른 가지의 잔가지만 가져오기
 
 #### 다른 브랜치에서 파생된 브랜치 옮겨붙이기
 
-- `rebase --onto` 옵션
+- `citrus` 브랜치를 `main` 브랜치에 옮겨붙일려는 경우
+  - 그냥 `rebase`를 하면 `fruit` 브랜치부터 전부가 옮겨진다.
+  - 따라서 `rebase --onto` 옵션 사용!
 
 #### `fruit` 브랜치에서 파생된 `citrus` 브랜치를 `main` 브랜치로 옮겨붙이기
 
@@ -286,13 +293,19 @@ git cherry-pick (체리의 해시)
 git rebase --onto (도착 브랜치) (출발 브랜치) (이동할 브랜치)
 ```
 
-- `git rebase --onto main fruit citrus`
-- `citrus`로 fast forward
+```
+                        "main"     "citrus"
+- o --- o --- o --- o --- o --- o --- o
+F.C. Apple Carrot Onion Cherry Lemon Lime
+```
+
+- `git rebase --onto main fruit citrus`하면 `main` 브랜치가 위와 같은 형태가 된다.
+- `main` 브랜치로 이동 후 `git merge citrus`로 fast forward❗️
 
 ### `rebase --onto`를 되돌리려면?
 
 - 위의 사항들을 진행한 뒤 `git reflog`를 사용해서 내역을 살펴보면 `rebase --onto` 명령 시 여러 내역들이 진행된 것을 확인할 수 있다.
-  - `rebase --onto`가 여러 동작들을 포함한다는 것을 알 수 있다.
+  - 그 내역을 보면 `rebase --onto`가 여러 동작들을 포함한다는 것을 알 수 있다.
   - 그럼 전체 브랜치의 상태를 `rebase --onto` 이전으로 돌리려면 어떻게 하면 될까?
     - `reset`은 브랜치별로 이뤄지므로, `rebase --onto`로 영향을 받은 모든 브랜치들에서 하나하나 리셋을 진행해주어야 한다.
     - 혹은 다시 옮겨붙이는 방법도 있다.
@@ -315,20 +328,22 @@ git rebase --onto (도착 브랜치) (출발 브랜치) (이동할 브랜치)
   ```
   - 위 명령어로 `citrus`의 두 커밋들을 해당 위치로 옮겨붙인 뒤 `temp` 브랜치는 삭제하면 된다.
 
-### 다른 가지의 마디들 묶어서 가져오기
+## 다른 가지의 마디들 묶어서 가져오기
 
-#### 다른 커밋들을 하나로 묶어 가져오기
+### 다른 커밋들을 하나로 묶어 가져오기
 
-`merge --squash` 옵션 사용
+- `root` 브랜치의 커밋들을 하나의 커밋으로 합쳐서 `main` 브랜치에 합치고 싶은 경우
+  - `merge --squash` 옵션 사용
 
-#### `root` 브랜치의 마디들을 하나로 묶어 `main` 브랜치로 가져오기
+### `root` 브랜치의 마디들을 하나로 묶어 `main` 브랜치로 가져오기
 
 ```bash
 git merge --squash (대상 브랜치)
 ```
 
-- 변경사항들 스테이지 되어 있음
+- **변경사항들 스테이지 되어 있음**
 - `git commit` 후 메시지 입력
+- `merge --squash`는 `merge`되거나 `rebase`된 흔적이 남아있지 않는다.
 
 #### 일반 merge와의 차이 정리
 
@@ -353,6 +368,22 @@ git merge --squash (대상 브랜치)
 | release | 출시/배포 전 테스트 진행(QA)    |
 | feature | 기능 개발                       |
 | hotfix  | 긴급한 버그 수정                |
+
+- `main`
+  - 실제로 사용자들에게 출시될 버전들이 최종적으로 `merge`된다.
+- `develop`
+  - `main`의 버전들을 만들어 내기 위한 개발작업을 해당 브랜치에서 한다.
+  - 새로운 기능을 추가, 수정 등 작업을 한다.
+- `feature`
+  - `develop` 브랜치에서 굵직한 기능은 따로 브랜치를 만들어서 진행하는데 그 때 사용하는 브랜치
+  - 따라서 `feature--(무슨기능)`처럼 브랜치는 여러 개가 될 수 있다.
+  - 기능이 완성되면 `develop` 브랜치로 다시 보내서 개발을 해나간다.
+- `release`
+  - 개발을 어느정도 완성해서 출시를 해도 될 것 같으면 `release` 브랜치로 옮긴다.
+  - QA팀 등 테스트를 하는 사람들에 의해서 검증이 이루어지는 곳
+  - 성능, 버그 통과되면 `main` 브랜치로 이동한다.
+- `hotfix`
+  - 기존 출시된 버전에서 오류가 발견이 되면 해당 브랜치를 사용한다.
 
 # 11. 분석하고 디버깅하기
 
@@ -434,7 +465,10 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
   git diff (커밋1) (커밋2)
   ```
   - 커밋 해시 또는 HEAD 번호로
+    - `git diff HEAD~~ HEAD~10`
   - 현재 커밋과 비교하려면 이전 커밋만 명시
+  - `git diff --name-only HEAD~3 HEAD~7`
+    - 어떤 파일들이 변화있었는지 확인할 수 있다.
 - <b>브랜치간의 차이 확인</b>
   ```bash
   git diff (브랜치1) (브랜치2)
@@ -454,13 +488,17 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
   git blame -L (시작줄) (끝줄, 또는 +줄수) (파일명)
   ```
 
-### VS Code의 GitLens 확장 사용해보기
+### VS Code의 GitLens 확장해서 사용해보기
 
 ## 오류가 발생한 시점 찾아내기
+
+- 어느 커밋부터 오류가 발생했는지 찾기 위해서 코드만 보고서는 에러가 발생하는지 알기 어렵기 때문에
+- 해당 버전으로 돌아가서 해당 버전의 프로그램 전체를 실행시켜봐야 에러났는지 확인할 수 있다.
 
 ### git bisect
 
 - 이진 탐색 알고리즘으로 문제의 발생 시점을 찾아낸다.
+  - 버전 하나하나 순서대로 실행해보면서 찾으면 시간이 너무 오래 걸린다.
 
 #### v3 시점이 의심되는 상황
 
@@ -493,12 +531,17 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
 
 ## Git Hooks
 
-> Git상의 이벤트마다 자동으로 실행될 스크립트를 지정한다.
+- Git상의 이벤트마다 자동으로 실행될 스크립트를 지정한다.
+  - ex) 커밋을 할 때마다 자동으로 푸시까지
 
 ### Git Hooks 폴더 보기
 
 - 프로젝틒 폴더 내 `.git` > `hooks` 폴더 확인
+  - 파일의 이름은 각각 언제 실행되는가를 나타낸다.
+    - `pre-commit`: 커밋이 이뤄지기 전(커밋 명령어 직후~)
+    - `pre-push`: 푸시가 이뤄지기 전(푸시 명령 직후~)
   - 파일 끝에 `.sample`을 없애면 훅 실행파일이 된다.
+    - 파일을 수정하기 위해서는 `Shell script`를 배워야 한다.
 
 ### gitmoji-cli로 활용예 보기
 
@@ -530,8 +573,21 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
 
 ### 서브 모듈
 
-- 프로젝트 폴더 안에 <b>또 다른 프로젝트</b>가 포함될 때 사용
+```
+- 📁 main-project
+  - 📁 main-project-files
+  - 📁 module-project-1
+  - 📁 module-project-2
+```
+
+- 위처럼 프로젝트 폴더 안에 <b>또 다른 프로젝트</b>가 포함될 때 사용
 - 여러 프로젝트에 사용되는 공통모듈일 때 유용
+  - main-proejct도 Git으로 관리되고, 그 안에 들어가는 다른 project들도 각각 Git으로 개별적인 프로젝트이다.
+  - 서브 프로젝트는 메인 프로젝트 안에 위치하지만 메인 프로젝트와는 별개로 다룬다.
+- 그냥 Git을 사용하면 해당 프로젝트 폴더 안에 있는 모든 파일들의 변화를 Git이 관리하는데
+  - 위 경우는 main-project의 Git은 딱 그 폴더에 해당하는 파일들만 관리하고,
+  - 각 폴더(sub-proejct) 안에 들어있는 또다른 프로젝트들에는 관여를 안할 때 사용한다.
+  - 그렇다고 `.gitignore`처럼 완전히 무시하는 것이 아니라 메인-서브 관계를 가지고 있다.
 
 ### 사용해보기
 
@@ -544,18 +600,22 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
 
 #### `main-project`에 서브모듈로 `submodule` 프로젝트 추가
 
-- `main-project` 디렉토리상 터미널에서 아래 명령어 실행
-  ```bash
-  git submodule add (submodule의 GitHub 레포지토리 주소) (하위폴더명, 없을 시 생략)
-  ```
-  - 프로젝트 폴더 내 `submodule` 폴더와 `.gitmodules` 파일 확인
-  - 스테이지된 변경사항 확인 뒤 커밋
-  - 양쪽 모두 수정사항 만든 뒤 `main-project`에서 `git status`로 확인
-    - `submodule`의 변경사항은 포함되지 않음 확인
-  - `main-project`에서 변경사항 커밋 뒤 푸시
-  - `submodule`에서 변경사항 커밋 뒤 푸시
-  - `main-project`에서 상태 확인
-  - `main-project`에서 커밋, 푸시 뒤 GitHub에서 확인
+```bash
+git submodule add (submodule의 GitHub 레포지토리 주소) (하위폴더명, 없을 시 생략)
+```
+
+- 프로젝트 폴더 내 `submodule` 폴더와 `.gitmodules` 파일 확인
+- 스테이지된 변경사항 확인 뒤 커밋
+- 양쪽 모두 수정사항 만든 뒤 `main-project`에서 `git add .` 후`git status`로 확인
+  - <b>`submodule`의 변경사항은 포함되지 않음 확인</b>
+- `main-project`에서 변경사항 커밋 뒤 푸시
+  - GitHub에서 확인하면 `main-project`의 변경사항만 푸시됨
+- `submodule`에서 변경사항 커밋 뒤 푸시
+  - 당연히 `submodule` 레포지토리에서는 최신 커밋 상태가 되지만, `main-project`에서는 아님
+- `main-project`에서 상태 확인
+  - (new commit)이라는 메시지가 보인다.
+  - 이를 `git add .` 스테이지하고 커밋 후 푸시하면 원격에서도 반영이 된다.
+- `main-project`에서 커밋, 푸시 뒤 GitHub에서 확인
 
 #### 서브모듈 업데이트
 
@@ -565,11 +625,14 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
   git submodule init (특정 서브모듈 지정시 해당 이름)
   git submodule update
   ```
-- GitHub에서 `submodule`에 수정사항 커밋
+
+#### GitHub에서 `submodule`에 수정사항 커밋
+
+- `submodule`을 관리하는 팀원이 업데이트하면 받아오기
   - `main-project`에서 아래 명령어로 업데이트
-  ```bash
-  git submodule update --remote
-  ```
+    ```bash
+    git submodule update --remote
+    ```
   - 서브 모듈 안에 또 서브모듈이 있을 시: `--recursive` 추가
 
 # 13. GitHub 잘 사용하기
@@ -598,6 +661,7 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
 
 ### Pull request
 
+- 한 팀원이 코드를 작성해서 자시 브랜치에 푸시하면 그것을 `main`이나 `develop` 브랜치로 가기 전에 다른 팀원들이 그 코드를 미리 리뷰해서 몇 명 이상 동의하면 그 때 받아오는 방식
 - 변경사항을 merge하기 전 리뷰를 거치기 위함
   - 팀원들의 동의를 거친 뒤 대상 브랜치에 적용
 
@@ -618,7 +682,7 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
 
 ### Issue
 
-- 버그나 문제 제보, 추가할 기능 등의 이슈 소통
+- 버그나 문제 제보, 추가할 기능 등의 이슈 소통(레포지토리의 게시판 같은 기능)
 - 예시
   - [네이버 지도 API 예제](https://github.com/navermaps/maps.js)
   - [Flutter](https://github.com/flutter/flutter)
@@ -678,6 +742,7 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
 - <b>공개키</b> 암호화 방식 활용
 - username과 토큰 사용할 필요 없음
 - 컴퓨터 자체에 키 저장
+  - SSH를 사용하는 협엄(GitHub, Bitbucket, GitLab) 및 기타 서비스 사이트에 사용 가능
 
 #### SSH 키 등록하기
 
@@ -716,6 +781,7 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
 - <b>GitHub 커밋 내역 살펴보기</b>
   - 로컬에서 푸시한 커밋과 GitHub에서 작성한 커밋 비교
   - `Verified`: 신뢰할 만한 출처에서 커밋되었다는 인증
+   - GitHub에서 바로 수정했다면 당연히 `Verified` 인증이 뜬다.
 
 #### GPG 사용
 
@@ -742,15 +808,16 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
 
 ### GitHub Actions를 사용한 자동화
 
+- 코딩을 작성해서 직접 돌리고, 빌드하고, 서버에 올려서 배포했지만 `CI/CI`는 자동으로 해준다.
 - CI/CD: 지속적 통합과 배포
   - [관련 영상](https://www.youtube.com/watch?v=UbI0Q_9epDM)
-  - 동종: GitLab CI/CD, BitBucket Pipelines
+  - 동종: GitLab -> CI/CD, BitBucket -> Pipelines
 
-#### GitHub Actions 살펴보기
+### GitHub Actions 살펴보기
 
 - <b>github.io 페이지의 액션</b>
-  - 해당 레포지토리 페이지에서 `Actions` 탭 살펴보기
-  - 새로운 커밋 푸시한 직후 다시 살펴보기
+  - `index.html` 수정 후 푸시한 다음 해당 레포지토리 페이지에서 `Actions` 탭 살펴보기
+  - 푸시가 되고 나면 어떠한 과정이 거쳐지는지 확인할 수 있다.
 - <b>다른 프로젝트에서 액션 추가해보기</b>
   - `Actions` 탭에서 액션들 살펴보고 적용해보기
   - `Marketplace` 살펴보고 적용해보기
@@ -779,15 +846,15 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
 
 - <b>로그인/로그아웃</b>
   ```bash
-  git auth (login/logout)
+  gh auth (login/logout)
   ```
 - <b>레포지토리들 보기</b>
   ```bash
-  git repo list
+  gh repo list
   ```
 - <b>프로젝트 클론</b>
   ```bash
-  git repo clone (사용자명)/(레포지토리명)
+  gh repo clone (사용자명)/(레포지토리명)
   ```
 - <b>프로젝트 생성/삭제</b>
   ```bash
@@ -799,17 +866,17 @@ git log --graph --all --pretty=format:'%C(yellow) %h  %C(reset)%C(blue)%ad%C(res
   ```
 - <b>이슈 열람/닫기</b>
   ```bash
-  git issue (view/close) (이슈 번호)
+  gh issue (view/close) (이슈 번호)
   ```
 - <b>이슈 생성</b>
   ```bash
-  git issue create
+  gh issue create
   ```
 - <b>풀 리퀘스트 만들기/목록 보기</b>
   ```bash
-  git pr (create/list)
+  gh pr (create/list)
   ```
 - <b>풀 리퀘스트 보기/코멘트/닫기/병합</b>
   ```bash
-  git pr (view/comment/close/merge) (PR 번호)
+  gh pr (view/comment/close/merge) (PR 번호)
   ```
