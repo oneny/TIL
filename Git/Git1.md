@@ -1346,14 +1346,14 @@ git reset (reset옵션) HEAD(원하는 단계)
 ### fetch와 pull의 차이
 
 - `fetch`: 원격 저장소의 최신 커밋을 로컬로 가져오기만 함
-- `pull`: 원격g`merge` 또는 `rebase`
+- `pull`: 원격 저장소의 최신 커밋을 코컬로 가져와서 `merge` 또는 `rebase`
 
 ### `fetch`한 내역 적용 전 살펴보기
 
 - 원격의 `main` 브랜치에 커밋 추가
   - tigers.yaml에 fetch: this 아무렇게나 작성
   - `git checkout origin/main`으로 확인해보기
-    - `switch`가 아닌 `checkout`으로 사용해야된다.
+    - 원격 저장소의 브랜치로 이동하는 것이기 때문에 `switch`가 아닌 `checkout`으로 사용해야된다.
     - 아직 원격에서 최신 상태를 받아오지 않았으므로 반영되지 않는다.
 - 원격의 변경사항 `fetch`
   - `git checkout origin/main`으로 확인해보기

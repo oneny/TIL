@@ -70,7 +70,7 @@ git resotre --staged (파일명)
 #### 파일을 특정 커밋의 상태로 되돌리기
 
 ```bash
-git restore --sourc=(헤드 또는 커밋 해시) 파일명
+git restore --source=(헤드 또는 커밋 해시) 파일명
 ```
 
 ## reset했어도 희망은 있다!
@@ -97,9 +97,10 @@ git reflog
 
 ### 태그 달아보기
 
-|태그 종류|설명|
-|lightweight|특정 커밋을 가리키는 용도(한 마디로 태크만 붙이는 것!)|
-|annotated|작성자 정보와 날짜, 메시지, GPG 서명 포함 가능|
+| 태그 종류   | 설명                                                   |
+| ----------- | ------------------------------------------------------ |
+| lightweight | 특정 커밋을 가리키는 용도(한 마디로 태크만 붙이는 것!) |
+| annotated   | 작성자 정보와 날짜, 메시지, GPG 서명 포함 가능         |
 
 #### 마지막 커밋 태그 달기(lightweight)
 
@@ -124,7 +125,7 @@ git show v2.0.0
 #### 태그 삭제
 
 ```bash
-git tag -d v2.0.02
+git tag -d v2.0.0
 ```
 
 #### 마지막 커밋에 태그 달기 (annotated)
@@ -397,7 +398,7 @@ git merge --squash (대상 브랜치)
   ```
 - <b>최근 n개 커밋만 보기</b>
   ```bash
-  git log -(갯수)
+  git log -(개수)
   ```
 - <b>통계와 함께 보기</b>
   ```bash
@@ -781,7 +782,7 @@ git submodule add (submodule의 GitHub 레포지토리 주소) (하위폴더명,
 - <b>GitHub 커밋 내역 살펴보기</b>
   - 로컬에서 푸시한 커밋과 GitHub에서 작성한 커밋 비교
   - `Verified`: 신뢰할 만한 출처에서 커밋되었다는 인증
-   - GitHub에서 바로 수정했다면 당연히 `Verified` 인증이 뜬다.
+  - GitHub에서 바로 수정했다면 당연히 `Verified` 인증이 뜬다.
 
 #### GPG 사용
 
