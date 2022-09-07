@@ -127,6 +127,7 @@ div.header {
 ```
 
 ### inline elements
+
 - [inline elements vs block-level elements](https://www.w3schools.com/html/html_blocks.asp)
 - 내부에 있는 텍스트, 이미지가 해당
 - <b>baseline</b>라는 것 위에 존재
@@ -167,5 +168,23 @@ img {
   - 그리고 자식 요소에 같은 프로퍼티가 있으면 자식의 것으로 적용된다.
 
 ## Cascading
-* `cascading`은 '폭포, 위에서 아래로 쏟아지는'이라는 뜻을 가진 단어이다. 그리고 `cascading`은 css에서 Cascading Style Sheet의 약자로 가장 중요한 스타일 적용 규칙이기도 한다.
-* `cascading`은 `스타일 우선순위`, `스타일 상속`이라는 두 가지의 원칙을 통해 어떤 요소에 스타일을 적용할지 결정한다.
+
+- `cascading`은 '폭포, 위에서 아래로 쏟아지는'이라는 뜻을 가진 단어이다. 그리고 `cascading`은 css에서 Cascading Style Sheet의 약자로 가장 중요한 스타일 적용 규칙이기도 한다.
+- `cascading`은 `스타일 우선순위`, `스타일 상속`이라는 두 가지의 원칙을 통해 어떤 요소에 스타일을 적용할지 결정한다.
+
+## CSS 적용하기
+
+### 다중 스타일시트
+
+```css
+@import "foo.css";
+```
+
+* 위 코드처럼 `@`가 붙는 문법을 `at-rule`이라고 부른다. import만 있는 것이 아니고 아래처럼 다양한 엣룰이 있다.
+  * `@charset`: 스타일시트에서사용하는 문자 인코딩을 지정한다. 문서에서 가장 먼저 선언한다.
+  * `@import`: 다른 스타일 시트에서 스타일 규칙을 가져온다. @charset 바로 다음에 선언되어야 한다.
+  * `@font-face`: 디바이스에 없는 폰트를 다운받아 적용할 때 사용한다.
+  * `@keyframes`: 애니메이션을 만들 때 사용한다.
+  * `@media`: 사용자 디바이스에 따른 스타일을 분기 처리하고자 할 때 사용한다.
+  * `@supports`: 특정 CSS 속성을 브라우저가 지원하는지 확인하고 스타일을 선언하고자 할 때 사용한다.
+  
