@@ -1,5 +1,18 @@
 # CSS 기초
 
+## 목차
+- [속성마다 다른 auto](#속성마다-다른-auto❗️)
+  - [Width, Height](#width-height)
+  - [블럭 요소 중 하나인 \<div>](#블럭-요소-중-하나인-div)
+  - [box-sizing의 속성값](#box-sizing의-속성값)
+- [inline elements vs block-level elements](#inline-elements-vs-block-level-elements)
+  - [inline elements](#inline-elements)
+  - [상속](#상속)
+- [Cascading](#cascading)
+- [margin 병합 현상](#margin-병합-현상)
+  - [margin 병합 이해하기](#margin-병합-이해하기)
+- [CSS 적용하기](#css-적용하기)
+  - [다중 스타일시트](#다중-스타일시트)
 ## 속성마다 다른 auto❗️
 
 ### Width, Height
@@ -111,24 +124,11 @@ div {
 - [관련 내용](https://www.w3.org/TR/CSS21/visudet.html#inline-replaced-height)
   - If `margin-top`, or `margin-bottom`are `auto`, their used value is 0.
 
-## profile 만들기
 
-### Selector 종류
-
-- `type`: 이씨 성을
-- `class`: 이름표 시스템같은 느낌
-
-```css
-/* 섬세한 디자인과 선택을 위해서 */
-*.header {
-} /* Universal Selector */
-div.header {
-} /* div 요소의 header 클래스 가진 요소만 선택 */
-```
-
+## inline elements vs block-level elements
+- [inline elements vs block-level elements](https://www.w3schools.com/html/html_blocks.asp)
 ### inline elements
 
-- [inline elements vs block-level elements](https://www.w3schools.com/html/html_blocks.asp)
 - 내부에 있는 텍스트, 이미지가 해당
 - <b>baseline</b>라는 것 위에 존재
   ```
@@ -172,6 +172,109 @@ img {
 - `cascading`은 '폭포, 위에서 아래로 쏟아지는'이라는 뜻을 가진 단어이다. 그리고 `cascading`은 css에서 Cascading Style Sheet의 약자로 가장 중요한 스타일 적용 규칙이기도 한다.
 - `cascading`은 `스타일 우선순위`, `스타일 상속`이라는 두 가지의 원칙을 통해 어떤 요소에 스타일을 적용할지 결정한다.
 
+## margin 병합 현상
+
+```html
+<head>
+  <style>
+    .wrapper {
+      background-color: antiquewhite;
+      width: 300px;
+      margin: 100px auto;
+    }
+
+    .animal {
+      background-color: blue;
+    }
+
+    .ground {
+      background-color: brown;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- 윗 부분이라고 해서 꼭 header가 아님 -->
+    <img class="animal" src="images/animal07.png" alt="" />
+    <!-- 재사용성을 위해 아래 컴포넌트를 div 태그 안에 작성 -->
+    <div class="ground">
+      <!-- 잔디는 해당 컨텐츠에 꼭 있어야 하는 것이 아님! 그저 데코용 -> background로 설정 -->
+      <h1>Fox</h1>
+      <p>
+        Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
+        ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis
+        dis parturient montes, nascetur ridiculus mus. Donec quam felis,
+        ultricies nec
+      </p>
+    </div>
+  </div>
+</body>
+```
+
+<img>
+위 코드를 브라우저에서 코드를 실행하면 아래와 같은 결과가 나온다.
+<details>
+  <summary>animals 결과</summary>
+
+  <img src="../img/마진병합.png" alt="마진병합" width="200px" >
+</details>
+
+- 위 여우 이미지의 마진과 h1의 마진부분이 병합되는 현상이 일어난다.
+  - 즉, **block-level 엘리먼트 사이들의 일어나는 마진은 병합되도록 설정되어 있다.**
+  - 근데 `<h1>Fox</h1>`는 div.ground 태그안에 있는데 그 안에서 margin 안일어나나?
+  - 그리고 ground 클래스 밖에 margin이 일어나는 이유는???
+
+### margin 병합 이해하기
+
+<details>
+  <summary>마진 병합 다른 예시</summary>
+
+```html
+<head>
+  <style>
+    .wrapper {
+      background-color: aqua;
+      margin: 100px auto;
+      width: 260px;
+      /* border: 1px solid transparent; */
+      /* padding: 1px; */
+      display: flow-root; /* 부모에게 flow-root로 줘서 위, 아래 마진 겹침 해결 */
+    }
+    .box {
+      font-size: 100px;
+      text-align: center;
+      line-height: 200px;
+      background-color: orange;
+      color: rgba(255, 255, 255, 0.3);
+      width: 200px;
+      height: 200px;
+      margin: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="box">A</div>
+    <div class="box">B</div>
+  </div>
+  <body></body>
+</body>
+```
+
+</details>
+
+- A와 B 박스가 마진 병합 현상으로 인해위 아래로 margin 60px이 돼야하는데 30px인 것을 확인할 수 있다.
+- 그리고 부모의 자식의 margin 병합도 일어나 아래 이미지 같은 현상이 일어난다.
+  - 해결하기 위해서는 부모 요소에 위 코드 주석처럼 `border`, `padding` 속성을 줘서 부모와 자식의 마진 겹침 현상을 해결할 수도 있지만 `display: flow-root;`로 설정해서 마진 겹침 현상을 해결할 수 있다.
+
+<details>
+  <summary>AB 박스 마진 병합 현상 및 해결</summary>
+
+  <img src="../img/ab마진병합.png" alt="ab마진병합" width="300px" >
+  <img src="../img/ab마진병합해결.png" alt="ab마진병합해결" width="200px" >
+  
+</details>
+
 ## CSS 적용하기
 
 ### 다중 스타일시트
@@ -180,11 +283,10 @@ img {
 @import "foo.css";
 ```
 
-* 위 코드처럼 `@`가 붙는 문법을 `at-rule`이라고 부른다. import만 있는 것이 아니고 아래처럼 다양한 엣룰이 있다.
-  * `@charset`: 스타일시트에서사용하는 문자 인코딩을 지정한다. 문서에서 가장 먼저 선언한다.
-  * `@import`: 다른 스타일 시트에서 스타일 규칙을 가져온다. @charset 바로 다음에 선언되어야 한다.
-  * `@font-face`: 디바이스에 없는 폰트를 다운받아 적용할 때 사용한다.
-  * `@keyframes`: 애니메이션을 만들 때 사용한다.
-  * `@media`: 사용자 디바이스에 따른 스타일을 분기 처리하고자 할 때 사용한다.
-  * `@supports`: 특정 CSS 속성을 브라우저가 지원하는지 확인하고 스타일을 선언하고자 할 때 사용한다.
-  
+- 위 코드처럼 `@`가 붙는 문법을 `at-rule`이라고 부른다. import만 있는 것이 아니고 아래처럼 다양한 엣룰이 있다.
+  - `@charset`: 스타일시트에서사용하는 문자 인코딩을 지정한다. 문서에서 가장 먼저 선언한다.
+  - `@import`: 다른 스타일 시트에서 스타일 규칙을 가져온다. @charset 바로 다음에 선언되어야 한다.
+  - `@font-face`: 디바이스에 없는 폰트를 다운받아 적용할 때 사용한다.
+  - `@keyframes`: 애니메이션을 만들 때 사용한다.
+  - `@media`: 사용자 디바이스에 따른 스타일을 분기 처리하고자 할 때 사용한다.
+  - `@supports`: 특정 CSS 속성을 브라우저가 지원하는지 확인하고 스타일을 선언하고자 할 때 사용한다.
