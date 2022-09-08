@@ -1,0 +1,55 @@
+/* Reset */
+body, ul, li, h1, p, div {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+li {
+  list-style-type: none;
+}
+
+img {
+  vertical-align: top;
+}
+
+body {
+  background-image: url(images/bg.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/* Components */
+.wrapper {
+  padding: 80px 0;
+  margin: 0 auto;
+}
+
+.wrapper .header {
+  width: min-content;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.wrapper .contents {
+  color: #fff;
+  width: 300px;
+  padding: 20px;
+  background-color: #996600;
+  margin: 0 auto;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 10px #493322;
+}
+
+.wrapper .contents .title {
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
