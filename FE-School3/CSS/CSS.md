@@ -1,6 +1,7 @@
 # CSS 기초
 
 ## 목차
+
 - [속성마다 다른 auto](#속성마다-다른-auto❗️)
   - [Width, Height](#width-height)
   - [블럭 요소 중 하나인 \<div>](#블럭-요소-중-하나인-div)
@@ -13,6 +14,7 @@
   - [margin 병합 이해하기](#margin-병합-이해하기)
 - [CSS 적용하기](#css-적용하기)
   - [다중 스타일시트](#다중-스타일시트)
+
 ## 속성마다 다른 auto❗️
 
 ### Width, Height
@@ -124,9 +126,10 @@ div {
 - [관련 내용](https://www.w3.org/TR/CSS21/visudet.html#inline-replaced-height)
   - If `margin-top`, or `margin-bottom`are `auto`, their used value is 0.
 
-
 ## inline elements vs block-level elements
+
 - [inline elements vs block-level elements](https://www.w3schools.com/html/html_blocks.asp)
+
 ### inline elements
 
 - 내부에 있는 텍스트, 이미지가 해당
@@ -171,6 +174,92 @@ img {
 
 - `cascading`은 '폭포, 위에서 아래로 쏟아지는'이라는 뜻을 가진 단어이다. 그리고 `cascading`은 css에서 Cascading Style Sheet의 약자로 가장 중요한 스타일 적용 규칙이기도 한다.
 - `cascading`은 `스타일 우선순위`, `스타일 상속`이라는 두 가지의 원칙을 통해 어떤 요소에 스타일을 적용할지 결정한다.
+
+### 선택자 우선순위
+
+- CSS 파일 안에서 사용되는 선택자 우선순위에는 3가지 원칙이 있다.
+  - `후자 우선의 원칙`
+  - `명시도(구체성)의 원칙`
+  - `중요성의 원칙`
+
+#### 후자 우선의 원칙
+
+```css
+p {
+  color: red;
+  font-size: 20px;
+}
+
+p {
+  color: green;
+}
+```
+
+- 위 코드에서 동일한 선택자가 연속으로 사용된 것을 확인할 수 있고 `후자 우선의 원칙`에 의해 두 번째 타입선택자의 color 값으로 덮어씌워진다.
+
+#### 명시도(Specificity)의 원칙
+
+```css
+p.color-red {
+  color: red;
+  font-size: 20px;
+}
+
+p {
+  color: green;
+}
+```
+
+- 한 선택자가 다른 선택자보다 더 구체적으로 작성되었다면 구체적인 선택자를 우선으로 선택하는 원칙
+  - 위 코드에서 선택자는 둘 다 같은 p 태그를 가리키고 있지만 첫 번째 선택자가 두 번째 보다 더 구체적이기 때문에 첫 번째 선택자의 스타일이 적용된다.
+- **`가중치`**
+  - 명시도의 원칙은 가중치 즉, **어떤 선택자가 더 구체적인가?**를 판단할 때 가중치를 기준으로 판단한다는 의미이다.
+  - 아래 코드와 같이 id와 class가 동시에 있을 경우 `id > class > 타입` 순으로 style 적용이 된다.
+    ```css
+    h1 {
+      color: red;
+    }
+    .yellowgreen {
+      color: yellowgreen;
+    }
+    #fourth {
+      color: skyblue;
+    }
+    ```
+- **`우선 순위 계산`**
+  - inline-style: 요소의 안에 속성으로 선언되는 스타일이다. 1000 점의 가중치를 가진다.
+  - id 선택자: 100점의 가중치를 가진다.
+  - class, 가상클래스, 속성 선택자: 10점의 가중치를 가진다.
+  - 타입, 가상요소 선택자: 1점의 가중치를 가진다.
+  - 전체선택자(Universal Selector)는 무시된다.
+  - 단, 자리올림이 되지 않는 것을 주의! 예를 들어, 타입선택자로 13점의 점수를 얻어도, 클래스가 가지는 10점을 넘지못한다.
+- 우선 순위 계산
+```css
+h1 {
+  color: blue; /* 0001점 */
+}
+section h1 {
+  color: red; /* 0002점 */
+}
+
+.sector {
+  color: blue: /* 0010점 */
+}
+section .sector {
+  color: red; /* 0011점 */
+}
+
+#one {
+  color: blue; /* 0100점 */
+}
+section .sector #one {
+  color: red; /* 0111점 */
+}
+```
+
+#### 중요성의 원칙
+
+- `!important`: 절대적인 우선순위. 가중치 점수를 무시하고 무조건적인 우선 순위를 가진다. 쉬운 방법이지만 우선 순위 계산을 어렵게 만들기 때문에 인라인 스타일을 덮어 써야하는 등의 불가피한 상황이 아니라면 사용하지 않는 것이 좋다. 나쁜 습관이다.
 
 ## margin 병합 현상
 
@@ -290,3 +379,56 @@ img {
   - `@keyframes`: 애니메이션을 만들 때 사용한다.
   - `@media`: 사용자 디바이스에 따른 스타일을 분기 처리하고자 할 때 사용한다.
   - `@supports`: 특정 CSS 속성을 브라우저가 지원하는지 확인하고 스타일을 선언하고자 할 때 사용한다.
+
+### RESET CSS
+
+#### 문제의 시작. 너무 많은 브라우저들. 각자 다른 스타일.
+
+- 사파리, 크롬 등 브라우저 제작사들마다 각각 브라우저가 제공하는 요소의 기본 스타일이 모두 다르다.
+- 개발자들은 디자이너에게 받은 웹디자인을 구현하기 위해 각각의 브라우저에 따라 다른 스타일을 부여해야 한다는 문제가 발생
+  - 너무 비효율적인 방법이기 때문에 아래와 같은 해결방법이 나타난다.
+
+#### 에릭 마이어의 reset CSS
+
+- 매우 오래전부터 널리 사용된 방법. 하지만 2011년 이후로 업데이트 중단
+- [해당 사이트](https://meyerweb.com/eric/tools/css/reset/)
+
+#### normalize.css
+
+- 노멀라이즈는 브라우저의 기본적인 스타일 속성들을 모두 제거하지 않는다.
+  - 에릭 마이어는 기존 스타일을 모두 제거하는 적극적인 방법이라면, normalize는 브라우저 고유의 스타일을 존중하면서 거기에 스타일을 첨가하는, 좀 더 부드러운 방법으로 생각하면 된다.
+- [해당 사이트](https://necolas.github.io/normalize.css/)
+
+#### CSS Remedy
+
+- 아직 프로젝트 진행중이며, 만약 CSSWG에서 CSS를 제작하는 사람들의 입장이라면, 어떤식으로 브라우저에게 기본 스타일을 주게 될 까 라는 생각에서 출발한 차세대 CSS reset 프로젝트
+  - 때문에 단순히 스타일만 생각하는 것이 아닌, 하위 브라우저 호환 걱정없이 CSS가 브라우저에서 효율적으로 작동하도록 하는 것이 목표!
+- [해당 사이트](https://github.com/jensimmons/cssremedy)
+
+### 벤더프리픽스(Vendor-Prefix)
+
+| 벤더 프리픽스 | 웹 브라우저                                                                 | 예                           |
+| ------------- | --------------------------------------------------------------------------- | ---------------------------- |
+| -webkit-      | 크롬, 안드로이드, 사파리, ios 기반 파이어폭스, 오페라 등 웹킷 기반 브라우저 | -webkit-transition: all .5s; |
+| -moz-         | 파이어폭스 브라우저                                                         | -moz-transition: all .5s;    |
+| -ms-          | 마이크로소프트 인터넷 익스플로어, 레거시 엣지                               | -ms-transition: all .5s;     |
+| -o-           | 레거시 오페라 브라우저                                                      | -o-transition: all .5s;      |
+
+- 벤더(브라우저 제조사)와 프리픽스(접두어)의 합성어
+- 아직 비표준이거나 실험적인 CSS 속성을 특정 브라우저에서 실행할 수 있도록 CSS 속성 앞에 브라우저 제조사만의 접두어(prefix)를 붙이는 문법을 의미한다.
+  ```css
+  -webkit-transition: all 4s ease;
+  -moz-transition: all 4s ease;
+  -ms-transition: all 4s ease;
+  -o-transition: all 4s ease;
+  transition: all 4s ease;
+  ```
+  - 벤더 프리픽스는 줄어 들고 있지만 새로운 CSS 기능들은 개발되고 있기 때문에 아직까지 사용해야하는 벤더 프리픽스들이 존재한다.
+  - 그리고 크로스 브라우징을 위해 레거시 브라우저들을 지원해야한다는 점도 있다!
+  - [벤더 프리픽서 자동화를 위한 사이트](https://autoprefixer.github.io/) 및 VS Code 익스텐션 `Autoprefixer`를 이용할 수 있다.
+
+#### 웹킷 기반 브라우저?
+
+웹킷(Webkit)은 브라우저가 HTML, CSS를 화면에 그려줄때 사용하는 렌더링 엔진이다.  
+크롬, 안드로이드, 사파리, ios 기반 파이어폭스 등 많은 브라우저들이 사용했다.  
+현재 크롬, 안드로이드, 오페라, 마이크로소프트 엣지 브라우저 등은 **Blink** 엔진으로 전환되었다. 참고로 Blink 엔진은 vendor-prefix가 존재하지 않는다.
