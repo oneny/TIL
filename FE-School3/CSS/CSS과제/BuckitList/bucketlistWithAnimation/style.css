@@ -1,0 +1,98 @@
+/* Reset */
+div, header, h1, ul, p {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+body {
+  background-color: #ddd;
+}
+
+li {
+  list-style-type: none;
+}
+
+/* Components */
+.wrapper {
+  width: 400px;
+  margin: 150px auto;
+  border-radius: 20px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  overflow: hidden;
+}
+
+.title {
+  color: rgb(218, 32, 125);
+  background-color: white;
+  padding: 30px 0;
+  border-bottom: 3px solid lightgray;
+}
+
+.title h1 {
+  padding-left: 30px;
+  font-size: 30px;
+  font-weight: bold;
+  border-left: 10px solid rgb(218, 32, 125);
+}
+
+.list {
+  background-color: #eee;
+  padding: 20px;
+  color:rgb(218, 32, 125);
+}
+
+.list li {
+  position: relative;
+  margin-bottom: 20px;
+  padding: 10px;
+  padding-left: 45px;
+  cursor: pointer;
+}
+
+.list li:last-child {
+  margin-bottom: 0;
+}
+
+.list li::before {
+  content: '>';
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 35px;
+  height: 35px;
+  border-radius: 30px;
+  background-color: transparent;
+  border: 2px solid rgb(218, 32, 125);
+  color: rgb(218, 32, 125);
+  transition: background-color 0.4s, width 0.4s;
+  transition-delay: 0.4s, 0s;
+  box-sizing: border-box;
+}
+
+.list li:hover::before {
+  content: '';
+  width: 100%;
+  background-color: rgb(218, 32, 125);
+  transform-origin: 0s, 0.4s;
+}
+
+.list li p {
+  position: relative;
+  z-index: 10;
+  transition: color 0.4s, font-weight 0.4s;
+}
+
+.list li:hover p {
+  font-weight: bold;
+  color: #fff;
+}

@@ -234,6 +234,7 @@ p {
   - 전체선택자(Universal Selector)는 무시된다.
   - 단, 자리올림이 되지 않는 것을 주의! 예를 들어, 타입선택자로 13점의 점수를 얻어도, 클래스가 가지는 10점을 넘지못한다.
 - 우선 순위 계산
+
 ```css
 h1 {
   color: blue; /* 0001점 */
@@ -315,9 +316,6 @@ section .sector #one {
 
 ### margin 병합 이해하기
 
-<details>
-  <summary>마진 병합 다른 예시</summary>
-
 ```html
 <head>
   <style>
@@ -327,8 +325,16 @@ section .sector #one {
       width: 260px;
       /* border: 1px solid transparent; */
       /* padding: 1px; */
-      display: flow-root; /* 부모에게 flow-root로 줘서 위, 아래 마진 겹침 해결 */
+      /* display: flow-root; */
+      /* overflow: hidden */
     }
+    /*
+    .wrapper::before,
+    .wrapper::after {
+      content: ' ';
+      display: table;
+    }
+    */
     .box {
       font-size: 100px;
       text-align: center;
@@ -350,12 +356,30 @@ section .sector #one {
 </body>
 ```
 
-</details>
-
-- A와 B 박스가 마진 병합 현상으로 인해위 아래로 margin 60px이 돼야하는데 30px인 것을 확인할 수 있다.
+- A와 B 박스가 마진 병합 현상으로 인해 위아래로 margin 60px이 돼야하는데 30px인 것을 확인할 수 있다.
 - 그리고 부모의 자식의 margin 병합도 일어나 아래 이미지 같은 현상이 일어난다.
-  - 해결하기 위해서는 부모 요소에 위 코드 주석처럼 `border`, `padding` 속성을 줘서 부모와 자식의 마진 겹침 현상을 해결할 수도 있지만 `display: flow-root;`로 설정해서 마진 겹침 현상을 해결할 수 있다.
 
+#### 부모 자식 간의 마진 병합 해결 방법
+
+- `border`, `padding`을 속성을 줘서 부모와 자식의 마진 병합 해결
+- `display: flow-root;` 속성을 설정해 해결할 수 있지만 IE에서 지원하지 않는다는 문제점이 있다.
+- `overflow: hidden` 속성을 줘서 원래의 용도가 아닌 마진 병합 해결하는데 사용할 수 있다.
+  - `Block Formatting Context`라는 요소가 내부에 있어 독립적인 영역이 돼서 해결 가능
+  - [Block Formatting Context 자세히 알기](https://developer.mozilla.org/ko/docs/Web/Guide/CSS/Block_formatting_context)
+  - 대신 A, B 박스에 `box-shadowing` 프로퍼티를 설정하게 되면 짤리게 되는 문제가 생긴다.
+- `<table>`로 해결하기
+  ```html
+  <div class="wrapper">
+    <table></table>
+    <div class="box">A</div>
+    <div class="box">B</div>
+    <table></table>
+  </div>
+  ```
+  - A와 B 박스 위아래로 `<table>` 태그를 작성해 공간은 차지않으면서 마진 겹침 현상을 해결할 수 있다.
+  - 대신 올바른 마크업을 사용하는 것은 아니므로 HTML 관점에서는 올바른 상황은 아니다.
+- `.wrapper::before, .wrapper::after`로 Pseudo Element로 마진 병합 해결할 수 있다.
+  - css 단에서 컨텐츠를 추가해주는 개념을 활용해 마진 병합을 해결 가능
 <details>
   <summary>AB 박스 마진 병합 현상 및 해결</summary>
 

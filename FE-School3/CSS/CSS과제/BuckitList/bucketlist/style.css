@@ -1,0 +1,63 @@
+/* Reset */
+div, header, h1, ul, p {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+body {
+  background-color: #ddd;
+}
+
+li {
+  list-style-type: none;
+}
+
+/* Components */
+.wrapper {
+  width: 400px;
+  margin: 150px auto;
+  border-radius: 20px;
+  box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.title {
+  color: rgb(218, 32, 125);
+  background-color: white;
+  padding: 30px 0;
+  border-bottom: 3px solid lightgray;
+}
+
+.title h1 {
+  padding-left: 30px;
+  font-size: 30px;
+  font-weight: bold;
+  border-left: 10px solid rgb(218, 32, 125);
+}
+
+.list {
+  background-color: #eee;
+  padding: 20px;
+}
+
+.list li {
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 3px solid gray;
+  background-color: #fff;
+}
+
+.list li:nth-child(2) {
+  color: rgb(68, 102, 204);
+  border: 3px solid rgb(68, 102, 204);
+}
+
+.list li:last-child {
+  margin-bottom: 0;
+}
