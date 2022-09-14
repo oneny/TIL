@@ -733,7 +733,8 @@ background-image 속성은 html 요소 뒤에 이미지를 배치할 때 사용�
 
 ### line-height
 
-글자 라인의 높이를 지정하여 텍스트 라인과 라인 사이의 간격(leading)을 조정할 때 사용한다.
+- 글자 라인의 높이를 지정하여 `텍스트 라인과 라인 사이의 간격(leading)`을 조정할 때 사용한다.
+  - 위 이미지에서 line-height에서 font-size를 뺀 leading을 반반 나누어 가진다.
 
 #### line-height의 단위
 
@@ -795,3 +796,263 @@ background-image 속성은 html 요소 뒤에 이미지를 배치할 때 사용�
   </body>
 </html>
 ```
+
+### letter-spacing
+
+#### letter-spacing 단위
+
+- normal: 현재 폰트의 기본 간격
+- px, em, rem: 기본 간격에 사용하는 유닛 단위만큼 간격을 추가한다.(%는 사용 X)
+
+### text-align
+
+- left: 기본값으로 텍스트를 왼쪽에 정렬
+- right: 텍스트를 오른쪽에 정렬
+- center: 텍스트를 가운데에 정렬
+- justify: 마지막 라인을 제외하고 텍스트를 양쪽 끝으로 정렬
+
+### vertical-align
+
+`인라인 요소`의 수직 정렬을 맞추기 위해 사용하는 속성이다.(블락 요소나 인라인블락 요소에서는 적용 X)
+
+- baseline: 베이스라인을 부모의 베이스 라인에 맞추어 정렬
+- sub: 베이스라인을 부모의 subscript(아랫첨자)-baseline에 맞추어 정렬
+- super: 베이스라인을 부모의 superscript(윗첨자)-baseline에 맞추어 정렬
+- top: 상단의 위치를 라인(인라인 박스를 감싸고 있는 공간)의 상단으로 정렬
+- text-top: 상단의 위치를 **부모 엘리먼트 폰트의 상단**으로 정렬
+- bottom: 하단의 위치를 전체 라인의 하단으로 정렬
+- text-bottom: 하단의 위치를 **부모 엘리먼트 폰트의 하단**으로 정렬
+- middle: 폰트의 중간 위치를 부모의 `baseline + x-height`의 절반에 해당하는 위치로 정렬
+- 실무에서는 보통 쓰게된다면 기본값인 baseline과 top, bottom 정도로 쓰고 나머지는 거의 쓰지 않는다.
+
+### text-indent
+
+텍스트 라인에서 텍스트가 시작하기 전의 공간을 설정할 수 있다. 쉽게 말해 **들여쓰기 공간 설정**이다.
+
+#### text-indent 단위
+
+- mm, cm: 밀리미터, 센터미터 단위를 지원
+- px, em, %: 기본 간격에 사용하는 유닛 단위만큼 간격을 추가
+
+```css
+p {
+  text-indent: 5em;
+  text-indent: -5em;
+  text-indent: 70px;
+  text-indent: 15%; /* %는 요소의 넓이에 비례합니다. */
+  text-indent: 1mm;
+  text-indent: 5cm;
+
+  font-size: 14px;
+  background-color: black;
+  color: white;
+}
+```
+
+### text-decoration
+
+텍스트에 붙는 라인을 꾸며주는 속성으로 텍스트의 상단, 하단에 라인을 그려줄 수 있고, 라인의 종류와 색상도 지정할 수 있다.  
+글씨의 font-family, 텍스트의 형태에 따라 라인이 잘리는 경우가 있기 때문에 스타일의 용도로는 잘 사용하지 않는다.
+
+```css
+p {
+  text-decoration: none;
+  text-decoration: underline dotted;
+  text-decoration: underline dotted red;
+  text-decoration: green wavy underline;
+  text-decoration: underline overline #ff3028;
+  text-decoration: line-through;
+}
+```
+
+### text-overflow
+
+- 부모 컨테이너를 넘어가 컨텐츠가 어떻게 보여질지 결정하는 속성이다.
+  - clip: 기본값. 컨테이너의 끝에서 텍스트를 자른다.
+  - ellipsis: 잘린 텍스트를 말줄임 표시로 나타낸다.
+- text-overflow 속성은 그 자체만으로 넘친 컨텐츠를 만들어서 처리하지 않는다.
+  - 따라서 컨테이너에 `overflow: hidden`, `white-space: nowrap` 속성이 같이 사용되어야 한다.
+
+#### 말줄임('...')
+
+```html
+<p>
+  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla, ad, autem
+  quaerat sed impedit cupiditate tenetur recusandae facere, alias ab nihil nisi
+  eligendi eaque ea molestiae dolore accusantium repellat maiores?
+</p>
+```
+
+```css
+/* 한 줄 말줄임 코드입니다. */
+
+p {
+  width: 300px; /* p 태그의 크기를 제한합니다. */
+  overflow: hidden; /* 요소를 넘어가는 컨텐츠를 숨깁니다. */
+
+  /* 텍스트의 공백을 만났을때 어떻게 처리할지 설정하는 속성입니다. nowrap은 공백을 만나도 줄바꿈하지 않습니다.*/
+  white-space: nowrap;
+  text-overflow: ellipsis; /* 요소의 크기를 넘친 텍스트를 말줄임 처리합니다. */
+}
+```
+
+```css
+/* 여러줄 말줄임 코드입니다. */
+/* -webkit-box, -webkit-box-orient 속성은 웹표준 속성이 아닙니다. 
+앞으로 삭제되거나 기능이 변경될 수 있기 때문에 주의가 필요합니다. */
+
+p {
+  overflow: hidden;
+
+  /* 자식요소들의 배치를 지정하는 속성입니다. flex의 예전 버전입니다. */
+  display: -webkit-box;
+
+  -webkit-line-clamp: 2; /*  블록 컨텐츠의 라인 수를 제한하는 속성입니다.*/
+
+  /* 자식요소들의 배치를 수직으로 만드는 속성입니다. flex-direction의 예전 버전입니다. */
+  -webkit-box-orient: vertical;
+}
+```
+
+## position
+
+HTML 태그의 위치를 지정해주는 속성. position 속성을 이용해 페이지의 레이아웃을 결정할 수 있다.
+
+### position: static
+
+기본적으로 모든 태그들은 따로 position 속성값을 주지 않았다면 static 값을 가진다. 즉, HTML에 쓴 태그 순으로 정상적인 흐름(normal flow)에 따라 위치가 지정되게 된다.
+
+### position: relative
+
+단어 자체의 뜻처럼 **원래 자신이 있어야 하는 위치(static)**에 `상대적`인 속성을 가지고 있다.  
+relative는 자신이 원래 있던 자리를 기억해 `left: 50px`를 추가적으로 설정하면, 본인의 static 자리에서 왼쪽으로 50px만큼 떨어진 자리에 위치하게 된다.
+
+- relative 속성은 원래의 자리를 인식하지만 left, right, top, bottom 속성을 이용해서 움직일때는 다른 콘텐츠들의 레이아웃에 영향을 미치지 않는다.
+
+### position: absolute
+
+굳이 한 단어로 설명하자면 `my way`라고 할 수 있다. 그러나, **static**을 제외한 position 속성을 가진 가장 가까운 부모의 박스 내를 기준으로 위치하게 된다.
+
+### position: fixed
+
+스크롤을 올리거나 내릴 떄, 특정 박스가 고정되어 움직이지 않았으면 할 때 사용하는 속성값이다.  
+**fixed**는 현재 사용자가 보고 있는 브라우저 화면(뷰포트)를 기준으로 마치 화면에 붙은 것처럼 그 자리에 계속해서 위치할 것이다.
+
+### position: sticky
+
+sticky(끈끈한, 끈적끈적한) 속성값이 적용된 요소는 조상에 스크롤이 있다면 가장 가까운 부모 요소의 컨텐츠 영역에 달라붙는다.
+
+- IE 지원하지 않는다는 점 유의하자!
+
+### z-index
+
+position을 통해 요소의 위치를 변경하다보면 요소와 요소가 겹쳐보이는 일이 발생한다. 이 때 어떤 요소가 더 위로 나타나게 할지 결정할 때 사용하는 것이 바로 **z-index** 속성이다.  
+오직 static을 제외한 position 속성값이 적용된 요소의 Z축 순서를 결정할 수 있으며, z-index 값이 더 큰 요소가 값이 작은 요소의 위를 덮어버리게 된다.
+
+- 하지만 **부모가 z-index를 높여 자식 앞으로 나올 수 없다! 자식은 z-index를 낮춰 부모 뒤로 가는 것은 가능하다!**
+
+## Float
+
+원래 그림을 따라 흐르는 텍스트 레이아웃을 웹에서 구현하기 위해 탄생한 속성이다.  
+하지만 왼쪽 혹은 오른쪽으로 정렬되는 특성 덕분에 현재는 **블록 박스** 요소를 정렬하는 가장 기본적인 방법으로 사용되고 있다.
+
+### 블록 박스 태그 vs float 속성 태그
+
+- 블록 속성 태그는 **가로 폭 전체의 넓이를 가지는 속성**을 가지고 있다.
+- float 속성을 주면 **컨텐츠가 차지하는 공간만큼만** 넓이가 바뀌게되고 왼쪽이나 오른쪽에 배치된다.
+  - 그리고 float된 요소들의 넓이의 합이 그들을 감싸는 컨테이너의 넓이보다 커지면 순차적으로 아래로 떨어지는 모습이다.
+  - 또한 `<span>`과 같은 inline 요소에 float 속성을 적용하면 display 속성값이 자동으로 `block`으로 바뀌게 된다.
+  - 때문에 float 속성이 적용되면 inline 요소도 `width`, `height`, `margin`, `padding` 속성값을 자유롭게 사용할 수 있다.
+
+### 자식 박스들의 존재를 인식하지 못하는 float 속성
+
+자식한테 float 속성을 설정하면 자식 요소들은 붕 띄워진 상태(floating)이기 때문에 부모 요소가 자식 박스들의 존재를 인식하지 못한다.
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .wrap {
+        border: 4px solid blue;
+      }
+      .content {
+        float: left;
+        margin: 5px;
+        height: 20px;
+        border: 2px solid green;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="content">내용1</div>
+      <div class="content">내용2</div>
+    </div>
+  </body>
+</html>
+```
+
+#### floating 현상 이유
+
+<div style="text-align: center"><img src="../img/normalflow-fin.png" width="500px" /></div>
+
+- 브라우저는 요소들을 화면에 어떻게 보여줄지 결정하는 여러가지 방법이 있다.
+  - 그 중 대표적인 세가지 방법: `normal flow`, `float`, `position`
+- 대부분의 요소들 즉, 블록 레벨 요소와 인라인 요소들은 `normal flow`에 따라 레이아웃이 결정된다.
+- 하지만 **float, position(absolute, fixed)**의 방법을 사용하면 `normal flow`를 벗어난다.
+  - 따라서 벗어난 **float, position** 속성이 적용된 요소들을 인식하지 못한다.
+
+#### 해결 방법1. 부모 요소에 **overflow 속성 추가**
+
+overflow는 BFC(Block-Formatting-Context)를 생성한다. BFC는 float 속성이 적용된 요소를 컨테이너가 인식하도록 만들어 준다.  
+그렇기 때문에 컨테이너 요소에 `overflow: hidden;` 혹은 `overflow: scroll;` 등 `overflow: visible`을 제외한 overflow 속성을 추가하여 해결한다.
+
+```css
+.wrap {
+  border: 4px solid blue;
+  overflow: hidden;
+}
+```
+
+#### 해결 방법2. 부모 요소의 **높이 값을 직접 지정**
+
+강제로 부모에 높이를 주어 늘리는 것이므로 좋은 방법은 아니다. 만약 자식 요소의 높이가 변경되었을 경우 혹은 자식 요소가 추가되어 부모 요소의 높이 수정이 불가피한 경우마다 부모의 높이를 변경해야 하므로 비효율적이다.
+
+```css
+.wrap {
+  border: 4px solid blue;
+  height: 35px;
+}
+```
+
+#### 해결 방법3. clear 속성 사용
+
+`float`이 사용된 요소의 바로 다음 형제 요소에 `clear` 속성을 사용한다. `clear` 속성은 left, right, both 세 가지 값을 가지면 `float`이 사용된 요소가 정렬된 방향에 따라 적절히 사용해주면 된다.
+
+#### 해결 방법4. clear-fix 방법
+
+CSS의 `::after` 가상요소로 해결한다. 부모 요소에 가상으로 마지막 child 요소를 덧붙여서 부모 요소인 wrap이 자식 요소들을 알아보게 하는 방법이다. 이러한 방법은 **clear-fix**라고 한다.
+
+```css
+.warp::after {
+  content: "";
+  display: block; /* display: table;을 사용하기도 한다. */
+  clear: both;
+}
+```
+
+#### 이 외에 BFC를 만들어내는 여러가지 방법들을 사용할 수 있음
+
+- **Block Formatting Context**
+  - 웹 페이지 화면에 CSS를 렌더링하는 과정의 한 부분으로, block 레벨 요소들이나 float된 요소들이 서로 상호작용하여 화면에 보여지게 되는 방법(block formatting)을 결정하는 구역(context)를 말한다.
+- **BFC 생성되는 경우**
+  - /<html> 요소를 사용했을 때
+  - float: left, right
+  - overflow: visible을 제외한 속성값(auto, hidden, scroll)을 사용했을 경우
+  - display: table-cell, inline-block, flow-root
+  - position: absolute, fixed 등등
+- **BFC 생성 후 일어나는 현상**
+  - 내부, 외부 float을 해제
+  - 마진 컬랩싱 (margin collapsing) 현상을 막는다.
+- [자세히 알아보기](https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Block_formatting_context)
