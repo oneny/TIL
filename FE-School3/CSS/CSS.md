@@ -739,7 +739,7 @@ background-image 속성은 html 요소 뒤에 이미지를 배치할 때 사용�
 #### line-height의 단위
 
 - **normal**: 기본값. 폰트의 font-family에 따른 글자의 기본 높이이다.
-  - 사용하는 font-family에 따라 기본 line-height 값이 다르다는 것에 유의해야 한다.
+  - **사용하는 font-family에 따라 기본 line-height 값이 다르다는 것에 유의해야 한다.**
 - number: 숫자로 값을 설정할 수 있다.
   - 1은 font-size 값 만큼의 라인 높이를 의미한다.
   - 2는 font-size 값의 두 배를 의미하므로 font-size가 16px이면 해당 inline의 높이는 총 32px가 된다.
@@ -1056,3 +1056,183 @@ CSS의 `::after` 가상요소로 해결한다. 부모 요소에 가상으로 마
   - 내부, 외부 float을 해제
   - 마진 컬랩싱 (margin collapsing) 현상을 막는다.
 - [자세히 알아보기](https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Block_formatting_context)
+
+## negative margin과 line-height 이해하기
+
+### line-height
+
+```html
+<head>
+  <style>
+    .pseudo-padding {
+      background-color: #b7f6c2;
+      color: green;
+      line-height: 40px;
+      padding: 0 10px;
+      height: 40px;
+      cursor: pointer;
+      text-align: right;
+      opacity: 1;
+    }
+
+    .buckets-header h1 {
+      line-height: 1; /* half-leading을 없앰 */
+
+      /* leading-trim 하는 방법: font-family가 바뀌면 다시 작업해야해서 비추! */
+      /* 위 공간을 줄여 텍스트 노드(My Bucket List)를 위로 올라가게 */
+      /* margin-top: -0.05em; */
+      /* h1 요소 공간을 줄여 아래 공간이 -.24em부터 일찍 시작하게  */
+      /* margin-bottom: -0.24em; */
+      /* padding-left: 24px; */
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <header class="buckets-header">
+    <div class="pseudo-padding">pseudo-padding: 40px</div>
+    <h1>My Bucket List</h1>
+    <div class="pseudo-padding">pseudo-padding: 40px</div>
+  </header>
+</body>
+```
+
+<details>
+  <summary>결과 확인하기</summary>
+  <div style="text-align: center">
+    <img src="../img/myBucketList.png" alt="" width="500px" 
+  ></div>
+  <div style="text-align: center">
+    <img src="../img/myBucketList2.png" alt="" width="500px" 
+  ></div>
+</details>
+
+- half-leading으로 인해 h1의 font 크기는 24px이지만 h1 요소 자체의 크기는 28.5px이 되는 것을 확인할 수 있다.
+- 이를 해결하기 위해 `line-height` 속성을 사용해서 **half-leading**을 없애 font 크기만큼 요소가 차지할 수 있도록 설정할 수 있다.
+  - [line-height 보러가기](#line-height)
+- 아직 미세한 위 아래 공간이 남는 것을 확인할 수 있는데 `negative-margin`을 줘서 해결할 수 있다.
+  - 하지만 font-family가 바뀔때마다 설정을 다시 해줘야 해서 비추인 방법
+
+### negative maring 이해하기
+
+```html
+<div class="pokemon">
+  <img src="images/pikachu.png" />
+  <h1>Pikachu</h1>
+  <p>
+    Pikachu ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
+    ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis
+    parturient
+  </p>
+  <div class="icons">
+    <a class="twitter" href="">Twitter</a>
+    <a class="facebook" href="">Facebook</a>
+    <a class="pinterest" href="">Pinterest</a>
+  </div>
+</div>
+```
+
+<details>
+  <summary>css 보기</summary>
+  <div>
+
+```css
+h1,
+p {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background-color: #ddd;
+}
+
+.pokemon {
+  border-radius: 5px;
+  background-color: white;
+  width: 300px;
+  text-align: center;
+  border-right: 2px solid #ccc;
+  border-bottom: 2px solid #ccc;
+  margin: 240px auto;
+}
+
+/*
+.pokemon img {
+  background-color: orange;
+  margin 의미 해석: 보여지는 공간(이미지 그 자체)은 그대로지만 img 요소가 차지하는 공간은 위 아래로 50px씩 늘어남 
+  margin-top: 50px; 마진 병합 현상은 블럭과 블럭 사이에 일어남
+  margin-bottom: 50px;
+}
+*/
+
+.pokemon img {
+  vertical-align: bottom;
+  /* 이미지가 차지하는 공간은 negative로 줬기 때문에 공간이 줄어들어 이미지 자체는 위로 올라간다. */
+  /* img 요소가 차지하는 공간까지 모두 줄여버리면 더 이상 위로 올라가지 않는다. */
+  margin-top: -200px;
+  /* img 요소가 차지하는 공간이 줄어들면서 pikachu 글자가 위로 올라간다 */
+  /* img 요소가 차지하는 공간까지 모두 없애버리면 
+     아래 pikachu가 더 이상 일찍 시작할 수 없기 때문에 그 뒤로 이미지 자체가 아래로 내려가기 시작
+  */
+  /* margin-bottom: -0px; */
+}
+
+.pokemon h1 {
+  color: orange;
+  border-bottom: 5px solid orange;
+  width: 120px;
+  margin: 0 auto 20px;
+}
+
+.pokemon p {
+  padding: 20px 20px 40px;
+}
+
+.icons {
+  background-color: #eee;
+  padding: 20px 0;
+}
+
+.icons a {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  text-indent: -9999px;
+  background-image: url(images/icon-sprite.png);
+}
+
+.icons a.twitter {
+  background-position: left top;
+}
+.icons a.facebook {
+  background-position: center top;
+}
+.icons a.pinterest {
+  background-position: right top;
+}
+
+.icons a:hover {
+  background-position-y: bottom;
+}
+```
+
+  </div>
+</details>
+
+<details>
+  <summary>결과 확인하기</summary>
+
+  <div style="text-align:center">
+    <img src="../img/negativeMargin.png" alt="" width="500px" height="500px">
+  </div>
+</details>
+
+- 주석에 정리한 것처럼 `margin: 50px 0;` 속성을 주면
+  - margin의 의미는 보여지는 공간(이미지 그 자체)은 그대로지만
+  - img 요소가 차지하는 공간은 위 아래로 50px씩 늘어나는 것을 확인할 수 있다.
+- 그 다음 .pokemon img {}처럼 margin 속성의 값으로 negative 값을 주게 되면
+  - margin-top 경우, img 요소가 차지하는 공간이 위로 줄어들면서 이미지 자체가 올라가게 된다.
+    - 만약 img 요소가 차지하는 공간까지 모두 줄여버리면 더 이상 올라가지 않는다.
+  - margin-bottom 경우, img 요소가 차지하는 공간이 아래로 줄어들면서 화면상 아래에 있는 요소가 위로 올라오게 된다.(일찍 시작한다.)
+    - img 요소가 차지하는 공간까지 모두 줄여버리면 그 뒤로는 이미지 자체가 아래로 내려가기 시작한다.
+- 이러한 margin의 negative한 속성값을 줘서 font의 미세한 위 아래 공간을 없앨 수 있다.
