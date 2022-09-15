@@ -317,6 +317,25 @@ body {
   .cont-result {
     margin-bottom: 60px;
   }
+
+  #modal-toggle:checked + .cont-modal {
+    padding: 30px 55px;
+  }
+
+  #modal-toggle:checked + .cont-modal .tit-modal strong {
+    font-size: 60px;
+  }
+
+  #modal-toggle:checked + .cont-modal img {
+    width: 300px;
+    margin-bottom: 20px;
+  }
+
+  #modal-toggle:checked + .cont-modal .btn-exc {
+    width: 300px;
+    border-radius: 15px;
+    word-break: keep-all;
+  }
 }
 
 @media screen and (max-width: 450px) {
@@ -327,6 +346,7 @@ body {
   .tit-timelaw .tit-logo {
     width: 267px;
   }
+
   .tit-timelaw .tit-clock {
     width: 125px;
     height: 126px;
@@ -431,5 +451,16 @@ body {
   .txt-footer {
     font-size: 10px;
     padding: 15px;
+  }
+
+  #modal-toggle:checked + .cont-modal {
+    padding: 30px 40px;
+  }
+  #modal-toggle:checked + .cont-modal img {
+    width: 250px;
+  }
+
+  #modal-toggle:checked + .cont-modal .btn-exc {
+    width: 234px;
   }
 }

@@ -1236,3 +1236,406 @@ body {
   - margin-bottom 경우, img 요소가 차지하는 공간이 아래로 줄어들면서 화면상 아래에 있는 요소가 위로 올라오게 된다.(일찍 시작한다.)
     - img 요소가 차지하는 공간까지 모두 줄여버리면 그 뒤로는 이미지 자체가 아래로 내려가기 시작한다.
 - 이러한 margin의 negative한 속성값을 줘서 font의 미세한 위 아래 공간을 없앨 수 있다.
+
+## CSS Selector 심화
+
+### 속성 선택자
+
+- \*: 전체, ^: 시작/반대, $: 끝
+- 태그[속성이름]
+  - **속성이름**에 해당되는 속성을 가진 태그를 모두 선택한다.
+- 태그[속성이름="변수"]
+  - **속성이름**의 속성값이 **변수**와 일치하는 태그를 선택한다.
+- 태그[속성이름~="변수"]
+  - **속성이름**의 속성값이 **변수**와 일치하는 태그를 선택한다.
+- 태그[속성이름^="변수"]
+  - **속성**의 속성값이 **변수**로 시작하는 태그를 선택한다.
+- 태그[속성$="변수"]
+  - **속성**의 속성값이 **변수**로 끝나는 요소를 선택한다.
+- 태그[속성*="변수"]
+  - **속성**의 속성값이 **변수**를 포함하는 태그를 선택한다.
+- 태그 [속성|="변수"]
+  - **속성**의 속성값이 **변수**이거나 **변수**로 시작하면서 뒤에 바로 `-` 기호가 있는 태그를 선택한다.
+- `태그[속성~="변수"]`와 `태그[속성*="변수"]` 차이
+  - `~=`는 단어를 기준으로 `*=`는 문자열을 기준으로 판단하게 된다.
+  - 변수에 **paullab**를 할당하면 `~=`은 단어가 기준이므로 `paullab`과 `paullabs`를 다르게 인식하고,
+  - `*=`은 문자열을 기준으로 `paullabs` 안에 `paullab`가 포함되어 있기 때문에 선택을 한다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <title>속성 선택자</title>
+    <style>
+      /* 1. 태그[속성이름] */
+      /* 속성명으로 선택했을 경우 */
+      /* div 태그이면서 class 속성을 가지고 있는 요소 */
+      div[class] {
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        border: 1px solid black;
+      }
+      /* a 태그이면서 href 속성을 가지고 있는 요소 */
+      a[href] {
+        color: gray;
+      }
+
+      /* 2번부터 하나씩 주석을 해제해보며 실습해 보세요 :) */
+
+      /* 2. 태그[속성이름="값"] */
+      /* div 태그이면서 class명이 red인 요소*/
+      /* 공백을 포함하지 않기 때문에 red 클래스 하나만 가진 요소가 선택됩니다. */
+      /* div[class="red"] {
+            background-color: red;
+        } */
+
+      /* 3. 태그[속성이름~="값"] */
+      /* div 태그이면서 red인 class를 가지고 있는 요소 */
+      /* 공백을 포함하기 때문에 red 클래스를 가진 요소는 div 태그는 모두 선택됩니다. */
+      /* div[class~="red"] {
+            background-color: red;
+        } */
+
+      /* 4. 태그[속성이름*="값"] */
+      /* div 태그이면서 class 중 red 문자열을 포함하는 요소 */
+      /* div[class*="red"] {
+            background-color: red;
+        } */
+
+      /* 5. 태그[속성이름^="값"] */
+      /* div 태그이면서 class 속성값이 sky로 시작하는 요소 */
+      /* div[class^="sky"] {
+            background-color: skyblue;
+        } */
+      /* a 태그이면서 href 속성값이 http로 시작하는 요소 */
+      /* a[href^="https"] {
+            color: red;
+        } */
+
+      /* 6. 태그[속성이름$="값"] */
+      /* div 태그이면서 속성값이 pink로 끝나는 요소 */
+      /* div[class$="pink"] {
+            background-color: pink;
+        } */
+      /* a 태그이면서 href 속성값이 kr로 끝나는 요소 */
+      /* a[href$="kr"] {
+            color: black;
+        } */
+
+      /* 6. 태그[속성이름|="값"] */
+      /* a 태그이면서 href 속성값이 http이거나 http로 시작하는 요소 */
+      /* 
+           언더바(_), 공백, 합성어가 포함될 경우 적용되지 않으며,
+           독립된 값이거나 하이픈을 포함하는 값은 선택됩니다.
+         */
+      /* a[href|="http"] {
+            color: red;
+        } */
+    </style>
+  </head>
+  <body>
+    <!-- class 속성을 가지고 있지 않아 스타일 설정이 되지 않음 -->
+    <div>1</div>
+
+    <div class="red">2</div>
+    <div class="red pink">3</div>
+    <div class="redpink skyblue pink">4</div>
+    <div class="skyblue">5</div>
+
+    <hr />
+
+    <!-- href 속성을 가지고 있지 않아 스타일 설정이 되지 않음 -->
+    <a>바울랩</a>
+
+    <a href="http://paullab.co.kr">바울랩1</a>
+    <a href="http://paullab.com">바울랩2</a>
+    <a href="https://paullab.com">바울랩3</a>
+    <a href="http">바울랩4</a>
+    <a href="http-paullab">바울랩5</a>
+  </body>
+</html>
+```
+
+### 가상 클래스 선택자(Psudo Class Selector)
+
+실제로 HTML에 존재하지 않는 클래스지만 마치 클래스가 존재하는 것처럼 작동한다고 하여 가상 클래스 선택자라 부른다.
+
+```html
+<ul>
+  <li class="foo">1</li>
+  <!-- .foo:first-child -->
+  <li class="foo">2</li>
+  <li class="foo">3</li>
+  <!-- .foo:nth-child(3) -->
+  <li class="foo">4</li>
+  <li class="foo">5</li>
+  <!-- .foo:last-child -->
+</ul>
+```
+
+- **.foo:first-child**: class="foo"인 엘리먼트 중 첫번째 자식인 엘리먼트를 선택한다.
+- **.foo:last-child**: class="foo"인 엘리먼트 중 마지막 자식인 엘리먼트를 선택한다.
+- **.foo:nth-child(3)**: class="foo"인 엘리먼트 중 3번쨰 자식인 엘리먼트를 선택한다.
+  - **.foo:nth-child(odd)**: class="foo"인 엘리먼트 중 홀수 번째 자식인 엘리먼트를 모두 선택한다.
+  - **.foo:nth-child(even)**: class="foo"인 엘리먼트 중 짝수 번쨰 자식인 엘리먼트를 모두 선택한다.
+  - **.foo:nth-child(n)**: class="foo"인 엘리먼트 중 n번째 자식인 엘리먼트를 모두 선택한다. n은 0부터 1씩 증가
+  - **.foo:nnth-child(3n)**: class="foo"인 엘리먼트 중 3번째 자식마다 모두 선택한다.
+  - **.foo:nth-child(3n+1)**: class="foo"인 엘리먼트 중 3n+1번째 자식인 엘리먼트를 모두 선택한다.
+- **a:visited**: 사용자가 방문한 적이 있는 링크를 선택
+  - 개인정보 보호를 위해 매우 제한적이다.
+
+### 상호 작용을 위한 가상클래스
+
+#### :hover
+
+사용자가 마우스를 요소 위에 올렸을 때 적용된다. 스마트폰이나 패드 류의 터치스크린 기기에서는 사용자의 손가락이 호버되는 시점을 알 수 없기 때문에 모바일 기기가 많아지면서 점점 사용 빈도가 줄어드는 기능이다.
+
+#### :active
+
+사용자가 요소를 실행할 때(버튼을 누르거나 링크를 클릭할 때) 적용된다.
+
+#### :focus
+
+요소에 포커스가 있을 때 적용된다. 클릭할 수 있는 요소나 폼컨트롤(input, select 등등)과 같이 상호작용할 수 있는 모든 요소에는 포커스가 가능하다.
+
+#### :checked
+
+선택한 상태의 **라디오, 체크박스, 옵션** 요소를 나타낸다.
+
+### 가상 요소 선택자
+
+#### ::before
+
+요소의 맨 첫번째 자식으로 HTML 코드에 존재하지 않는 가상요소를 하나 생성한다.
+
+#### ::after
+
+요소의 맨 마지막 자식으로 HTML 코드에 존재하지 않는 가상요소를 하나 생성한다.
+
+#### ::selection
+
+사용자가 선택하여 하이라이트된 상태의 텍스트를 선택한다.
+
+#### 가상 클래스와 가상 요소 선택자 차이
+
+- **가상 요소 선택자**는 콜론이 2개(가상 클래스 선택자는 1개). 간혹 가상요소 선택자에 콜론이 1개만 보이는 경우가 있는데 `레거시 브라우저 호환`을 위한 선택이다.(IE 8 이하)
+- 가상 요소 선택자는 마크업 없는 요소를 삽입. 가상 클래스 선택자는 클래스 없는 요소에 클래스 삽입.
+  - 브라우저, OS 스크린리더에 따라 가상요소 선택자를 읽을 수도 있고 읽지 않을 수도 있다.
+
+#### CSS 연습 및 치트시트
+
+- [CSS selector game](https://flukeout.github.io/)
+- [cheatsheet](https://www.w3schools.com/cssref/css_selectors.asp)
+
+## CSS Selector
+
+### Combinator (aka 복합 선택자, 연결자 혹은 결합자)
+
+CSS Combinator는 복합 선택자, 연결자, 결합자 등의 다양한 한글 표기가 존재한다.
+
+```css
+/* 선택자 */
+header a {
+  display: inline-block;
+  /* 속성 */ /* 값 */
+}
+/* header에 포함되어 있는 a의 display를 inline-block으로 설정  */
+```
+
+### 자손(Descendent) 콤비네이터
+
+하위 선택자는 선택자 사이를 `공백`을 사용하여 나타낸다. 앞 요소의 `자손`인 뒤 요소를 선택한다.  
+이 태그는 section 아래 있는 모든 ul태그를 가리키기 때문에 바로 아래 자식을 선택할 때에는 자식 콤비네이터를 사용한다.
+
+### 자식(Child) 콤비네이터
+
+하위 선택자는 선택자 사이를 `>`를 사용하여 나타낸다. 앞 요소의 `자식`인 뒤 요소를 선택한다.  
+`자손`은 `자식`을 포괄하는 의미로 `자손`은 모든 하위 요소를 의미하고 `자식`은 바로 아래의 하위 요소에만 적용한다.
+
+### 인접 형제(Adjacent sibling) 콤비네이터
+
+`형제`란 같은 부모를 가지는 요소들을 말한다.  
+인접 형제 콤비네이터는 선택자 사이를 `+`를 사용하여 나타낸다. `+`를 기준으로 전방 선택자 **직후**에 나오는 후방 형제 선택자를 선택한다.
+
+### 일반 형제(General sibling) 콤비네이터
+
+일반 형제 콤비네이터는 선택자 사이에 `~`를 사용하여 나타낸다. `~`를 기준으로 앞 요소 이후에 나오는 모든 뒤 요소를 선택한다.
+
+### 예제
+
+```css
+/* 자손(Descendent) 콤비네이터 */
+section ul {
+  text-shadow: none;
+}
+
+/* 자식(Child) 콤비네이터 */
+section > ul {
+  text-shadow: none;
+}
+
+/* 인접 형제(Adjacent sibling) 콤비네이터 */
+h1 + ul {
+  color: red;
+}
+
+/* 일반 형제(General sibling) 콤비네이터 */
+h1 ~ ul {
+  color: red;
+}
+```
+
+## flex
+
+`display` 속성으로, 내부 자식 박스들의 배치에 영향을 미치는 내부 디스플레이 타입 중 하나이다.
+
+- [flexngrid](https://flexngrid.com/)
+- [MDN: flex](https://developer.mozilla.org/ko/docs/Web/CSS/CSS_Flexible_Box_Layout/Basic_Concepts_of_Flexbox)
+- [Codepen(flex)](https://codepen.io/enxaneta/full/adLPwv)
+
+### 기본 속성
+
+- 가로 축(x축) 또는 세로 축(y축) 한 방향으로 배치 및 정렬
+  - 각 요소의 순서를 변경하거나 요소들의 영역을 동일하게 분배하는 것 가능!
+- 단, 한 방향으로만 설정할 수 밖에 없는 치명적인 단점이 있다.
+- **flex 속성은 컨테이너에 적용할 수 있는 컨테이너 속성과 아이템에 적용할 수 있는 아이템 속성으로 구분 가능하다.**
+  - Block-level Element의 성질을 가지며 주로 부모의 속성을 통해 자식들을 컨트롤한다.
+  - 이 때 부모를 `Flex-container`, 영향을 받는 자식들을 `Flex-item`이라고 부른다
+- flex는 자신의 직계자식까지만 영향을 미친다.
+
+### Axis, Cross-Axis
+
+- flex 레이아웃에서는 정렬에서 기준점이 되는 축(axis)이 존재한다.
+  - 메인 축과 교차 축을 기준으로 아이템을 정렬
+  - `메인축`: 아이템이 배치되는 방향축을 의미
+  - `교차축`: 메인 축과 수직을 이루는 축을 의미
+- axios가 row 상태라면 cross-axis는 column이고, axis가 column이면 cross-axis는 row인 상태이다.
+
+### flex-container에 사용하는 속성
+
+#### flex-direction
+
+- flex-container가 사용할 주축과 정렬 방향을 결정한다.
+  - **row**: 주축을 행 방향으로 한다.
+  - **row-reverse**: 주축을 행 방향으로 하되 축의 시작점을 역전한다.
+    - 즉, `flex-direction: row`였을 때의 `flex-start`가 `flex-end`로 변경된다.
+  - **column**: 주축을 열 방향으로 한다.
+  - **column-reverse**: 주축을 열 방향으로 하되 축의 시작점을 역전한다.
+    - 즉, `flex-direction: column`이었을 때의 `flex-start`가 `flex-end`로 변경된다.
+
+#### justify-content
+
+- **주축(Axis)**을 기준으로 배열의 위치를 조종하거나 아이템 간의 간격을 설정할 수 있다.
+  - 세 개의 아이템이 있다고 가정
+  - **flex-start**: 시잠점
+  - **flex-end**: 끝점
+  - **center**: 중간
+  - **space-between**: 첫 번재 아이템은 시작점에, 마지막 아이템은 끝점에, 나머지 아이템들은 균등한 간격으로 정렬
+  - **space-around**: 전체 아이템들을 균인할 여백을 포함해서 정렬
+- flex-direction의 속성값에 따라 main-axis(메인축)의 방향이 바뀌기 때문에 유의해야 한다.
+  - `flex-direction: row`: 가로 축 방향
+  - `flex-direction: column`: 세로 축 방향
+
+#### align-items, align-content
+
+- **align-items**: **교차 축(Cross-axis)** 방향으로 아이템 정렬을 설정하는 속성
+
+  - `flex-direction: row`라고 가정
+  - **stretch**: 기본값으로 아이템들이 컨테이너 높이만큼 가지게 된다.
+  - **flex-start**: 세로 방향 기준 `시작점`을 기준으로 아이템이 가지는 높이만큼 정렬된다.
+  - **flex-end**: 세로 방향 기준 `끝점`을 기준으로 아이템이 가지는 높이만큼 정렬된다.
+  - **center**: 세로 방향 기준 시작점과 끝점 중간에 위치하게 된다.
+
+- **align-content**: **교차 축(Cross-axis)** 방향으로 아이템 정렬을 지정하는데
+  - flex-wrap 속성이 wrap으로 지정되어 있는 상태에서 item이 여러 줄로 배치되었을 때만 적용되는 속성
+- align-content 기본 속성의 값이 align-items와 마찬가지로 stretch로 지정되어 있다.
+  - **flex-start**: 교차축 방향에서 flex 레이아웃 시작점을 기준으로 정렬
+  - **flex-end**: 교차축 방향에서 flex 레이아웃 끝점을 기준으로 정렬
+  - **space-between**: `justify-content`처럼 교차축 방향 기준으로
+    - 첫 번째 아이템은 시작점에, 마지막 아이템은 끝점에, 중간 아이템들은 균등하게 여백을 분배해서 정렬한다.
+
+#### flex-wrap
+
+- flex-container는 flex-item 넓이의 합이 컨테이너보다 크다고 해서 강제로 flex-item의 넓이를 조절하지 않는다.
+  - 때문에 자식 요소를 감싸서 부모의 넓이에 따라 자식들을 줄바꿈하도록 하는 기능이 필요한데, 그것이 바로 flex-wrap이다.
+  - 즉, 아이템의 크기가 컨테이너 전체 크기보다 커질 때 아이템의 줄바꿈을 어떻게 할 것인지 지정하는 속성이다.
+- 속성값
+  - **wrap**: 컨테이너의 공간이 부족하면 자동으로 줄바꿈한다.
+  - **nowrap**: 기본 속성인 `nowrap`으로 진형을 유지하면서 줄어들거나 늘어난다.
+  - **wrap-reverse**: 순서가 거꾸로 줄바꿈하게 된다.
+
+#### flex-flow
+
+- flex-direction과 flex-wrap은 같이 사용하는 일이 많기 때문에 flex-flow을 통해 단축하여 사용할 수 있다.
+
+```css
+.container {
+  flex-flow: row wrap; /* flex-direction: row; flex-wrap: wrap; */
+}
+```
+
+### flex-item에 사용하는 속성
+
+flex-basis, flex-grow, flex-shink는 각각 flex-container의 상태에 따라 flex-item의 레이아웃을 결정히는 속성들이다.
+
+#### flow-basis
+
+- flex-item의 크기를 지정한다.
+  - width, height와 다른 점은 axis 방향에 따라 달라진다는 것 그리고 내부의 컨텐츠에 따라 유연한 크기이다.
+  - 기본값은 auto
+  - 만약 flex-basis 값이 적용되어 있다면 width, height 값은 무시된다.
+  - 기본적으로 px이나 em 등의 단위값을 사용하며, 0 외에 다른 상수값을 사용할 수 없다.
+  - 메인축의 방향이 row(가로)일 경우에는 가로 크기를, column(세로)일 경우에는 세로 크기를 지정
+- `width 속성과의 차이`
+  - **flex-basis의 속성은 아이템이 표현될 때의 나타나야할 최소 크기를 설정한다고 생각하면 된다.**
+
+#### flex-grow
+
+- flex-basis의 값에서 더 늘어나도 되는지 지정하는 값으로, 할당된 값에 따라 flex-container의 남은 여백을 할당하도록 한다.
+  - 0 이상의 값을 가지게 된다면 flex-basis로 지정한 크기를 제외한 남는 공간을 flex-grow로 지정한 숫자의 비율로 분배하게 된다.
+    - flow-grow: 1 -> 자식 요소들이 모두 동일한 크기의 공간을 할당받는다.
+    - flow-grow: 2 -> 특정한 하나의 자식에게만 줄 경우 다른 자식요소보다 두 배의 **여백 공간**을 할당받는다.
+    - 만약 자식요소들의 컨텐츠 크기가 존재한다며 그 컨텐츠의 넓이에 따라 할당받는 값이 달라진다.
+  - `flex-basis: 0`을 주게 되면 여백 공간이 아니라 전체 공간을 분할한다.(\* 늘어나지 않음을 의미)
+
+
+#### flex-shrink
+
+- flex-grow에 반대되는 개념으로 컨테이너의 공간이 줄어들때 flex-basis의 값에서 더 줄어들어도 되는지 지정하는 값이다.
+  - flex-grow 속성을 사용하면 의도한 크기 이하로 줄어들지 않도록 설정해서 특정 크기를 유지할 수 있다.
+  - 0의 값을 사용할 경우 컨테이너의 크기가 줄어도 값은 고정된다. 즉, 아이템은 줄어들지 않는 것을 의미한다.
+  - 마이너스 숫자를 사용할 수 없으며 기본값은 1 -> 줄어들 수 있는 것을 의미
+
+
+#### flex
+
+- flex-grow, flex-shrink, flex-basis 속성의 값을 축양하여 사용할 수 있는 것이 `flex` 속성이다.
+
+```css
+div {
+  /* flex: flex-grow, flex-shrink, flex-basis */
+  flex: 2; /* flex-grow:2; flex-shrink: 1; flex-basis: 0 */
+  flex: 1 1; /* flex-grow: 1; flex-shrink: 1; flex-basis: 0 */
+  flex: 2 300px; /* flex-grow: 2; flex-shrink: 1; flex-basis: 300px; */
+  flex: 1 1 300px; /* flex-grow: 1; flex-shrink: 1; flex-basis: 300px; */
+}
+```
+
+#### align-self
+
+- 부모의 `align-items` 속성을 덮어 flex-item에게 개별적인 `align-items` 속성을 부여한다.
+  - 즉, `align-self`는 **교차축**에서 개별 아이템의 정렬 방법을 지정하는 속성이다.
+  - **align-self 속성은 container 속성인 align-items 속성보다 우선순위가 높아 덮어쓸 수 있는 것이다!**
+  - 기본값은 `align-items`와 마찬가지로 `stretch`이다.
+
+#### order
+
+- flex-item 들의 **시각적인** 순서를 결정한다. 수의 의미로 순서를 결정하지 않는다. 수의 크기로 결정한다.
+  - 시각적인 순서라 한 이유
+    - HTML 문서를 조작하는 것이 아니기 때문!
+    - 보이는 순서만 바뀔 뿐 데이터 순서가 바뀌는 것이 아니다.
+    - 따라서 스크린리더 같은 기능들을 사용할 때에는 `order`로 지정된 순서가 적용되지 않는다.
+  - 수가 작을수록 더 높은 우선 순위를 부여 받는다.(음수도 사용 가능)
+    - 기본값은 0
+
