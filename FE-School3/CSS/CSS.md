@@ -1590,15 +1590,54 @@ flex-basis, flex-grow, flex-shink는 각각 flex-container의 상태에 따라 f
 - `width 속성과의 차이`
   - **flex-basis의 속성은 아이템이 표현될 때의 나타나야할 최소 크기를 설정한다고 생각하면 된다.**
 
+```html
+<head>
+  <style>
+    .container {
+      /* 1. 주 축에 따라 basis가 넓이가 되기도 하고, 높이가 되기도 한다. */
+      /* flex-direction: column; */
+      /* 2. 넓이를 다 포함하지 못할 때는 개행한다. */
+      flex-wrap: wrap;
+    }
+    .item {
+      background-color: aqua;
+      border: 1px solid black;
+    }
+    .item:nth-child(2) {
+      /* 1. 주 축에 따라 basis가 넓이가 되기도 하고, 높이가 되기도 한다. */
+      /* flex-basis: 150px; */
+
+      /* 2. 2개의 값이 있었을 때 basis의 값을 우선한다. */
+      /* flex-basis: 100px; */
+      /* width: 150px */
+
+      /* 3. width의 값은 넓이를 강제한다. */
+      /* width: 100px; */
+      /* flex-basis: 100px; */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="item">1</div>
+    <div class="item">2222222222222222</div>
+    <div class="item">3</div>
+    <div class="item">4</div>
+    <div class="item">5</div>
+  </div>
+</body>
+```
+
 #### flex-grow
 
 - flex-basis의 값에서 더 늘어나도 되는지 지정하는 값으로, 할당된 값에 따라 flex-container의 남은 여백을 할당하도록 한다.
-  - 0 이상의 값을 가지게 된다면 flex-basis로 지정한 크기를 제외한 남는 공간을 flex-grow로 지정한 숫자의 비율로 분배하게 된다.
+  - 0 이상의 값을 가지게 된다면 flex-basis로 `지정한 크기를 제외한 남는 공간(여백)`을 flex-grow로 지정한 숫자의 비율로 분배하게 된다.
+    - **컨텐츠 크기의 비율만큼이 아닌 컨텐츠 크기를 제외한 여백의 비율만큼 값이 달라진다.**
+      - 줄어들 때에도 여백의 비율만큼 줄어들고, 여백이 없어지면 `flex-basis: 0`이라면 컨텐츠 크기가 줄어든다.
     - flow-grow: 1 -> 자식 요소들이 모두 동일한 크기의 공간을 할당받는다.
     - flow-grow: 2 -> 특정한 하나의 자식에게만 줄 경우 다른 자식요소보다 두 배의 **여백 공간**을 할당받는다.
     - 만약 자식요소들의 컨텐츠 크기가 존재한다며 그 컨텐츠의 넓이에 따라 할당받는 값이 달라진다.
-  - `flex-basis: 0`을 주게 되면 여백 공간이 아니라 전체 공간을 분할한다.(\* 늘어나지 않음을 의미)
-
+  - `flex-basis: 0(초깃값)`을 주게 되면 여백 공간이 아니라 전체 공간을 분할한다.(\* 늘어나지 않음을 의미)
 
 #### flex-shrink
 
@@ -1606,11 +1645,12 @@ flex-basis, flex-grow, flex-shink는 각각 flex-container의 상태에 따라 f
   - flex-grow 속성을 사용하면 의도한 크기 이하로 줄어들지 않도록 설정해서 특정 크기를 유지할 수 있다.
   - 0의 값을 사용할 경우 컨테이너의 크기가 줄어도 값은 고정된다. 즉, 아이템은 줄어들지 않는 것을 의미한다.
   - 마이너스 숫자를 사용할 수 없으며 기본값은 1 -> 줄어들 수 있는 것을 의미
-
+- 실무에서는 더 줄어들지 않게 하기 위해서 사용한다.
 
 #### flex
 
 - flex-grow, flex-shrink, flex-basis 속성의 값을 축양하여 사용할 수 있는 것이 `flex` 속성이다.
+- **flex 축약 속성**을 사용하도록 권장된다!
 
 ```css
 div {
@@ -1618,9 +1658,20 @@ div {
   flex: 2; /* flex-grow:2; flex-shrink: 1; flex-basis: 0 */
   flex: 1 1; /* flex-grow: 1; flex-shrink: 1; flex-basis: 0 */
   flex: 2 300px; /* flex-grow: 2; flex-shrink: 1; flex-basis: 300px; */
-  flex: 1 1 300px; /* flex-grow: 1; flex-shrink: 1; flex-basis: 300px; */
+  flex: 1 0 300px; /* flex-grow: 1; flex-shrink: 0; flex-basis: 300px; */
 }
 ```
+
+```css
+.item:nth-child(2) {
+  flex: 1 0 300px;
+}
+```
+
+- 플렉스 안에 있는 item의 속성을 정하는데
+  - flex-grow: 1(컨테이너가 늘어나면 아이템들의 여백이 1:1로 늘어난다)
+  - flex-shrink: 0(컨테이너가 줄어들면 아이템들의 여백이 같이 줄다가 고정된다)
+  - flex-basis: 300px(아이템들의 기본 컨텐츠 크기 결정)
 
 #### align-self
 
@@ -1639,3 +1690,283 @@ div {
   - 수가 작을수록 더 높은 우선 순위를 부여 받는다.(음수도 사용 가능)
     - 기본값은 0
 
+## Grid
+
+### Grid 기본 개념
+
+부모 컨테이너 요소 안에서 내부 자식 요소들의 위치를 X축과 Y축 방향 모두를 이용해 배치하는 내부 디스플레이 타입의 하나이다.
+
+<div style="text-align: center">
+  <img src="../img/grid.png" alt="grid" width="80%">
+</div>
+
+- 그리드 컨테이너: 그리드의 가장 바깥 영역
+- 그리드 아이템: 그리드 컨테이너의 자식 요소들
+- 그리드 트랙: 그리드의 행(row) 또는 열(column)
+- 그리드 셀: 그리드의 한 칸 (개념적인 정의)
+- 그리드 라인: 그리드 셀을 구분하는 선
+- 그리드 넘버: 그리드 라인의 각 번호
+- 그리드 갭: 그리드 셀 사이의 간격
+- 그리드 에어리어: 그리드 셀의 집합
+
+### grid-container에 사용하는 속성
+
+- `display: grid`로 그리드 컨테이너와 아이템을 설정한다.
+
+#### grid-template-rows
+
+- 행방향 그리드 트랙의 사이즈를 설정한다.
+
+#### grid-template-columns
+
+- 열방향 그리드 트랙의 사이즈를 설정한다.
+- `fr`: 비율을 의미한 **fraction**의 약자
+  - grid 컨테이너 안에서 사용되는 데이터 타입으로, 상황에 따른 유연한 길이를 의미한다.
+
+#### repeat() 함수
+
+- row 혹은 column 방향으로 grid-track의 사이즈를 좀 더 간단한 형태로 표현하도록 도와주는 CSS 함수이다.
+- 함수에 전달하는 첫 번째 인자는 반복 횟수(repeat count), 두 번째 인자는 반복할 트랙 셋팅 값이다.
+
+#### minmax() 함수
+
+- 최소와 최대 사이의 범위를 설정하는 함수이다. 최소와 최대값을 의미하는 두 가지 인자를 가진다.
+
+```css
+.container {
+  display: grid;
+
+  /* 열방향 그리드 트랙의 최소 넓이를 50px, 최대 넓이를 150px로 한다. */
+  grid-template-columns: repeat(3, minmax(50px, 150px));
+
+  /* 행방향 그리드 트랙의 최소 넓이를 120px, 최대 높이를 가용할 수 있는 최대 크기로 한다. */
+  grid-template-columns: repeat(3, minmax(120px, auto));
+}
+```
+
+#### auto-full & auto-fit
+
+만약 repeat 함수를 사용할 때, 반복되는 카운트를 고정하지 않고 컨테이너의 넓이에 따라 **가능한 많은** 그리드 컬럼을 배치하고 싶다면 사용하는 키워드 값이다.
+
+```css
+.container {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(50px, 150px));
+  grid-template-columns: repeat(auto-fill, minmax(50px, auto));
+  /* grid-template-columns: repeat(auto-fit, minmax(50px, auto)) */
+}
+```
+
+- `auto-fill`과 `auto-fit` 모두 자동으로 필요한 그리드 트랙을 만들어 배치하는 동일한 기능을 하지만 배치할 수 있는 그리드 셀이 없을 때 차이가 발생한다.
+- `auto-fill`과 `auto-fit` 중 어떤 키워드를 사용할지는 기획 의도나 디자인에 따라 선택하시면 된다.
+
+#### gap
+
+셀과 셀 사이의 간격을 설정할 때 사용할 수 있는 속성이다. 복잡한 레이아웃 안에서 마진 대신 편리하게 간격을 설정할 수 있다. **grid-gap**은 gap으로 사용할 수 있따.
+
+- gap 속성은 IE 미지원이다.
+
+### grid-item에 사용하는 속성
+
+#### 그리드 아이템의 영역(grid area) 설정하기
+
+그리드 컨테이너 안에서 그리드 아이템이 차지하는 영역의 범위와 위치를 설정하는 속성이다. 범위의 시작과 끝을 설정할 수 있으며, 컬럼과 로우 방향에 대한 축약 속성을 지원한다.  
+이 때 범위의 기준이 되는 값은 바로 grid-line의 번호이다.
+
+```css
+.container {
+  display: grid;
+  height: 500px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.container li:nth-child(1) {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 1;
+  grid-row-end: 3;
+}
+
+/* grid-colmn: 1 / 3 */
+/* grid-row: 1 / 3 */
+
+/* grid-area의 설정 값은 순서대로 각각 -> 그리드 start가 먼저인 것 주의
+grid-row-start, grid-column-start, grid-row-end, grid-column-end를 의미한다. */
+
+/* grid-area: 1/1/3/3 */
+
+/* span 키워드를 사용하면 그리드 라인의 번호를 사용하지 않아도 된다. */
+/* grid-area: 1 / 1 / span 2 / span 2; */
+```
+
+- 익숙하지만 새로운 키워드 `span`
+  - 그리드에서 **span**이라는 키워드를 사용할 수 있다. span의 사전적 의미는 "한 뼘", "~을 채우다"의 의미를 가지고 있다.
+
+#### grid area로 좀 더 직관적으로 영역 설정
+
+```html
+<head>
+  <style>
+    body {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      grid-template-areas:
+        "header header header"
+        "main main aside"
+        "footer footer footer";
+    }
+
+    header {
+      grid-area: header;
+      background-color: pink;
+    }
+
+    main {
+      grid-area: main;
+      background-color: lightblue;
+    }
+    aside {
+      grid-area: aside;
+      background-color: lightgreen;
+    }
+    footer {
+      grid-area: footer;
+      background-color: aquamarine;
+    }
+  </style>
+</head>
+<body>
+  <header>header</header>
+  <main>
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error repellat
+    earum iure id natus, consectetur, aut a adipisci, suscipit dolore in quam
+    commodi recusandae magni excepturi sapiente quasi optio accusantium?
+  </main>
+  <aside>aside</aside>
+  <footer>footer</footer>
+</body>
+```
+
+#### 그리드 아이템의 Z축 설정하기
+
+grid 안에서는 굳이 position 속성을 사용하지 않더라도 z-index를 사용하여 화면에 보여지는 우선수위를 설정할 수 있다.
+
+```css
+/* 위 코드의 css만 수정 */
+aside {
+  grid-area: aside;
+  background-color: lightgreen;
+  transition: 0.3s;
+  transform-origin: 0 0;
+}
+
+/* aside 에 마우스를 호버하면 10% 크기를 키웁니다. */
+aside:hover {
+  transform: scale(1.1);
+}
+
+footer {
+  /* aside 의 크기가 커져도 footer를 가리지 않게 합니다. */
+  z-index: 1;
+  grid-area: footer;
+  background-color: aquamarine;
+}
+```
+
+## CSS transition, transform
+
+### Transition
+
+CSS 속성값이 변할 때, 값의 변화가 일정 시간에 걸쳐 일어나도록 설정하는 것
+
+### Transition의 속성들
+
+#### transition-delay
+
+- `transition`이 일어나기 전까지 얼마나 기다릴지 지정해주는 것
+  - **절대값 시간**만큼 기다렸다가 시작하므로 음수값으로 작성해도 된다.
+
+#### transition-duration
+
+- `transition`이 얼마만큼의 시간 동안 변할지 지정해 준다.
+  - 초 단위를 나타내는 `s`나 밀리 초를 나타내는 `ms`로서 값을 설정한다.
+
+#### transition-property
+
+- 어떤 속성에 `transition` 효과를 줄지 설정하는 것
+- 속성값
+  - `all`: 기본값으로 모든 속성에 `transition` 효과가 나타나게 하는 것
+  - `none`: 속성들이 `transition` 효과를 받지 못하는 것
+  - `property`: `transition` 효과를 적용하고 싶은 css 속성을 설정하면 지정된 속성에 `transition`이 나타난다.
+  - 하나 이상의 속성에 적용하고 싶을 때는 **쉼표**로 나열한다.
+
+#### transition-timing-function
+
+- `transition`의 진행 속도를 설정할 수 있다.
+- [TCPSchool 자세히 보기](http://www.tcpschool.com/css/css3_transform_transition)
+
+#### transition
+
+```css
+div {
+  transition: width 2s linear 1s;
+}
+```
+
+`transition-property`, `transition-duration`, `transition-timing-function`, `transition-delay` 순의 축약 속성
+
+### transform
+
+HTML 요소를 여러 형태로 변형할 때 사용하는 속성으로 가장 많이 사용하는 속성에는 `scale`, `rotate`, `translate`, `skew` `origin`이 있다.
+
+#### scale
+
+요소의 크기를 변환시킬 때 사용하는 속성으로 마치 위에 예시에서 width와 height의 크기를 늘린 것처럼 변형이 되지만 기본으로는 중심점이 가운데이기 때문에 가운데를 중심으로 커지는 효과를 나타낸다.  
+scale의 값에는 2가지 인자(x축, y축)를 받을 수 있다. 한 개의 인자값만 입력할 경우 x, y 동일한 수치를 뜻한다.
+
+#### rotate
+
+`rotate`는 회전을 시켜주는 값이다. 괄호 안에 각도를 입력하면 입력값만큼 회전을 하며, 사용 단위는 **deg(degree)**를 사용한다.  
+360deg 한 바퀴를 뜻하기에 `transform: rotate(1turn)`으로도 사용이 가능하다.
+
+#### translate
+
+`translate(옮기다)`는 Object를 x, y축 지점으로 이동을 시켜주는 값으로 (x축, y축)을 뜻한다.  
+기준점은 가운데이며 값이 증가할 시 x축은 오른쪽으로 y축은 아래 방향으로 이동한다.  
+음수 값을 적용시 반대 방향으로 이동한다.
+
+#### skew
+
+`skew(왜곡하다)`는 상자를 비틀기 또는 외곡을 주어 형태를 변형시키는 속성이다. 사용 단위는 **deg(degree)** 단위를 사용한다.
+
+#### transform-origin
+
+transform되는 Object의 기준점을 변경할 때 사용된다.  
+default값은 가운데이지만 `transform-origin`을 사용하여 left, right, top, bottom, center, 숫자 등으로 기준점을 설정할 수 있다.
+
+#### translate vs position
+
+- 브라우저의 부담을 덜기 위해서 GPU(Graphic Processing Unit)를 이용한 그래픽 가속능력을 사용할 수 있는데 이러한 능력을 지원하는 css 속성이 바로 transform이다.
+  - GPU는 여러 개의 코어가 간단한 작업을 동시에 협업하는데 특화되어 있기 때문에 애니메이션을 빠르게 처리할 수 있다.
+- 결론: 정적인 사이트에서 요소의 위치를 단순 배치하는 것은 position을 사용해도 괜찮지만, 애니메이션이나 혹은 동적으로 요소의 위치를 이동해야 하는 경우 transform 속성을 사용하는 것이 성능에 좋다.
+
+## CSS Animation 애니메이션
+
+### Keyframe
+
+어떤 변화가 일어나는 지점을 설정하여 특정 시간 동안 해당 Property와 Value를 변화시킨다.
+
+#### transition과 animation의 차이점
+
+- transition과 animation 속성은 JavaScript의 도움 없이 오브젝트에 직접 애니메이션 효과를 적용할 때 사용한다.
+  - transition과 animation은 `요소 상태에 대한 의존 여부`에 대해 차이를 가진다.
+  - transition은 요소의 상태가 변경되어야 애니메이션을 실행할 수 있지만,
+  - animation 속성은 요소의 상태 변화와 관계없이 애니메이션을 실행할 수 있다.
+    - 또한, animation 속성은 `@keyframe` 속성을 이용해 프레임을 추가할 수 있다.
+
+### animation의 단일 속성들
+* `animation-name`: 애니메이션을 재생(호출)하기 위해서 반드시 이름 정의
+  * 이름 규칙: **영문 소문자, 숫자 문자열, 언더바(_), 하이픈(-)**을 사용한다. 영문 대문자, 숫자, 특수문자는 사용할 수 없다.
+  * 여러 개의 animation-name을 동시에 나열할 경우 `,`를 사용한다.
+  
