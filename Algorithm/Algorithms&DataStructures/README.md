@@ -22,7 +22,7 @@
   - [BubbleSort 최적화](#bubblesort-최적화)
   - [Big O of BubbleSort](#big-o-of-bubblesort)
 - [선택 정렬(Selection Sort)](#선택-정렬selection-sort)
-  - [Selection Sort Pseudocode](#selection-sort-pseudocode )
+  - [Selection Sort Pseudocode](#selection-sort-pseudocode)
   - [Big O of Selection Sort](#big-o-of-selection-sort)
 - [삽입 정렬(Insertion Sort)](#삽입-정렬insertion-sort)
   - [Insertion Sort Pseudocode](#insertion-sort-pseudocode)
@@ -532,46 +532,483 @@ Builds up the sort by gradually creating a larger left half which always sorted.
 - Repeat until the array is sorted
 
 ```js
-function insertionSort(arr) {
+function insertSort(arr) {
+  // 두 번째 요소부터 시작
   for (let i = 1; i < arr.length; i++) {
+    // 앞에 있는 요소보다 작으면 swap하고 또 그 앞에 있는 요소와 비교, 아니면 그대로 두고 끝
     let currentVal = arr[i];
     let j;
-
+    // arr[j]가 currentVal보다 작은 시점에서 루프가 종료되도록 조건문 설정
     for (j = i - 1; j >= 0 && arr[j] > currentVal; j--) {
-      arr[j + 1] = arr[j];
+      arr[j + 1] = arr[j]; // swap
     }
+    arr[j + 1] = currentVal; // j-- 이후 루프를 빠져나오기 때문에 j + 1을 해줘야 한다.
+  }
+}
+```
 
-    arr[j + 1] = currentVal;
+### Big O of Insertion Sort
+
+- 거의 정렬된 상태에서는 효과가 좋지만 [4, 3, 2, 1] 같은 경우느 최악의 경우이다.
+- 온라이넹서 실시간으로 번호를 제출하는 코드가 있고 이를 받아서 정렬한다고 가정할 때,
+  - 삽입 정렬은 한 부분을 정렬된 배열로 유지하고,
+  - 한 번씩 항목을 삽입하여 작동하기 때문에 어떤 숫자가 입력되더라도 필요한 위치에 놓으면 효율성이 좋다.
+
+## 합병 정렬(Merge Sort)
+
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms%26DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0%26%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%983.md#13-%ED%95%A9%EB%B3%91-%EC%A0%95%EB%A0%AC)
+
+- It's a combination of two things - merging and sorting!
+- Exploits the fact that arrays of 0 or 1 element are always sorted
+- Works by decomposing an array into smaller arrays of 0 or 1 elements, then building up a newly sorted array
+
+### Merging Arrays
+
+- Create an empty array, take a look at the smallest values in each input array
+- While there are still values we haven't looked at...
+  - If the value in the first array is smaller than the value in the second array, push the value in the first array our results and move on to the next value in the first array
+  - If the value in the first array is larger than the value in the second array, push the value in the second array into our results and move on to the next avlue in the second array
+  - Once we exhaust one array, push in all remaing values from the other array
+
+```js
+function merge(arr1, arr2) {
+  let results = [];
+  let i = 0;
+  let j = 0;
+
+  while (i < arr1.length && j < arr2.length) {
+    if (arr2[j] > arr1[i]) {
+      results.push(arr1[i]);
+      i++;
+    } else {
+      results.push(arr2[j]);
+      j++;
+    }
+  }
+
+  while (i < arr1.length) {
+    results.push(arr1[i]);
+    i++;
+  }
+  while (j < arr2.length) {
+    results.push(arr2[j]);
+    j++;
+  }
+
+  return results;
+}
+```
+
+### mergeSort
+
+- Break up the array into halves until you have arrays that are empty or have one element
+- Once you have smaller sorted arrays, merge those arrays with other sorted arrays until you are back at the full length of the array
+- Once the array has been merged back together, return the merged (and sorted) array
+
+```js
+function merge(arr1, arr2) {
+  let results = [];
+  let i = 0;
+  let j = 0;
+
+  while (i < arr1.length && j < arr2.length) {
+    if (arr2[j] > arr1[i]) {
+      results.push(arr1[i]);
+      i++;
+    } else {
+      results.push(arr2[j]);
+      j++;
+    }
+  }
+
+  while (i < arr1.length) {
+    results.push(arr1[i]);
+    i++;
+  }
+  while (j < arr2.length) {
+    results.push(arr2[j]);
+    j++;
+  }
+
+  return results;
+}
+
+function mergeSort(arr) {
+  if (arr.length <= 1) return arr;
+  let mid = Math.floor(arr.length / 2);
+  let left = mergeSort(arr.slice(0, mid));
+  let right = mergeSort(arr.slice(mid));
+
+  return merge(left, right);
+}
+```
+
+### Big O of MergeSort
+
+- 입력값이 무엇이든 이미 정렬되어 있든, 거꾸로 되어 있든, 모두 무작위든 상관없이 계속 나누고 나눈 다음에 합치고 또 합친다.
+- Time Complexity
+  - Best Case - O(n log n)
+  - Average Case - O(n log n)
+  - Worst Case - O(n log n)
+- Space Complexity - O(n)
+- O(log n) decompositions \* O(n) comparsions per decomposition
+
+## 퀵 정렬(Quick Sort)
+
+- Like merge sort, exploits the fact that arrays of 0 or 1 element are always sorted
+- Works by selecting one element (called the `pivot`) and finding the index where the pivot should end up in the sorted array
+- Once the pivot is positioned approprivately, quick sort can be applied on either side ot the pivot
+
+### Pivot Helper
+
+- In order to implement merge sort, it's useful to first implement a function responsible arranging elements in an array on either side of a pivot
+- Given an array, this helper function should deginate an element as the pivot
+- It should then rearrange elements in the array so that all values less than the pivot are moved to the left of the pivot, and all values greater than the pivot are moved to the right of the pivot
+- The order of elements on either side if the pivot doesn't matter!
+- The helper should do this **in place**, that is, it should not create a new array
+- When complete, the helper should return the index of the pivot
+
+#### Picking a pivot
+
+- the runtime of quick sort depends in part on how one selects the pivot
+- Ideally, the pivot should be chosen so that it's roughly the median value in the data set you're sorting
+- For simplicity, we'll always choose the pivot to be the first element (we'll talk about consequences of this later)
+
+### Pivot
+
+- It will help to accept three arguments: an array, a start index, and an end index (these can default to 0 and the array length minus 1, respectively)
+- Grab the pivot from the start of the array
+- Store the current pivot index in a variable (this will keep track of where the pivot should end up)
+- Loop through the array from the start until the end
+- Swap the starting element (i.e. the pivot) with the pivot index
+- Return the pivot index
+
+```js
+function swap(arr, i, j) {
+  let temp = arr[i];
+  arr[i] = arr[j];
+  arr[j] = temp;
+}
+
+function pivot(arr, start = 0, end = arr.length - 1) {
+  let pivot = arr[start];
+  let swapIdx = start; // 스왑 인덱스는 피벗이 맨 마지막에 어디로 옮길지 추적
+
+  // 첫 번째 항목 뺴고 루프 수행
+  for (let i = start + 1; i < arr.length; i++) {
+    // 피벗 비교 (피벗이 해당 요소보다 클 경우 스왑!)
+    if (pivot > arr[i]) {
+      swapIdx++;
+    }
+  }
+  swap(arr, start, swapIdx);
+
+  return swapIdx;
+}
+```
+
+### QuickSort
+
+- Call the pivot helper on the array
+- When the helper returns to you the updated pivot index, recursively call the pivot helper on the subarray to the left of that index, and the subarray to the right of that index
+- Your base case occurs when you consider a subarray with less than 2 elements
+
+```js
+function quickSort(arr, left = 0, right = arr.length - 1) {
+  console.log(arr);
+  // if문 조건에 base case 설정
+  if (left < right) {
+    let pivotIndex = pivot(arr, left, right);
+
+    quickSort(arr, left, pivotIndex - 1);
+    quickSort(arr, pivotIndex + 1, right);
   }
 
   return arr;
 }
 ```
 
-### Big O of Insertion Sort
-* 거의 정렬된 상태에서는 효과가 좋지만 [4, 3, 2, 1] 같은 경우느 최악의 경우이다.
-* 온라이넹서 실시간으로 번호를 제출하는 코드가 있고 이를 받아서 정렬한다고 가정할 때,
-  * 삽입 정렬은 한 부분을 정렬된 배열로 유지하고,
-  * 한 번씩 항목을 삽입하여 작동하기 때문에 어떤 숫자가 입력되더라도 필요한 위치에 놓으면 효율성이 좋다.
+### Big O of QuickSort
 
-## 합병 정렬(Merge Sort)
+- O(log n) decompositions \* O(n) comparisions per decomposition
+  - 합병 정렬처럼 log n의 비율로 분할할 개수가 늘어나고, 각 분해하는 단계마다 O(n)번의 비교 수행을 해야 한다.
+- Worst Case - O(n^2)
+  - 데이터가 이미 정렬되어 있는 경우 가장 안좋다.
 
-> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms%26DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0%26%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%983.md#13-%ED%95%A9%EB%B3%91-%EC%A0%95%EB%A0%AC)
+## 기수 정렬(Radix Sort)
 
-* It's a combination of two things - merging and sorting!
-* Exploits the fact that arrays of 0 or 1 element are always sorted
-* Works by decomposing an array into smaller arrays of 0 or 1 elements, then building up a newly sorted array
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms%26DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0%26%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%983.md#15-%EA%B8%B0%EC%88%98-%EC%A0%95%EB%A0%ACradix-sort)
 
-### Merging Arrays
+- Radix Sort is a special sorting algorithm that works on lists of numbers
+- It never makes comparisons between elements!
+- It exploits the fact that information about the size of a number is encoded in the number of digits
+- More digits means a bigger number!
+- 비교 정렬에 비해 아주 빠르게 정렬할 수 있다.
 
-* Create an empty array, take a look at the smallest values in each input array
-* While there are still values we haven't looked at...
-  * If the value in the first array is smaller than the value in the second array, push the value in the first array our results and move on to the next value in the first array
-  * If the value in the first array is larger than the value in the second array, push the value in the second array into our results and move on to the next avlue in the second array
-  * Once we exhaust one array, push in all remaing values from the other array
+### Radix Sort Helpers
+
+- In order to implement radix sort, it's helpful to build a few helper functions first:
+
+  - getDigit(num, place) - returns the digit in num at the given place value
+    ```js
+    function getDigit(num, i) {
+      return Math.floor(Math.abs(num) / Math.pow(10, i)) % 10;
+    }
+    ```
+  - digitCount(num) - returns the number of digits in num
+    ```js
+    function digitCount(num) {
+      if (num === 1) return 1; // 0에 로그 계산(log10)을 수행하면 -Infinity를 얻는다.
+      return Math.floor(Math.log10(Math.abs(num))) + 1;
+    }
+    ```
+  - mostDigits(nums) Given an array of numbers, returns the number of digits in the largest numbers in the list
+
+    ```js
+    function mostDigits(arr) {
+      let maxDigits = 0;
+      for (let i = 0; i < arr.length; i++) {
+        maxDigits = Math.max(maxDigits, digitCount(arr[i]));
+      }
+
+      return maxDigits;
+    }
+    ```
+
+    - 재귀나 복잡한 로직을 짤 필요없이 해당 함수를 사용해서 루프를 수행해 나눈 다음 버킷에 집어넣고 다시 묶은다음 n번 반복하면 된다.
+      - n은 이 때 최대 자릿수!
+
+### Radix Sort Pseudocoe
+
+- Define a function that accepts list of numbers
+- Figure out how many digits the largest number has
+- Loop from k = 0 up to this largest number of digits
+- For each iteration of the loop:
+  - Create buckets for each digit (0 to 9)
+  - Place each number in the corresponding bucket based on its _kth_ digit
+
+### Radix Sort Implement
 
 ```js
-function mergeArrays(arr1, arr2) {
-  
+function getDigits(num, i) {
+  return Math.floor(Math.abs(num) / Math.pow(10, i)) % 10;
+  // i가 0일 때 1의 자릿수를 반환한다. 따라서 자릿수 개수 이상되면 0 반환.
+}
+
+function digitCount(num) {
+  return Math.floor(Math.log10(Math.abs(num))) + 1;
+}
+
+function mostDigits(nums) {
+  let maxDigits = 0;
+  for (let i = 0; i < nums.length; i++) {
+    maxDigits = Math.max(maxDigits, digitCount(nums[i]));
+  }
+  return maxDigits;
+}
+
+function radixSort(nums) {
+  let maxDigitCount = mostDigits(nums);
+
+  for (let k = 0; k < maxDigitCount; k++) {
+    let digitBuckets = Array.from({ length: 10 }, () => []); // 2차원 배열(Bucket 만들기)
+
+    for (let i = 0; i < nums.length; i++) {
+      let digit = getDigits(nums[i], k);
+      digitBuckets[digit].push(nums[i]);
+    }
+    console.log(digitBuckets);
+    nums = [].concat(...digitBuckets);
+  }
+
+  return nums;
 }
 ```
+
+## 단방향 연결 리스트(Singly Linked Lists)
+
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms%26DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0%26%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%983.md#17-%EB%8B%A8%EB%B0%A9%ED%96%A5-%EC%97%B0%EA%B2%B0-%EB%A6%AC%EC%8A%A4%ED%8A%B8singly-linked-lists)
+
+- A data structure that contains a head, tail and length property.
+- Linked Lists consist of nodes, and each node has a value and a pointer to another node or null.
+
+### Comparisons with Arrays
+
+- **Lists**
+  - Do not have indexes!
+  - Connected via `nodes` with **a next pointer**
+  - Random access is not allowed(열 번째 항목이 필요한 경우 바로 그 값을 얻을 수 없다는 의미)
+- **Arrays**
+  - Indexed in order!
+  - Insertion and deletion can be expensive
+  - Can quickly be accessed at a specific index(인덱스 접근이 빠름)
+
+### Singly Linked Lists Implement
+
+```js
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.next = null;
+  }
+}
+
+class SinglyLinkedList {
+  constructor() {
+    this.head = null;
+    this.tail = null;
+    this.length = 0;
+  }
+
+  push(value) {
+    const newNode = new Node(value);
+
+    if (!this.head) {
+      this.head = newNode;
+      this.tail = newNode;
+    } else {
+      // 두 번째부터 새 노드를 tail의 next를 가리키게 하고, tail을 새 노드로 업데이트
+      this.tail.next = newNode;
+      this.tail = newNode;
+    }
+    this.length++;
+
+    return this;
+  }
+
+  pop() {
+    if (!this.head) return undefined; // 노드가 없는 경우
+    let current = this.head;
+    let newTail = current;
+
+    while (current.next) {
+      newTail = current; // current가 마지막 노드가 될 때 newTail은
+      current = current.next;
+    }
+    this.tail = newTail;
+    this.tail.next = null;
+    this.length--;
+
+    if (this.length === 0) {
+      this.head = null;
+      this.tail = null;
+    }
+
+    return current; // 마지막 노드 반환
+  }
+
+  shift() {
+    if (!this.head) return undefined;
+
+    let currentHead = this.head;
+    this.head = currentHead.next;
+    currentHead.next = null;
+    this.length--;
+    if (this.length === 0) this.tail = null;
+
+    return currentHead;
+  }
+
+  unshift(value) {
+    const newNode = new Node(value);
+
+    if (!this.head) {
+      this.head = newNode;
+      this.tail = newNode;
+    } else {
+      newNode.next = this.head;
+      this.head = newNode;
+    }
+    this.length++;
+
+    return this;
+  }
+
+  get(index) {
+    if (index < 0 || index >= this.length) return null;
+
+    let counter = 0;
+    let current = this.head;
+    while (counter !== index) {
+      current = current.next;
+      counter++;
+    }
+
+    return current;
+  }
+
+  set(index, value) {
+    const foundNode = this.get(index);
+
+    if (foundNode) {
+      foundNode.value = value;
+      return true;
+    }
+    // null 반환하면
+    return false;
+  }
+
+  insert(index, value) {
+    if (index < 0 || index > this.length) return false;
+    if (index === this.length) return !!this.push(value);
+    if (index === 0) return !!this.unshift(value); // true로 치환하기 위해 !! 사용
+
+    const newNode = new Node(value);
+    let prevNode = this.get(index - 1); // index - 1 해줘야 원하는 index에 노드가 삽입된다.
+    let nextNode = prevNode.next;
+    prevNode.next = newNode;
+    newNode.next = nextNode;
+    this.length++;
+
+    return true;
+  }
+
+  remove(index) {
+    if (index < 0 || index >= this.length) return undefined;
+    if (index === 0) return this.shift();
+    if (index === this.length - 1) return this.pop();
+
+    const prevNode = this.get(index - 1);
+    const removed = prevNode.next;
+    prevNode.next = removed.next;
+    removed.next = null;
+    this.length--;
+
+    return removed;
+  }
+
+  reverse() {
+    // head와 tail swap!
+    let node = this.head;
+    this.head = this.tail;
+    this.tail = node;
+    let next;
+    let prev = null;
+
+    for (let i = 0; i < this.length; i++) {
+      next = node.next;
+      node.next = prev;
+      prev = node;
+      node = next;
+    }
+
+    return this;
+  }
+}
+
+const list = new SinglyLinkedList();
+list.push("a");
+list.push("b");
+list.push("c");
+list.push("d");
+```
+
+### Big O of Singly Linked Lists
+
+- Insertion - O(1)
+- Removal - It depends on... O(1) or O(n)
+- Searching - O(n)
+- Access - O(n)
+- 단방향 연결 리스트가 삽입과 삭제의 경우 배열에 비해 우수하기 때문에 그러한 작업을 주로 해야 한다거나, 임의 접근 작업이 필요없다거나, 주어진 순서대로 데이터를 관리할 필요가 있는 경우, 배열 보다는 단방향 연결 리스트가 적절하다고 할 수 있다.
+
+## 이중 연결 리스트(Doubly Linked Lists)
