@@ -1,17 +1,31 @@
-/* Reset */
-article, h2, p, form {
-  margin: 0;
-  padding: 0;
+@import url(./reset.css);
+
+@font-face {
+  font-family: 'Spoqa Han Sans Neo';
+  src: url(./img/fonts/SpoqaHanSansNeo-Medium.otf);
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'Spoqa Han Sans Neo';
+  src: url(./img/fonts/SpoqaHanSansNeo-Regular.otf);
+  font-weight: 400;
+}
+
+/* 상속으로 할 수 있는 것은 body를 통해 상속이 되게! */
+body {
+  font-family: 'Spoqa Han Sans Neo';
+  font-weight: 400;
+  line-height: 15px;
+  font-size: 12px;
+}
+
+/* 상속이 안되는 box-sizing은 asterisk로! */
+* {
   box-sizing: border-box;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* Components */
-.blind {
+.txt-blind {
   position: absolute;
   clip: rect(0 0 0 0);
   width: 1px;
@@ -20,6 +34,94 @@ a {
   overflow: hidden;
 }
 
+/* clear-fix -> 가상요소로 float 공간 인식하게 하기 */
+.clearFix::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+/* Components */
+.cont-login {
+  width: 350px;
+  margin: 20px auto;
+  padding: 18px 15px 17px;
+  border: 1px solid #dbdbdb;
+  border-radius: 5px;
+}
+
+
+.cont-login .txt-login {
+  margin-bottom: 16px;
+}
+
+.cont-login .link-login {
+  display: block;
+  padding: 13px 20px 12px;
+  margin-bottom: 17px;
+  background-color: #711bff;
+  border-radius: 4px;
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  font-weight: 500;
+}
+
+.link-login .img-login {
+  width: 57px;
+  height: 11px;
+  margin-right: 6px;
+}
+
+.cont-login .find {
+  float: left;
+}
+
+.cont-login .join {
+  float: right;
+  margin-right: 2px;
+}
+
+/* inline이라 개행마다 공간이 생기고, vertical-align이 baseline인데 */
+/* float 속성을 줘서 .find 아래 요소들을 블록레벨로 만들어 개행이나 baseline을 없애준다. */
+.cont-login .find * {
+  float: left;
+}
+
+.cont-login .join * {
+  float: left;
+}
+
+.cont-login .img-find,
+.cont-login .img-join {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
+.find [class^=link],
+.join [class^=link] {
+  color: #767676;
+  text-decoration: none;
+}
+
+
+
+.find .link-id::after {
+  display: inline-block;
+  content: ''; /* content가 넣으면 스크린리더가 읽어버릴 수도 있다. */
+  width: 1px;
+  height: 11px;
+  background-color: #767676;
+  margin: 0 5px 0 6px;
+  vertical-align: -1px;
+}
+
+
+
+
+
+/* 밑에는 리팩토링 전 */
 /* Wrapper */
 .login-wrapper {
   position: absolute;
