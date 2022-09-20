@@ -1012,3 +1012,522 @@ list.push("d");
 - 단방향 연결 리스트가 삽입과 삭제의 경우 배열에 비해 우수하기 때문에 그러한 작업을 주로 해야 한다거나, 임의 접근 작업이 필요없다거나, 주어진 순서대로 데이터를 관리할 필요가 있는 경우, 배열 보다는 단방향 연결 리스트가 적절하다고 할 수 있다.
 
 ## 이중 연결 리스트(Doubly Linked Lists)
+
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms%26DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0%26%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%983.md#18-%EC%9D%B4%EC%A4%91-%EC%97%B0%EA%B2%B0-%EB%A6%AC%EC%8A%A4%ED%8A%B8doubly-linked-lists)
+
+- Singly Linked Lists에서 뒤를 가리키는 포인터도 있다!
+  - But, **More memory === More Flexibility**
+
+```js
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.next = null;
+    this.prev = null;
+  }
+}
+
+class DoublyLinkedLists {
+  constructor() {
+    this.head = null;
+    this.tail = null;
+    this.length = 0;
+  }
+
+  push(value) {
+    const newNode = new Node(value);
+
+    if (!this.head) {
+      this.head = newNode;
+      this.tail = newNode;
+    } else {
+      this.tail.next = newNode;
+      newNode.prev = this.tail;
+      this.tail = newNode;
+    }
+    this.length++;
+
+    return this;
+  }
+
+  pop() {
+    if (!this.head) return undefined;
+
+    const poppedNode = this.tail;
+    if (this.length === 1) {
+      this.head = null;
+      this.tail = null;
+    } else {
+      this.tail = poppedNode.prev;
+      this.tail.next = null;
+      poppedNode.prev = null;
+    }
+    this.length--;
+
+    return poppedNode;
+  }
+
+  shift() {
+    if (!this.length === 0) return undefined;
+
+    const oldHead = this.head;
+    if (this.length === 1) {
+      this.head = null;
+      this.tail = null;
+    } else {
+      this.head = oldHead.next;
+      this.head.prev = null;
+      oldHead.next = null;
+    }
+    this.length--;
+
+    return oldHead;
+  }
+
+  unshift(value) {
+    const newNode = new Node(value);
+
+    if (!this.head) {
+      this.head = newNode;
+      this.tail = newNode;
+    } else {
+      this.head.prev = newNode;
+      newNode.next = this.head;
+      this.head = newNode;
+    }
+    this.length++;
+
+    return this;
+  }
+
+  get(index) {
+    if (index < 0 || index >= this.length) return null;
+
+    // this.length / 2가 index보다 크면 왼쪽부터, 아니면 오른쪽부터
+    let count, current;
+    if (index <= this.length / 2) {
+      count = 0;
+      current = this.head;
+      while (count !== index) {
+        current = current.next;
+        count++;
+      }
+    } else {
+      count = this.length - 1;
+      current = this.tail;
+      while (count !== index) {
+        current = current.prev;
+        count--;
+      }
+    }
+
+    return current;
+  }
+
+  set(index, value) {
+    const foundNode = this.get(index);
+    if (foundNode) {
+      foundNode.value = value;
+      return true;
+    }
+
+    return false; // get(index)에서 null 반환하면 false 반환
+  }
+
+  insert(index, value) {
+    if (index < 0 || index > this.length) return false;
+    if (index === 0) return !!this.unshift(value);
+    if (index === this.length) return !!this.push(value);
+
+    const newNode = new Node(value);
+    const beforeNode = this.get(index - 1); // 중간에 넣어야하기 때문에 index - 1
+    const afterNode = beforeNode.next;
+    // beforeNode와 newNode 관계
+    beforeNode.next = newNode;
+    newNode.prev = beforeNode;
+    // afterNode와 newNode 관계
+    afterNode.prev = newNode;
+    newNode.next = afterNode;
+    this.length++;
+
+    return true;
+  }
+
+  remove(index) {
+    if (index < 0 || index >= this.length) return undefined;
+    if (index === 0) return this.shift();
+    if (index === this.length - 1) return this.pop();
+
+    const removedNode = this.get(index);
+    const beforeNode = removedNode.prev;
+    const afterNode = removedNode.next;
+    // beforeNode와 afterNode 관계
+    beforeNode.next = afterNode;
+    afterNode.prev = beforeNode;
+    removedNode.next = null;
+    removedNode.prev = null;
+    this.length--;
+
+    return removedNode;
+  }
+}
+```
+
+### Big O of Doubly Linked Lists
+
+- Insertion - O(1)
+- Removal - O(1)
+- Searching - O(n)
+- Access - O(n)
+- Technically Searching is `O(n/2)`, but that's still `O(n)`
+
+## 스택(Stack)과 큐(Queues)
+
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms%26DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0%26%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%984.md#19-%EC%8A%A4%ED%83%9Dstack%EA%B3%BC-%ED%81%90queues)
+
+### Stack
+
+- A **LIFO** Data Structure
+  - The last element added to the stack will be the first element removed from the stack
+
+```js
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.next = null;
+  }
+}
+
+class Stack {
+  constructor() {
+    this.first = null;
+    this.last = null;
+    this.size = 0;
+  }
+
+  push(value) {
+    const newNode = new Node(value);
+
+    if (!this.first) {
+      this.first = newNode;
+      this.last = newNode;
+    } else {
+      const temp = this.first;
+      this.first = newNode;
+      newNode.next = temp;
+    }
+
+    return ++this.size;
+  }
+
+  pop() {
+    if (!this.first) return null;
+
+    const poppedNode = this.first;
+    if (this.first === this.last) {
+      this.last = null;
+    }
+    this.first = this.first.next;
+    this.size--;
+
+    return poppedNode.value;
+  }
+}
+```
+
+### Big O of Stacks
+
+- Insertion - O(1)
+- Removal - O(1)
+- Searching - O(n)
+- Access - O(n)
+
+### Queue
+
+- A **FIFO** Data Structure
+  - Queues are useful for processing tasks and are foundational for complex data structures
+
+```js
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.next = null;
+  }
+}
+
+class Queue {
+  constructor() {
+    this.first = null;
+    this.last = null;
+    this.size = 0;
+  }
+
+  enqueue(value) {
+    const newNode = new Node(value);
+    if (!this.first) {
+      this.first = newNode;
+      this.last = newNode;
+    } else {
+      this.last.next = newNode;
+      this.last = newNode;
+    }
+
+    return ++this.size;
+  }
+
+  dequeue() {
+    if (!this.first) return null;
+
+    const dequeuedNode = this.first;
+    if (this.first === this.last) {
+      this.last = null;
+    }
+    this.first = this.first.next;
+    this.size--;
+
+    return dequeuedNode.value;
+  }
+}
+```
+
+### Big O of Queues
+
+- Insertion - O(1)
+- Removal - O(1)
+- Searching - O(n)
+- Access - O(n)
+- Insertion and Removal can done in **O(1)**
+
+## 이진 검색 트리(Binary Search Tree)
+
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms&DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0&%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%984.md#20-%EC%9D%B4%EC%A7%84-%EA%B2%80%EC%83%89-%ED%8A%B8%EB%A6%ACtrees)
+
+### What is a Tree?
+
+- A data structure that consists of nodes in a **parent / child** relationship
+  - **Lists** - linear(선형 구조)
+  - **Trees** - nonlinear(비선형 구조)
+- Tree Terminology
+  - **Root** - The top node in a tree
+  - **Child** - A node directly connected to another node when moving away from the Root
+  - **Parent** - The converse notion of a child
+  - **Siblings** - A group of nodes with the same parent
+  - **Leaf** - A node with no children
+  - **Edge** - The connection between one node and another
+
+### Kinds of Trees
+
+- Trees - 자식이 몇 개든 상관X
+- Binary Trees - 각 노드가 최대 두 개의 자식을 가져야 하는 특별한 조건이 있다.
+- Binary Search Trees - 특별한 방식으로 데이터가 순서대로 정렬된 이진 트리의 종류 중 하나
+  - Every parent node has at most **two** children
+  - Every node to the left of a parent node is **always less** than the parent
+  - Every node to the right of a parent node is **always greater** than the parent
+
+### Binary Search Tree
+
+```js
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.left = null;
+    this.right = null;
+  }
+}
+class BinarySearchTree {
+  constructor() {
+    this.root = null;
+  }
+
+  insert(value) {
+    const newNode = new Node(value);
+
+    if (!this.root) {
+      this.root = newNode;
+      return this;
+    } else {
+      let current = this.root;
+      while (true) {
+        if (value === current.value) return undefined;
+        if (value < current.value) {
+          // 현재 위치한 노드의 왼쪽 자식에 노드가 없는 경우
+          if (!current.left) {
+            current.left = newNode;
+            return this;
+          }
+          // 현재 위치한 노드의 왼쪽 자식에 노드가 있는 경우
+          current = current.left;
+        } else {
+          // 현재 위치한 노드의 오른쪽 자식에 노드가 없는 경우
+          if (!current.right) {
+            current.right = newNode;
+            return this;
+          }
+          // 현재 위치한 노드의 오른쪽 자식에 노드가 있는 경우
+          current = current.right;
+        }
+      }
+    }
+  }
+
+  find(value) {
+    if (this.root === null) return false;
+    let current = this.root;
+    let found = false;
+
+    while (current && !found) {
+      if (value < current.value) {
+        current = current.left;
+      } else if (value > current.value) {
+        current = current.right;
+      } else {
+        found = true;
+      }
+    }
+    if (!found) return false;
+
+    return current;
+  }
+
+  // true, false 값만 반환하는 메서드
+  contains(value) {
+    if (this.root === null) return false;
+    let current = this.root;
+    let found = false;
+
+    while (current && !found) {
+      if (value < current.value) {
+        current = current.left;
+      } else if (value > current.value) {
+        current = current.right;
+      } else {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+```
+
+### Big O of Binary Search Trees
+
+- Insertion - **O(log n)**
+- Searching - **O(log n)**
+- 이미 데이터를 insert할 때 O(log n)으로 위치를 찾아 정렬하기 때문에 Search할 때도 O(log n) 시간 복잡도로 데이터를 찾는다.
+- **But, NOT guaranteed**
+  - 이진 탐색 트리는 평균적인 경우와 최고의 경우에 트리가 가지는 시간 복잡도는 O(log n)이다.
+  - 최악의 경우
+    - 3 -> 17 -> 19 -> 32 -> 34 -> 86 -> 91 -> ...로 리스트처럼 한쪽으로 가지가 치우진 경우
+    - 그러면 완전히 한 쪽으로 쏠린 트리에 대해서 **O(n)**의 값을 가지게 된다.
+
+## 트리 순회(Traversing a Tree)
+
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms&DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0&%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%984.md#21-%ED%8A%B8%EB%A6%AC-%EC%88%9C%ED%9A%8C)
+
+### Two Ways of Traversing a Tree
+
+- Breath-first Search(너비 우선 탐색)
+- Depth-first Search(깊이 우선 탐색)
+  - InOrder(중위 순회)
+  - PreOrder(전위 순회)
+  - PostOrder(후위 순회)
+
+### Breath-first Search(너비 우선 탐색)
+
+```js
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.left = null;
+    this.right = null;
+  }
+}
+
+class BinarySearchTree {
+  constructor() {
+    this.root = null;
+  }
+
+  BFS() {
+    let node = this.root;
+    const data = [];
+    const queue = [];
+    queue.push(node);
+
+    while (queue.length) {
+      node = queue.shift();
+      data.push(node);
+      if (node.left) queue.push(node.left);
+      if (node.right) queue.push(node.right);
+    }
+
+    return data;
+  }
+}
+```
+
+### Depth-first Search(깊이 우선 탐색)
+
+```js
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.left = null;
+    this.right = null;
+  }
+
+  DFSPreOrder() {
+    const data = [];
+    let current = this.current;
+    function traverse(node) {
+      data.push(node);
+      if (node.left) traverse(node.left);
+      if (node.right) treverse(node.right);
+    }
+    traverse(current);
+
+    return data;
+  }
+
+  DFSPostOrder() {
+    const data = [];
+
+    function traverse(node) {
+      if (node.left) traverse(node.left);
+      if (node.right) traverse(node.right);
+      data.push(data.value);
+    }
+    traverse(this.root);
+
+    return data;
+  }
+
+  DFSInorder() {
+    const data = [];
+
+    function traverse(node) {
+      node.left && traverse(node.left); // if문 다르게 표현
+      data.push(node);
+      node.right && traverse(node.right);
+    }
+    traverse(this.root);
+
+    return data;
+  }
+}
+```
+
+### BFS? DFS? Which is better?
+
+#### **BFS**
+  * 100 레벨 정도 깊이 내려가야 하는 경우나 트리가 리스트처럼 한 쪽으로 치우진 경우를 생각하면 BFS에서 큐에 엄청난게 많은 데이터가 저장되기 떄문에 무리일 수 있다.
+#### **DFS**
+  * **InOrder** - 트리에 있는 모든 노드들을 오름차순으로 구할 수 있다.
+  * **PreOrder** - 트리를 복사하거나 Linear시켜 저장하는 경우(파일이나 DB에 저장하기 위해) 다시 연쇄 구조로 만들어 낼 때 도움이 된다.
+
+### 이진 힙(Binary Heaps)
+
+> 자세히 보기[https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms&DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0&%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%984.md#22-%EC%9D%B4%EC%A7%84-%ED%9E%99binary-heaps]
+
+#### What is a binary
