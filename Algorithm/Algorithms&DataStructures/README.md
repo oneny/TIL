@@ -69,7 +69,23 @@
 - [해시 테이블(Hash Table)](#해시-테이블hash-table)
   - [Big O of Hash Tables](#big-o-of-hash-tables)
 - [그래프(Graph)](#그래프graph)
-
+  - [Essential Graph Terms](#essential-graph-terms)
+  - [Differences between Adjacency List and Adjancency Matrix](#differences-between-adjacency-list-and-adjancency-matrix)
+  - [Graph](#graph)
+- [그래프 순회(Traversing a Graph)](#트리-순회traversing-a-tree)
+  - [DFS & BFS](#dfs--bfs)
+- [다익스트라 알고리즘(Dijkstra's Algorithm)](#다익스트라-알고리즘dijkstras-algorithm)
+  - [Write a Weighted Graph](#write-a-weighted-graph)
+  - [The Approach](#the-approach)
+  - [Dijkstra's Pseudocode](#dijkstras-pseudocode)
+  - [Dijkstra's Algorithm Implement](#dijkstras-algorithm-implement)
+  - [Upgrade PriorityQueue](#upgrade-priorityqueue)
+- [동적 프로그래밍(Dynamic Programming)](#동적-프로그래밍dynamic-programming)
+  - [Overlapping SubProblems(중복되는 하위문제)](#overlapping-subproblems중복되는-하위문제)
+  - [Optimal SubStructure(최적 부분 구조)](#optimal-substructure최적-부분-구조)
+  - [Enter Dynamic Programming](#enter-dynamic-programming)
+  - [Memorization](#memorization)
+  - [타뷸레이션(Tabulation): 상향식 접근](#타뷸레이션tabulation-상향식-접근)
 ## 문제 해결 패턴
 
 ### 빈도수 세기(Frequency Counters)
@@ -2143,6 +2159,7 @@ g.addEdge("D", "F");
 g.addEdge("E", "F");
 g.depthFirstRecursive("A"); // ["A", "B", "D", "E", "C", "F"]
 g.depthFirstIterative("A"); // ["A", "C", "E", "F", "D", "B"]
+g.breathFirst("A"); // ["A", "B", "C", "D", "E", "F"]
 ```
 
 ## 다익스트라 알고리즘(Dijkstra's Algorithm)
@@ -2203,6 +2220,8 @@ class WeightedGraph {
       - Update the distance object with new lower distance(같은 정점을 새로운 더 짧은 거리로 업데이트)
       - Update the previous object to contain that vertex
       - enqueue the vertex with the total distance from the start node
+
+### Dijkstra's Algorithm Implement
 
 ```js
 class SimplePQ {
@@ -2439,7 +2458,7 @@ function fibonacci(n) {
   * 핵심은 `What if we could "remember" old value?`이다!
   * 계산했던 값을 기억할 수 있또록 만드는 것이 동적 프로그램의 핵심!
 
-#### Memorization
+### Memorization
 
 Storing the results of expensive function calls and returning the cached result when the same inputs occur again
 
@@ -2459,7 +2478,7 @@ function fib(n, memo = []) {
   * 그리고 다시 fib(5)에 접근할 필요가 있을 때 memo에 저장했기 때문에 상수값의 시간을 가진다.
   * 따라서, n이 커짐에 알고리즘을 실행하는데 걸리는 시간은 O(n)이다.
 
-#### 타뷸레이션(Tabulation): 상향식 접근
+### 타뷸레이션(Tabulation): 상향식 접근
 
 * Storing the result of a previous result in a "table" (usually an array)
   * Usually done using **iteraion**
