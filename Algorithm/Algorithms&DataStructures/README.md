@@ -28,6 +28,47 @@
   - [Insertion Sort Pseudocode](#insertion-sort-pseudocode)
   - [Big O of Insertion Sort](#big-o-of-insertion-sort)
 - [합병 정렬(Merge Sort)](#합병-정렬merge-sort)
+  - [Merging Arrays](#merging-arrays)
+  - [mergeSort](#mergesort)
+  - [Big O of MergeSort](#big-o-of-mergesort)
+- [퀵 정렬(Quick Sort)](#퀵-정렬quick-sort)
+- [Pivot Helper](#pivot-helper)
+- [Picking a pivot](#picking-a-pivot)
+- [Pivot](#pivot)
+- [QuickSort](#quicksort)
+- [Big O of QuickSort](#big-o-of-quicksort)
+- [기수 정렬(Radix Sort)](#기수-정렬radix-sort)
+  - [Radix Sort Helpers](#radix-sort-helpers)
+  - [Radix Sort Pseudocoe](#radix-sort-pseudocoe)
+  - [Radix Sort Implement](#radix-sort-implement)
+- [단방향 연결 리스트(Singly Linked Lists)](#단방향-연결-리스트singly-linked-lists)
+  - [Comparisons With Arrays](#comparisons-with-arrays)
+  - [Singly Linked Lists Implement](#singly-linked-lists-implement)
+  - [Big O of Singly Linked Lists](#big-o-of-singly-linked-lists)
+- [이중 연결 리스트(Doubly Linked Lists)](#이중-연결-리스트doubly-linked-lists)
+  - [Big O of Doubly Linked Lists](#big-o-of-doubly-linked-lists)
+- [스택(Stack)과 큐(Queues)](#스택stack과-큐queues)
+  - [Stack](#stack)
+  - [Big O of Stacks](#big-o-of-stacks)
+  - [Queue](#queue)
+  - [Big O of Queues](#big-o-of-queues)
+- [이진 검색 트리(Binary Search Tree)](#이진-검색-트리binary-search-tree)
+  - [What is a Tree?](#what-is-a-tree)
+  - [Kinds of Trees](#kinds-of-trees)
+  - [Binary Search Tree](#binary-search-tree)
+  - [Big O of Binary Search Trees](#big-o-of-binary-search-trees)
+- [트리 순회(Traversing a Tree)](#트리-순회traversing-a-tree)
+  - [Two Ways of Traversing a Tree](#two-ways-of-traversing-a-tree)
+  - [Breath-first Search(너비 우선 탐색)](#breath-first-search너비-우선-탐색)
+  - [Depth-first Search(깊이 우선 탐색)](#depth-first-search깊이-우선-탐색)
+  - [BFS? DFS? Which is better?](#bfs-dfs-which-is-better)
+- [이진 힙(Binary Heaps)](#이진-힙binary-heaps)
+  - [Max Binary Heap](#max-binary-heap)
+  - [Priority Queue](#priority-queue)
+  - [Big O of Binary Heap](#big-o-of-binary-heap)
+- [해시 테이블(Hash Table)](#해시-테이블hash-table)
+  - [Big O of Hash Tables](#big-o-of-hash-tables)
+- [그래프(Graph)](#그래프graph)
 
 ## 문제 해결 패턴
 
@@ -1465,6 +1506,14 @@ class BinarySearchTree {
     return data;
   }
 }
+const tree = new BinarySearchTree();
+tree.insert(10);
+tree.insert(6);
+tree.insert(15);
+tree.insert(3);
+tree.insert(8);
+tree.insert(20);
+tree.BFS(); // [10, 6, 15, 3, 8, 20]
 ```
 
 ### Depth-first Search(깊이 우선 탐색)
@@ -1476,14 +1525,48 @@ class Node {
     this.left = null;
     this.right = null;
   }
+}
+
+class BinarySearchTree {
+  constructor() {
+    this.root = null;
+  }
+
+  insert(value) {
+    const newNode = new Node(value);
+
+    if (!this.root) {
+      this.root = newNode;
+      return this;
+    } else {
+      let current = this.root;
+      while (true) {
+        if (value === current.value) return undefined;
+        if (value < current.value) {
+          if (!current.left) {
+            current.left = newNode;
+            return this;
+          }
+          current = current.left;
+        } else {
+          if (!current.right) {
+            current.right = newNode;
+            return this;
+          }
+          current = current.right;
+        }
+      }
+    }
+  }
 
   DFSPreOrder() {
     const data = [];
-    let current = this.current;
+
+    let current = this.root; // 사용자가 시작하기를 원하는 노드가 있는 경우 current 변수 사용
     function traverse(node) {
       data.push(node);
       if (node.left) traverse(node.left);
-      if (node.right) treverse(node.right);
+      if (node.right) traverse(node.right);
     }
     traverse(current);
 
@@ -1496,7 +1579,7 @@ class Node {
     function traverse(node) {
       if (node.left) traverse(node.left);
       if (node.right) traverse(node.right);
-      data.push(data.value);
+      data.push(node.value); // 노드의 값만 가져오고 싶으면 node.value
     }
     traverse(this.root);
 
@@ -1516,18 +1599,885 @@ class Node {
     return data;
   }
 }
+
+const tree = new BinarySearchTree();
+tree.insert(10);
+tree.insert(6);
+tree.insert(15);
+tree.insert(3);
+tree.insert(8);
+tree.insert(20);
+tree.DFSPreOrder(); // [10, 6, 3, 8, 15, 20]
+tree.DFSPostOrder(); // [3, 8, 6, 20, 15, 10]
+tree.DFSInOrder(); // [3, 6, 8, 10, 15, 20]
 ```
 
 ### BFS? DFS? Which is better?
 
 #### **BFS**
-  * 100 레벨 정도 깊이 내려가야 하는 경우나 트리가 리스트처럼 한 쪽으로 치우진 경우를 생각하면 BFS에서 큐에 엄청난게 많은 데이터가 저장되기 떄문에 무리일 수 있다.
+
+- 100 레벨 정도 깊이 내려가야 하는 경우나 트리가 BFS에서 큐에 엄청난게 많은 데이터가 저장되기 떄문에 무리일 수 있다.
+- 만약, 리스트처럼 한 쪽으로 치우진 경우면 한 레벨에 한 노드만 큐에 있게 돼서 DFS보다 낫다.
+  - 한 줄로 치우지면 DFS 경우 스택이 많이 쌓여 좋지 않다.
+
 #### **DFS**
-  * **InOrder** - 트리에 있는 모든 노드들을 오름차순으로 구할 수 있다.
-  * **PreOrder** - 트리를 복사하거나 Linear시켜 저장하는 경우(파일이나 DB에 저장하기 위해) 다시 연쇄 구조로 만들어 낼 때 도움이 된다.
 
-### 이진 힙(Binary Heaps)
+- **InOrder** - 트리에 있는 모든 노드들을 오름차순으로 구할 수 있다.
+- **PreOrder** - 트리를 복사하거나 Linear시켜 저장하는 경우(파일이나 DB에 저장하기 위해) 다시 연쇄 구조로 만들어 낼 때 도움이 된다.
 
-> 자세히 보기[https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms&DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0&%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%984.md#22-%EC%9D%B4%EC%A7%84-%ED%9E%99binary-heaps]
+## 이진 힙(Binary Heaps)
 
-#### What is a binary
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms&DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0&%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%984.md#22-%EC%9D%B4%EC%A7%84-%ED%9E%99binary-heaps)
+
+**Very** similar to a binary search tree, but with some different rules!  
+In a **MaxBinaryHeap**, parent nodes are always larger than child nodes.  
+In a **MinBinaryHeap**, parent nodes are always smaller than child nodes
+
+- For any index of an array `n`...
+  - The left child is stored at `2n + 1`
+  - The right child is at `2n + 2`
+- For any child node at index `n`...
+  - Its parent is at index `(n - 1) / 2`
+
+### Max Binary Heap
+
+- Each parent has at most two child nodes
+- The value of each parent node is **always** greater than its child nodes
+- In a max Binary Heap, the parent is greater than the children, but there are no guarantees between sibling nodes
+  - **No Implied Ordering Between Slibings**
+- A binary heap is as compact as possible. All the children of each node are as full as they can be an left children are filled out first
+
+```js
+class MaxBinaryHeap {
+  constructor() {
+    this.values = [];
+  }
+
+  insert(value) {
+    this.values.push(value);
+    this.bubbleUp();
+  }
+
+  bubbleUp() {
+    let idx = this.values.length - 1;
+    let element = this.values[idx];
+
+    while (idx > 0) {
+      let parentIdx = Math.floor((idx - 1) / 2);
+      let parent = this.values[parentIdx];
+      if (element <= parent) break;
+
+      // 자식이 더 큰 경우 Swap!
+      this.values[parentIdx] = element;
+      this.values[idx] = parent;
+      idx = parentIdx;
+    }
+  }
+
+  extractMax() {
+    const max = this.values[0];
+    const end = this.values.pop();
+    if (this.values.length > 0) {
+      // 하나 남으면 pop해도 this.values[0] = end; 때문에 제거되지 않아 조건문 설정
+      this.values[0] = end;
+      this.sinkDown();
+    }
+
+    return max;
+  }
+
+  sinkDown() {
+    let idx = 0;
+    const length = this.values.length;
+    const element = this.values[idx];
+
+    while (true) {
+      let leftChildIdx = 2 * idx + 1;
+      let rightChildIdx = 2 * idx + 2;
+      let leftChild, rightChild;
+      let swap = null;
+
+      if (leftChildIdx < length) {
+        leftChild = this.values[leftChildIdx];
+        if (leftChild > element) {
+          swap = leftChildIdx;
+        }
+      }
+
+      if (rightChildIdx < length) {
+        rightChild = this.values[rightChildIdx];
+        if (
+          (swap === null && rightChild > element) ||
+          (swap !== null && rightChild > leftChild)
+        ) {
+          swap = rightChildIdx;
+        }
+      }
+
+      if (swap === null) break;
+
+      this.values[idx] = this.values[swap];
+      this.values[swap] = element;
+      idx = swap;
+    }
+  }
+}
+
+const heap = new MaxBinaryHeap();
+// ex) [41, 39, 33, 18, 27, 12]에 heap.insert(55) 실행
+// 결과: [55, 39, 41, 18, 27, 12, 33] -> extraMax()하면 원래대로 돌아옴
+```
+
+### Priority Queue
+
+A data structure where each element has a priority.  
+Elements with high priorities are served before elements with lower priorities.
+
+- Write a Min Binary Heap - lower number meas higher priority
+- Each Node has a value and a priority. Use the priority to build the heap
+  - Value doesn't matter. Heap is constructed **using Priority!**
+- `Enqueue` method accepts a value and priority, makes a new node, and puts it in the right spot based off of its priority
+- `Dequeue` method removes root element, returns it, and rearranges heap using priority
+
+```js
+class Node {
+  constructor(value, priority) {
+    this.values = value;
+    this.priority = priority;
+  }
+}
+
+class PriorityQueue {
+  constructor() {
+    this.values = [];
+  }
+
+  enqueue(value, priority) {
+    const newNode = new Node(value, priority);
+    this.values.push(newNode);
+    this.bubbleUp();
+  }
+
+  bubbleUp() {
+    let idx = this.values.length - 1;
+    const element = this.values[idx];
+
+    while (idx > 0) {
+      let parentIdx = Math.floor((idx - 1) / 2);
+      let parent = this.values[parentIdx];
+
+      if (element.priority >= parent.priority) break;
+
+      this.values[parentIdx] = element;
+      this.values[idx] = parent;
+      idx = parentIdx;
+    }
+  }
+
+  dequeue() {
+    const min = this.values[0];
+    const end = this.values.pop();
+
+    if (this.values.length > 0) {
+      this.values[0] = end;
+      this.sinkDown();
+    }
+
+    return min;
+  }
+
+  sinkDown() {
+    let idx = 0;
+    const length = this.values.length;
+    const element = this.values[0];
+
+    while (true) {
+      let leftChildIdx = 2 * idx + 1;
+      let rightChildIdx = 2 * idx + 2;
+      let leftChild, rightChild;
+      let swap = null;
+
+      if (leftChildIdx < length) {
+        leftChild = this.values[leftChildIdx];
+
+        if (leftChild.priority < element.priority) {
+          swap = leftChildIdx;
+        }
+      }
+
+      if (rightChildIdx < length) {
+        rightChild = this.values[rightChildIdx];
+
+        if (
+          (swap === null && rightChild.priority < element.priority) ||
+          (swap !== null && rightChild.priority < leftChild.priority)
+        ) {
+          swap = rightChildIdx;
+        }
+      }
+
+      if (swap === null) break;
+
+      this.values[idx] = this.values[swap];
+      this.values[swap] = element;
+      idx = swap;
+    }
+  }
+}
+
+const ER = new PriorityQueue();
+ER.enqueue("common cold", 5);
+ER.enqueue("gunshot wound", 1);
+ER.enqueue("hight fever", 4);
+ER.enqueue("broken arm", 2);
+ER.enqueue("glass in foot", 3);
+```
+
+### Big O of Binary Heap
+
+- 이진 힙은 최대 힙이든 최소 힙이든 삽입과 삭제에 있어서 아주 성능이 좋다!
+  - Insertion - **O(log n)**
+  - Removal - **O(log n)**
+  - Search - **O(n)**
+
+#### Why log(n)?
+
+- 삽입할 때 16개 요소나 노드가 있으면 최대 4번의 비교로 새로 들어온 요소나 노드를 위치시킬 수 있기 때문이다!
+  - 깊이는 4레벨까지 있고, 루트까지 비교하는데 최대 4번!
+
+#### What about worst case?
+
+- Binary Heap은 Binary Search Tree와 달리 왼쪽부터 채워지기 때문에 최악의 경우도 **O(log n)**이다!
+  - 이진 힙은 탐색을 위한 것이 아니다!
+
+## 해시 테이블(Hash Table)
+
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms&DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0&%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%984.md#23-%ED%95%B4%EC%8B%9C-%ED%85%8C%EC%9D%B4%EB%B8%94hash-tables)
+
+Hash tables are used to store _key-value_ pairs. They are like arrays, but the keys are not ordered/
+Unlike arrays, hash tables are _fast_ for all of the following operations: finding values, adding new values, and removing values!
+
+```js
+class HashTable {
+  constructor(size = 53) {
+    this.keyMap = new Array(size);
+  }
+
+  _hash(key) {
+    let total = 0;
+    let WEIRD_PRIME = 31;
+    for (let i = 0; i < Math.min(key.length, 100); i++) {
+      let char = key[i];
+      let value = char.charCodeAt(0) - 96; // a -> 1, b -> 2, ...
+      total = (total * WEIRD_PRIME + value) % this.keyMap.length;
+    }
+
+    return total;
+  }
+
+  set(key, value) {
+    let index = this._hash(key);
+
+    // 해당 위치에 key-value pair가 없는 경우(처음으로 해당 위치에 key-value가 들어가는 경우)
+    if (!this.keyMap[index]) {
+      this.keyMap[index] = []; // separate chaining을 위해 이차원 배열로 만들기
+    }
+    this.keyMap[index].push([key, value]);
+
+    return this;
+  }
+
+  get(key) {
+    let index = this._hash(key);
+    if (this.keyMap[index]) {
+      for (let i = 0; i < this.keyMap[index].length; i++) {
+        if (this.keyMap[index][i][0] === key) return this.keyMap[index][i][1];
+      }
+    }
+
+    return undefined;
+  }
+
+  values() {
+    let valuesArr = [];
+    for (let i = 0; i < this.keyMap.length; i++) {
+      if (this.keyMap[i]) {
+        for (let j = 0; j < this.keyMap[i].length; j++) {
+          // 중복 처리
+          if (!valuesArr.includes(this.keyMap[i][j][1]))
+            valuesArr.push(this.keyMap[i][j][1]);
+        }
+      }
+    }
+
+    return valuesArr;
+  }
+
+  keys() {
+    let keysArr = [];
+    for (let i = 0; i < this.keyMap.length; i++) {
+      if (this.keyMap[i]) {
+        for (let j = 0; j < this.keyMap[i].length; j++) {
+          if (!keysArr.includes(this.keyMap[i][j][0]))
+            keysArr.push(this.keyMap[i][j][0]);
+        }
+      }
+    }
+
+    return keysArr;
+  }
+}
+
+let ht = new HashTable();
+ht.set("maroon", "#800000");
+ht.set("yellow", "#FFFF00");
+ht.set("olive", "#808000");
+ht.set("salmon", "#FA8072");
+ht.set("lightcoral", "#F08080");
+ht.set("mediumvioletred", "#C71585");
+ht.set("plum", "#DDA0DD");
+```
+
+### Big O of Hash Tables
+
+- Average Case
+  - Insertion: O(1)
+  - Deletion: O(1)
+  - Access: O(1)
+  - 위 빅오는 해시 함수가 얼마나 빠른지, 그리고 얼마나 고르게 데이터를 분배해서 충돌의 횟수를 줄이는지에 달려있다.
+- Worst Case
+  - 한 인덱스에 모든 것을 넣는 경우 -> O(n)
+  - 이런 상황이 온다면 무언가를 가져오거나, 삽입하거나, 맨 뒤에서 제거를 하는 경우에는 n의 시간이 걸린다.
+  - 해시 함수 자체가 상수의 시간을 가진다고 리스트와 다름없기 때문이다.
+
+## 그래프(Graph)
+
+A **graph data structure** consists of a finite (and possibly mutable) set of vertices or nodes or points, together with a set of unordered pairs of these vertices for an **undirected graph** or a set of ordered pairs for a **directed graph**
+
+### Essential Graph Terms
+
+- **Vertex(정점)** - a node
+- **Edge(간선)** - connection between nodes
+- **Weighted/Unweighted(가중/비가중)** - values assigned to dstances between vertices
+- **Directed/Undirected(방향/무방향)** - directions assigned to distanced between vertices
+
+### Differences between Adjacency List and Adjancency Matrix
+
+- V - number of vertices(정점의 개수)
+- E - number of edges(간선의 개수)
+
+| OPERTAION     | ADJACENCY LIST | ADJACENCY MATRIX |
+| ------------- | -------------- | ---------------- |
+| Add Vertex    | O(1)           | O(V^2)           |
+| Add Edge      | O(1)           | O(1)             |
+| Remove Vertex | O(V + E)       | O(V^2)           |
+| Remove Edge   | O(E)           | O(1)             |
+| Query         | O(V + E)       | O(1)             |
+| Storage       | O(V + E)       | O(V^2)           |
+
+#### Adjacency List
+
+- Can take up less space (in sparse graphs)
+- Faster to iterate over all edges
+- Can be slower to loopup specific edge
+- Most data in the real-world tends to lend itself to sparser and/or larger graphs
+
+#### Adjacency Matrix
+
+- Takes up more space (in sparse graphs)
+- Slower to iterate over all edges
+- Faster to lookup specific edge
+
+### Graph
+
+```js
+class Graph {
+  constructor() {
+    this.adjacencyList = {};
+  }
+
+  addVertex(vertex) {
+    // 정점으로 추가하면서 값으로 노드들간의 관계를 연결할 새로운 배열을 설정
+    if (!this.adjacencyList[vertex]) this.adjacencyList[vertex] = [];
+  }
+
+  addEdge(vertex1, vertex2) {
+    this.adjacencyList[vertex1].push(vertex2);
+    this.adjacencyList[vertex2].push(vertex1);
+  }
+
+  removeEdge(vertex1, vertex2) {
+    this.adjacencyList[vertex1] = this.adjacencyList[vertex1].filter(
+      (v) => v !== vertex2
+    );
+    this.adjacencyList[vertex2] = this.adjacencyList[vertex2].filter(
+      (v) => v !== vertex1
+    );
+  }
+
+  removeVertex(vertex) {
+    while (this.adjacencyList[vertex].length) {
+      const adjacencyVertex = this.adjacencyList[vertex].pop();
+      this.removeEdge(vertex, adjacencyVertex);
+    }
+
+    delete this.adjacencyList[vertex];
+  }
+}
+
+const g = new Graph();
+g.addVertex("Dallas");
+g.addVertex("Tokyo");
+g.addVertex("Aspen");
+g.addVertex("Los Angeles");
+g.addVertex("Hong Kong");
+g.addEdge("Dallas", "Tokyo");
+g.addEdge("Dallas", "Aspen");
+g.addEdge("Hong Kong", "Tokyo");
+g.addEdge("Hong Kong", "Dallas");
+g.addEdge("Los Angeles", "Hong Kong");
+g.addEdge("Los Angeles", "Aspen");
+```
+
+## 그래프 순회(Traversing a Graph)
+
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms&DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0&%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%984.md#25-%EA%B7%B8%EB%9E%98%ED%94%84-%EC%88%9C%ED%9A%8Cgraph-traversal)
+
+- 그래프를 순회하는 코드를 짤 때는 트리와는 다르게 this.root라는 것이 없기 때문에 시작점을 정해줘야 한다.
+  - 그래프의 한 노드에서 다른 노드로 갈 때에는 유일한 하나의 길만이 있다는 보장이 없다는 것!
+
+### DFS & BFS
+
+```js
+class Graph {
+  constructor() {
+    this.adjacencyList = {};
+  }
+
+  // DFS - Recursive
+  depthFirstRecursive(start) {
+    const result = []; // 마지막에 반환할 배열
+    const visited = {}; // 방문한 정점에 대한 객체
+    // helper 함수 안에서 this가 달라지므로 실제 그래프 자체인 this.adjacencyList를 변수에 할당
+    const adjacencyList = this.adjacencyList;
+
+    // result와 visited에 데이터를 추가하고 맨 뒤에 작업을 마치면 result를 돌려주는 helper함수 작서
+    (function DFS(vertex) {
+      if (!vertex) return null;
+
+      visited[vertex] = true; // 방문하면 true 값으로 visited 객체에 넣어주기
+      result.push(vertex);
+
+      // 막 다른길(다음 가지로 넘어가려는데 이미 방문했거나 없는 경우) -> forEach 루프 끝!
+      // 여기 예시에서는 F 정점이 콜스택의 제일 위로 올라오고 그 뒤로 forEach들이 끝나기 시작한다.
+      adjacencyList[vertex].forEach((neighbor) => {
+        // 방문하지 않았다면 해당 정점에 대해 헬퍼 함수를 호출
+        if (!visited[neighbor]) {
+          return DFS(neighbor);
+        }
+      });
+    })(start);
+
+    return result;
+  }
+
+  // DFS - Iterative
+  depthFirstIterative(start) {
+    const result = [];
+    const visited = {};
+    const stack = [start];
+    let currentVertex; // 루프 안에서 매번 다시 정의하지 않고 위로 정의(사소한 차이임)
+    visited[start] = true;
+
+    while (stack.length) {
+      currentVertex = stack.pop();
+      result.push(currentVertex);
+
+      this.adjacencyList[currentVertex].forEach((neighbor) => {
+        if (!visited[neighbor]) {
+          visited[neighbor] = true;
+          stack.push(neighbor);
+        }
+      });
+    }
+
+    return result;
+  }
+
+  breathFirst(start) {
+    const result = [];
+    const queue = [start];
+    const visited = {};
+    let currentVertex;
+    visited[start] = true;
+
+    while (queue.length) {
+      currentVertex = queue.shift();
+      result.push(currentVertex);
+
+      this.adjacencyList[currentVertex].forEach((neighbor) => {
+        if (!visited[neighbor]) {
+          visited[neighbor] = true;
+          queue.push(neighbor);
+        }
+      });
+    }
+
+    return result;
+  }
+}
+const g = new Graph();
+g.addVertex("A");
+g.addVertex("B");
+g.addVertex("C");
+g.addVertex("D");
+g.addVertex("E");
+g.addVertex("F");
+
+g.addEdge("A", "B");
+g.addEdge("A", "C");
+g.addEdge("B", "D");
+g.addEdge("C", "E");
+g.addEdge("D", "E");
+g.addEdge("D", "F");
+g.addEdge("E", "F");
+g.depthFirstRecursive("A"); // ["A", "B", "D", "E", "C", "F"]
+g.depthFirstIterative("A"); // ["A", "C", "E", "F", "D", "B"]
+```
+
+## 다익스트라 알고리즘(Dijkstra's Algorithm)
+
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms&DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0&%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%984.md#26-%EB%8B%A4%EC%9D%B5%EC%8A%A4%ED%8A%B8%EB%9D%BC-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98dijkstras-algorithm)
+
+- One of the most famous and widely used algorithms around!
+- Find the shortest path between two vertices on a graph
+  - like "What's the fastest way to get from point A to point B?"
+- 다익스트라 알고리즘을 작성하기 위해서는 두 가지 데이터 구조를 알고있어야 한다.
+  - 그래프 - 다익스트라 알고리즘은 그래프에 대해 작동한다. 그래프를 가로지르며 탐색한다.
+  - 우선순위 큐 - 이진힙을 이용해서 우선순위 큐를 만들고 이를 사용해 다익스트라 알고리즘을 작성한다.
+
+### Write a Weighted Graph
+
+```js
+// 간선에 가중치를 저장하기 위해 가중치 그래프 작성
+class WeightedGraph {
+  constructor() {
+    this.adjacencyList = {};
+  }
+
+  addVertex(vertex) {
+    if (!this.adjacencyList[vertex]) this.adjacencyList = [];
+  }
+
+  addEdge(vertex1, vertex2, weight) {
+    this.adjacencyList[vertex1].push({ node: vertex2, weight });
+    this.adjacencyList[vertex2].push({ node: vertex1, weight });
+  }
+
+  // 간선을 제거하는 것과 정점을 제거하는 것은 생략
+  // 가중치를 재고해야 한다는 것만 제외하면 앞에서 제거하는 것과 유사하다.
+}
+```
+
+### The Approach
+
+- Every time we look to visit a new node, we pick te node with the smallest known distance to visit first.
+- Once we've moved to the node we're going to visit, we look at each of its neighbors
+- For each neighboring node, **we calculate the distance by summing the total edges that lead to that node we're checking _from the starting_ node**
+- If the new total distance to a node is less than the previous total, we store tha new shorter distance for that node
+  - 즉, 시작점으로부터 두 단계 떨어져있어도 떨어진 노드의 인접한 간선이 아닌 시작점으로부터의 거리를 비교한다.
+  - 그리고, 더 짧은 거리로 업데이트! 아니면 그대로 유지!
+
+### Dijkstra's Pseudocode
+
+- This function should accept a starting and ending vertex
+- Create an object(\* we'll it distances) and set each key to be every vertex in **the adjacency List** with a value of **Infinity**, except for the starting vertex which should have a value of 0.(시작점으로부터 현재 노드까지의 거리를 비교하기 위해 사용)
+- After setting a value in the distances object, add each vertex with a priority of **Infinity** to the priority queue, except the starting vertex, which shoud have a priority of 0 because that's where we begin
+- Create another object called previous and set each key to be every vertex in the adjacency List with a value of null(나중에 경로로 사용)
+- Start looping as long as there is anything in the priority queue
+  - dequeue a vertex from the priority queue
+  - If that vertex is the same as the ending vertex - we are done!
+  - Otherwise loop through each value in the adjacency List at that vertex
+    - Calculate the distance to that vertex from the starting vertex
+    - If the distance is less than what is currently stored in our distances object
+      - Update the distance object with new lower distance(같은 정점을 새로운 더 짧은 거리로 업데이트)
+      - Update the previous object to contain that vertex
+      - enqueue the vertex with the total distance from the start node
+
+```js
+class SimplePQ {
+  constructor() {
+    this.values = [];
+  }
+
+  enqueue(value, priority) {
+    this.values.push({ value, priority });
+    this.sort();
+  }
+
+  dequeue() {
+    return this.values.shift();
+  }
+
+  sort() {
+    this.values.sort((a, b) => a.priority - b.priority); // priority가 낮은 순으로
+  }
+}
+
+class WeightedGraph {
+  constructor() {
+    this.adjacencyList = {};
+  }
+
+  addVertex(vertex) {
+    if (!this.adjacencyList[vertex]) this.adjacencyList[vertex] = [];
+  }
+
+  addEdge(vertex1, vertex2, weight) {
+    this.adjacencyList[vertex1].push({ node: vertex2, weight });
+    this.adjacencyList[vertex2].push({ node: vertex1, weight });
+  }
+
+  dijkstra(start, finish) {
+    const node = new SimplePQ();
+    const distances = {}; // 거리 비교용
+    const previous = {}; // 최단 거리를 알기 위해 사용할 object
+    const path = []; // to return at end
+    let smallest;
+
+    for (let vertex in this.adjacencyList) {
+      if (vertex === start) {
+        distances[vertex] = 0;
+        node.enqueue(vertex, 0);
+      } else {
+        distances[vertex] = Infinity;
+        node.enqueue(vertex, Infinity);
+      }
+
+      previous[vertex] = null;
+    }
+
+    // previous = { A: null, B: null, C: null, D: null, ... }
+    // distances =  { A: 0, B: Infinity, C: Infinity , ... }
+    // node.values = [{ value: "A", priority: 0 }, { value: "B", priority: Infinity }, ... ]
+    
+    // as long as there is something to visit
+    while (node.values.length) {
+      smallest = node.dequeue().value; // 현재 위치한 노드
+
+      // If that vertex is the same as the ending vertex - we are done!
+      if (smallest === finish) {
+        while (previous[smallest]) {
+          path.push(smallest);
+          smallest = previous[smallest]; // smallest가 스타트 정점이 되면 루프 종료(* 스타트 정점은 push안된 상태)
+        }
+        break;
+      }
+
+      // Otherwise loop through each value in the adjacency list at that vertex
+      if (smallest || distance[smallest] !== Infinity) {
+        for (let neighbor in this.adjacencyList[smallest]) {
+          let nextNode = this.adjacencyList[smallest][neighbor]; // 현재 위치의 인접한 노드들
+          let candidate = distances[smallest] + nextNode.weight; // 시작점으로부터 현재노드까지 거리
+          let nextNeighbor = nextNode.node;
+          // 시작점부터 현재위치에서 인접한 노드까지의 거리가 distances[nextNeighbor] 보다 작으면 업데이트!
+          if (candidate < distances[nextNeighbor]) {
+            // updating new smallest distance to neighbor
+            distances[nextNeighbor] = candidate;
+            // updating previous - How we got to neighbor
+            previous[nextNeighbor] = smallest;
+            // enqueue in priority queue with new priority
+            node.enqueue(nextNeighbor, candidate);
+          }
+        }
+      }
+    }
+
+    // 마지막 스타트 정점만 push하지 못하고 루프를 나왔으므로 concat 후 reverse!
+    return path.concat(smallest).reverse();
+  }
+}
+
+const graph = new WeightedGraph();
+graph.addVertex("A");
+graph.addVertex("B");
+graph.addVertex("C");
+graph.addVertex("D");
+graph.addVertex("E");
+graph.addVertex("F");
+
+graph.addEdge("A", "B", 4);
+graph.addEdge("A", "C", 2);
+graph.addEdge("B", "E", 3);
+graph.addEdge("C", "D", 2);
+graph.addEdge("C", "F", 4);
+graph.addEdge("D", "E", 3);
+graph.addEdge("D", "F", 1);
+graph.addEdge("E", "F", 1);
+graph.dijkstra("A", "E"); // ["A", "C", "D", "E", "F"] -> previous["F"]의 값이 6으로 제일 짧은 경로
+```
+
+### Upgrade PriorityQueue
+
+> [PriorityQueue 부분으로 가기](#priority-queue)
+
+```js
+class Node {
+  constructor(value, priority) {
+    this.value = value;
+    this.priority = priority;
+  }
+}
+
+class PriorityQueue {
+  constructor() {
+    this.values = [];
+  }
+
+  enqueue(value, priority) {
+    const newNode = new Node(value, priority);
+    this.values.push(newNode);
+    this.bubbleUp();
+  }
+
+  bubbleUp() {
+    let idx = this.length - 1;
+    const element = this.values[idx];
+
+    while (idx > 0) {
+      let parentIdx = Math.floor((idx - 1) / 2);
+      let parent = this.values[parnetIdx];
+
+      if (element.priority >= parent.priority) break; // 자식이 우선순위 값이 더 크면 루프 종료!
+      
+      this.values[parentIdx] = element;
+      this.values[idx] = parent;
+      idx = parentIdx;
+    }
+  }
+
+  dequeue() {
+    const min = this.values[0];
+    const end = this.values.pop();
+    if (this.values.length > 0) {
+      this.values[0] = end;
+      this.sinkDown();
+    }
+
+    return min;
+  }
+
+  sinkDown() {
+    let idx = 0;
+    const element = this.values[idx];
+
+    while (true) {
+      let leftChildIdx = 2 * idx + 1;
+      let rightChildIdx = 2 * idx + 2;
+      let leftChild, rightChild;
+      let swap = null;
+
+      if (leftChildIdx < this.values.length) {
+        leftChild = this,values[leftChildIdx];
+        if (leftChild.priority < element.priority) swap = leftChildIdx;
+      }
+
+      if (rightChildIdx < this.values.length) {
+        rightChild = this.values[rightChildIdx];
+        if ((
+          swap === null || righitChild.priority < element.priority
+        ) || (
+          swap !== null || rightChild.priority < leftChild.priority
+        )) {
+          swap = rightChildIdx;
+        }
+      }
+
+      if (swap === null) break;
+
+      this.values[idx] = this.values[swap];
+      this.values[swap] = element;
+      idx = swap;
+    }
+  }
+}
+```
+
+## 동적 프로그래밍(Dynamic Programming)
+
+> [자세히 보기](https://github.com/oneny/TIL/blob/main/Algorithm/Algorithms&DataStructures/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0&%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%984.md#27-%EB%8F%99%EC%A0%81-%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8Ddynamic-programming)
+
+A method for solving a complex problem by breaking it down into a collection of simpler subproblems, solving each of those subproblems just once, and storing their solutions
+
+### Overlapping SubProblems(중복되는 하위문제)
+
+A problem is said to have **overlapping subproblems** if it can be broken down into subproblems which are reused several times
+
+### Optimal Substructure(최적 부분 구조)
+
+A problem is said to have **optimal substructure** if an optimal solution can be constructed from optimal solutions of its subproblems
+
+### Enter Dynamic Programming
+
+Using past knowledge to make solving a future problem eaier
+
+#### The Fibonacci Sequence
+
+피보나치 수열은 `Overlapping Subproblems`와 `Optimal Substructure` 두 가지 특성을 다 가지고 있다.
+
+```js
+function fibonacci(n) {
+  if (n <= 2) return 1;
+  return fibonacci(n - 1) * fibonacci(n - 2);
+}
+```
+
+* Big O of Fibonacci Sequence
+  * 실제 수학공식으로 정확한 빅오 표기법은 아니지만 위 피보나치 수열 함수의 빅오는 `O(2^n)`이다.
+  * n은 지수로 매우 좋지 않은 빅오 중 하나. 그리고 실제로는 대략 1.6의 n제곱.
+* **How can we improve?**
+  * 핵심은 `What if we could "remember" old value?`이다!
+  * 계산했던 값을 기억할 수 있또록 만드는 것이 동적 프로그램의 핵심!
+
+#### Memorization
+
+Storing the results of expensive function calls and returning the cached result when the same inputs occur again
+
+```js
+function fib(n, memo = []) {
+  if (memo[n] !== undefined) return memo[n];
+  if (n <= 2) return 1;
+  let res = fib(n - 1, memo) + fib(n - 2, memo); // memo를 지닌 함수로 호출해야 한다.
+  memo[n] = res;
+  return res;
+}
+```
+
+* **Big O of Memorized Solution**
+  * fib(7)의 경우 fib(6), fib(5), fib(4), fib(3)의 값만 구하면 된다.
+  * fib(2), fib(1)은 상수값의 시간을 가지기 때문에 고려할 필요 X.
+  * 그리고 다시 fib(5)에 접근할 필요가 있을 때 memo에 저장했기 때문에 상수값의 시간을 가진다.
+  * 따라서, n이 커짐에 알고리즘을 실행하는데 걸리는 시간은 O(n)이다.
+
+#### 타뷸레이션(Tabulation): 상향식 접근
+
+* Storing the result of a previous result in a "table" (usually an array)
+  * Usually done using **iteraion**
+  * Better **space complexity** can be achieved using tabulation
+
+```js
+function fib(n) {
+  if (n <= 2) return 1;
+
+  const fibNums = [0, 1, 1];
+  for (let i = 3; i <= n; i++) {
+    fibNums[i] = fibNums[i - 1] + fibNums[i - 2];
+  }
+
+  return fibNums[n];
+}
+```
+
+* `TOP-DOWN` 방식으로 해결한 `Memorized Solution`은 재귀를 사용했기 때문에 fib(10000)처럼 큰 수를 실행하는 경우 스택에서 대기하고 있는 해결되지 않은 재귀 호출들이 있을 수 있게 돼서 `Maximum call stack size exceeded` 에러가 발생하게 된다.
+* 하지만 `BOTTOM-UP` 방식인 `Tabulation`은 공간을 많이 차지하지 않기 때문에 같은 오류가 발생하지 않는 장점이 있다.
+  * 물론 fib(10000) 하게 되면 Infinity 값을 얻게 된다.
