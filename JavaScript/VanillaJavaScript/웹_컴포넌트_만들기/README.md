@@ -663,7 +663,7 @@ export default class App extends Component {
 
   addItem(contents) {
     const { items } = this.state;
-    const seq = Math.max(0, items.map(v => v.seq)) + 1;
+    const seq = Math.max(0, ...items.map(v => v.seq)) + 1;
     const active = false;
     this.setState({
       items: [
