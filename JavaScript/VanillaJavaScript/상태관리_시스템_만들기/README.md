@@ -880,6 +880,76 @@ const createStore = (reducer) => {
 ### `src/core/StoreRedux.js`
 
 ```js
+import { observable } from "./observer.js";
+
+export const createStore = (reducer) => {
+  // reducer가 실행될 때 반환하는 객체(state)를 observable로 만들어야 한다.
+  const state = observable(reducer());
+
+  // getState가 실제 state를 반환하는 것이 아니라 frozenState를 반환하도록 만들어야 한다.
+  const frozenState = {};
+  Object.keys(state).forEach((key) => {
+    Object.defineProperty(frozenState, key, {
+      get: () => state[key],
+    });
+  });
+
+  // 직접적으로 접근하지 못하고
+  // dispatch로만 state의 값을 변경할 수 있도록 한다.
+  const dispatch = (action) => {
+    const newState = reducer(state, action);
+
+    for (const [key, value] of Object.entries(newState)) {
+      // state의 key가 아닐 경우 변경 생략
+      if (!state[key]) continue;
+      state[key] = value;
+    }
+  }
+
+  // 값을 반환받을 수 있는 접근자 프로퍼티만 있는 객체 반환
+  const getState = () => frozenState;
+
+  // sbuscribe는 observe로 대체
+  return { getState, dispatch };
+};
+```
+
+### `src/store.js`
+
+```js
+import { createStore } from "./core/StoreRedux.js";
+
+// 초기 state의 값을 정의
+const initState = {
+  a: 10,
+  b: 20,
+};
+
+// dispatch에서 사용될 type들을 정의
+export const SET_A = "SET_A";
+export const SET_B = "SET_B";
+
+// reducer를 정의하여 store에 넘겨준다.
+export const store = createStore((state = initState, action = {}) => {
+  switch (action.type) {
+    case "SET_A":
+        return { ...state, a: action.payload };
+    case "SET_B":
+      return { ...state, b: action.payload };
+    default:
+      return state;
+  }
+});
+
+
+// reducer에서 사용될 action 정의
+export const setA = (payload) => ({ type: SET_A, payload });
+export const setB = (payload) => ({ type: SET_B, payload });
+```
+
+### `src/App.js`
+
+```js
 import { Component } from "./core/Component.js";
 // import { store } from "./store.js";
 import { setA, SET_B, store } from "./store.js";
@@ -932,3 +1002,108 @@ export class App extends Component {
 }
 ```
 
+## 심화학습
+
+`observable`과 `observer`를 사용할 때 고려해야 할 것들이 몇 가지 더 있다.
+
+### 최적화
+
+#### 이전 상태와 값이 똑같을 경우
+
+상태가 변경되어 render를 해야하는데, 만약에 변경된 상태가 이전 상태와 값이 똑같은 경우에는 어떻게 해야 할까?  
+이럴 때는 다시 렌더링되지 않도록 방어로직을 작성하면 된다.
+
+```js
+state.a = 1;
+state.a = 1;
+state.a = 1;
+state.a = 1;
+```
+```js
+// src/core/observer.js
+export const observable = obj => {
+  Object.keys(obj).forEach(key => {
+    let _value = obj[key];
+    const observers = new Set();
+
+    Object.defineProperty(obj, key, {
+      get () {
+        if (currentObserver) observers.add(currentObserver);
+        return _value;
+      },
+      set (value) {
+        if (_value === value) return;
+        if (JSON.stringify(_value) === JSON.stringify(value)) return;
+        _value = value;
+        console.log(observers);
+        observers.forEach(fn => fn());
+      }
+    });
+  });
+
+  return obj;
+};
+```
+
+* 숫자, 문자열, null, undefined 등의 원시타입은 `_value === value`처럼 검사하면 된다.
+* 배열이나 객체의 경우 `JSON.stringify(_value) === JSON.stringify(value))`를 사용하면 된다.
+* Set, Map, WeekSet, WeekMap 같은 것들은 `JSON.stringify`로 변환되지 않는다. 이런 경우에는 추가적인 검사 로직이 필요하다.
+  
+#### 상태가 연속으로 변경되는 경우
+
+```js
+state.a = 1;
+state.b = 2;
+```
+
+단순하게 `console.log`를 찍는 경우라면 상관없지만, 브라우저에 DOM으로 렌더링되는 경우라면 `requestAnimationFrame`과 `debounce`를 이용하여 한 프레임에 한 번만 렌더링 되도록 만들어줘야 한다.
+
+<details>
+  <summary>MDN - requestAnimationFrame</summary>
+
+* 브라우저에게 수행하기를 원하는 애니메이션을 알리고 다음 리페인트가 진행되기 전에 해당 애니메이션을 업데이트하는 함수를 호출하게 한다. 이 메서드는 **이전에 실행할 콜백**을 인자로 받는다.
+* 화면에 새로운 애니메이션을 업데이트할 준비가 될 때마다 이 메서드를 호출하는 것이 좋다. **콜백의 수는 보통 1초에 60회**지만, 일반적으로 대부분의 브라우저에서는 W3C 권장사항에 따라 그 수가 **디스플레이 주사율과 일치**하게 된다.
+* 쉽게 말해서 `requestAnimationFrame`은 1프레임에 1회 호출된다. 보통 `1초에 60프레임`이고, 1프레임은 약 `16ms`정도 된다.
+
+```js
+let v = 1
+const debounceFrame = ((callback) => {
+  let currentCallback = -1;
+  return callback => {
+    cancelAnimationFrame(currentCallback); // 현재 등록된 callback이 있을 경우 취소한다.
+    currentCallback = requestAnimationFrame(callback); // 1프레임 뒤에 실행되도록 한다.
+  }
+})();
+
+debounceFrame(() => console.log(++v));
+debounceFrame(() => console.log(++v));
+debounceFrame(() => console.log(++v));
+debounceFrame(() => console.log(++v));
+debounceFrame(() => console.log(++v)); // 이것만 실행된다. -> 2
+```
+
+</details>
+
+```js
+const debounceFrame = (callback) => {
+  let currentCallback = -1;
+  return () => {
+    cancelAnimationFrame(currentCallback);
+    currentCallback = requestAnimationFrame(callback);
+  }
+}
+
+export const observe = fn => {
+  currentObserver = debounceFrame(fn);
+  fn();
+  currentObserver = null;
+};
+```
+
+### Proxy
+
+`Object.defineProperty`는 `IE`를 지원하기 위해 사용하는 `API`이다. 최신 브라우저에서는 `Proxy`를 이용한다면 더 쉽게 `Observable`을 만들 수 있다.
+
+```js
+
+```

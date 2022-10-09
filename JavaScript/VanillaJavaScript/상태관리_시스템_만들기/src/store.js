@@ -37,7 +37,7 @@ export const setB = (payload) => ({ type: SET_B, payload });
 
 //   // setState(newState) {
 //   //   for (const [key, value] of Object.entries(newState)) {
-//   //     if (!this.state[key]) continue;
+//   //     if (!this.state[key]) continue; // 0인 경우도 들어가므로 다르게 로직 구현
 //   //     this.state[key] = value;
 //   //   }
 //   // }
