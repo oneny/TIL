@@ -178,11 +178,21 @@ function _reduce(list, iter, memo) {
     list = _rest(list);
   }
   
+  // val은 list가 루프 돌면서 요소 값들이다.
+  // memo는 초기값 및 루프를 돌면서 결과값이 된다.
   _each(list, function(val) {
     memo = iter(memo, val);
   });
   
   return memo;
+}
+
+function _each(list, iter) {
+  for (var i = 0; i < list.length; i++) {
+    iter(list[i]);
+  }
+
+  return list;
 }
 
 // -----------------------------------------------------------------
