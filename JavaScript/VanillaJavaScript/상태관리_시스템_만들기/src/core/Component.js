@@ -12,7 +12,6 @@ export class Component {
   }
 
   setup() {
-    this.state = observable(this.initState()); // state를 관찰한다.
     observe(() => { // state가 변경될 경우, 함수가 실행된다.
       this.render();
       this.setEvent();
@@ -20,7 +19,6 @@ export class Component {
     });
   }
 
-  initState() { return {} }
   template() { return ""; }
   render() { this.$el.innerHTML = this.template(); }
   setEvent() {}
