@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+</head>
+<body>
+  <button onclick="alert('안돼!')">button</button>
+  <div id="root"></div>
+  <script>
+    // HTML에서의 이벤트 핸들러 어트리뷰트 방식의 문제점
+    // HTML 코드에 자바스크립트 코드를 포함하면 HTML의 목적에 벗어나고, HTML과 자바스크립트가 분리되지 않는다.
+    // 가독성이 떨어지고, 유지보수하기가 어렵다.
+    // 예전 HTML 문서에서는 이 방식을 사용했기에 알아둘 필요는 있지만 더는 사용하지 않는 것이 좋다.
+
+    // 추가적으로, CBD(Component Based Development) 방식의 Angular/React/Svelte/Vue.js 프레임워크/라이브러리는 이벤트 핸들러 어트리뷰트 방식으로 이벤트를 처리한다.
+    // CBD에서는 HTML, CSS, JavaScript를 관심사가 다른 개별적인 요소가 아닌, 뷰를 구성하기 위한 구성 요소로 보아 관심사가 다르다고 생각하지 않기 때문이다.
+    const spa = ["React", "Vue", "Angular"];
+    // React, ReactDOM
+    // React: 뷰를 만들기 위한 라이브러리
+    // ReactDOM: UI를 실제로 브라우저에 렌더링할 때 사용하는 라이브러리
+    // <ul className="list" onClick={() => alert(item)}>React</ul>
+    // 첫 번째 인자: 엘리먼트 타입 정의
+    // 두 번째 인자: 엘리먼트 프로퍼티 표현
+    // 세 번째 인자: 엘리먼트를 여는 태그와 닫는 태그 사이에 들어가야 할 자식 노드들 표현
+    const ulEl = React.createElement("ul", { className: "list", title: "123" },
+      // [
+      //   React.createElement("li", null, "React"),
+      //   React.createElement("li", null, "Vue"),
+      //   React.createElement("li", null, "Angular")
+      // ]
+      // key를 사용해서 DOM을 더 효율적으로 갱신
+      spa.map((item, i) => React.createElement("li", { key: i, onClick: () => alert(item) }, item + props.title ))
+    );
+
+    console.log(ulEl);
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(ulEl);
+
+
+
+
+
+    // <label for="userId">사용자</label>
+    // React.createElement("label", { htmlFor: "userId" }, "사용자")
+  </script>
+</body>
+</html>

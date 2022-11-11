@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+      // import React, { useState } from "react";
+      const { useState, memo, useCallback, useEffect } = React;
+
+      const useInput = (initialState) => {
+        const [value, setValue] = useState(initialState);
+
+        return [
+          {
+            value,
+            onChange: (e) => setValue(e.target.value)
+          },
+          setValue
+        ];
+      }
+
+      const StepItem = memo(({ step, removeStep }) => {
+        console.log(step);
+
+        return (
+          <li>
+            <span>{step}</span>
+            <button onClick={() => removeStep(step)}>X</button>
+          </li>
+        )
+      });
+
+      function Step({ name, steps }) {
+        // useState 훅은 배열을 반환하고 반환하는 배열의 첫 번째 원소는 상태!, 이 상태가 바뀔때마다 해당 컴포넌트가 재렌더링됩니다!
+        // useState를 사용하여 상태와 컴포넌트를 엮어줬습니다!
+        const [recipceSteps, setRecipeSteps] = useState(steps);
+        // const [newStep, setNewStep] = useState("");
+        const [newStep, setNewStep] = useInput("");
+
+        const submit = async (e) => {
+          e.preventDefault();
+          try {
+
+            const response = await fetch("http://localhost:3500/step", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ name, step: newStep.value }),
+            });
+            const st = await response.json();
+
+            if (!response.ok) {
+              throw new Error(st.message);
+            }
+
+            // backend/routes/index.js에서 37-38줄 봐보세요!
+            // 아까 저희 message 받은거 step로 요청한거 그대로 받아와서 st.step을 추가하도록 다시 바꿔봤어요!
+            setRecipeSteps([...recipceSteps, st.step]);
+            setNewStep("");
+          } catch (err) {
+            console.error(err.message);
+          }
+        }
+        console.log('hi');
+
+        const removeStep = useCallback((step) => {
+          setRecipeSteps(recipceSteps.filter((content) => content !== step));
+        }, [recipceSteps]);
+
+        return (
+          <section>
+            <h3>조리 절차</h3>
+
+            <ul>
+              {recipceSteps.map((step, i) => (
+                <StepItem key={i} step={step} removeStep={removeStep} />
+              ))}
+            </ul>
+
+            <form onSubmit={submit}>
+              <label htmlFor="step">조리 절차 추가</label>
+
+              <input
+                // value={newStep}
+                // onChange={(e) => setNewStep(e.target.value)}
+                {...newStep}
+                id="step"
+                type="text"
+                placeholder="절차 추가"
+                required
+              />
+              <button>Add</button>
+            </form>
+          </section>
+        )
+      }
+
+      function Recipe({ name, ingredients, steps }) {
+
+        return (
+          <section>
+            <h2>{name}</h2>
+
+            <ul>
+              {ingredients.map(({ name, amount, measurement}, i) => (
+                <li key={i}>{name} - {amount} {measurement} </li>
+              ))}
+            </ul>
+
+            <Step steps={steps} name={name} />
+          </section>
+        )
+      }
+
+      function Menu({ title }) {
+        const [recipes, setRecipes] = useState([]);
+        const [errMsg, setErrMsg] = useState("");
+        console.log(errMsg);
+        // useEffect 함수 안에 콜백 함수를 렌더러가 렌더링한 직후에 부수 효과(side effect)로 실핸한다는 의미
+        // 렌더러가 부수효과로 무언가를 수행하게 하고 싶을 때 useEffect를 사용합니다.
+        // useEffect 안에 작성한 함수를 먼저 UI를 렌더링하고 컴포넌트가 렌더링 외에 다른 일을 시키고 싶을 때 사용하는 훅입니다.
+        useEffect(() => {
+          (async () => {
+            try {
+              const response = await fetch("http://localhost:3500");
+              const rec = await response.json();
+              console.log(response);
+              if (!response.ok) {
+                throw new Error(rec.message);
+              }
+              
+              setRecipes(rec.data);
+            } catch (err) {
+              setErrMsg(err.message);
+            }
+          })();
+        }, [])
+
+        return (
+          <>
+            <header>
+              <h1>{errMsg ? errMsg : title}</h1>
+            </header>
+
+            <main>
+              {/* recipes.map(({ name, ingredients, steps }, i) => (
+                <Recipe key={i} name={name} ingredients={ingredients} steps={steps} />
+            )) */}
+            {recipes.map((item, i) => (
+              <Recipe key={i} {...item} />
+            ))}
+            </main>
+          </>
+        )
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      // React.createElement(Menu, { recipes: data, title: "맛있는 조리법" })
+      // React.createElement(Menu, { ...obj })
+      root.render(<Menu title="맛있는 조리법" />)
+    </script>
+  </body>
+</html>

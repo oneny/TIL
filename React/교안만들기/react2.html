@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script>
+      const items = [
+        "연어 900 그램",
+        "신선한 로즈마리 5 가지",
+        "올리브 오일 2 테이블스푼",
+        "작은 레몬 2 조각",
+        "코셔 소금 1 티스푼",
+        "다진 마늘 4 쪽",
+      ];
+
+      function Ingredients({ items }) {
+        console.log(items);
+
+        return React.createElement(
+          "ul",
+          { className: "ingredient" },
+          items.map((item, i) => React.createElement("li", { key: i }, item))
+        )
+      }
+
+      // <Ingredient />
+      const dish = React.createElement(Ingredients, { items }, null);
+      console.log(dish);
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(dish);
+    </script>
+  </body>
+</html>
