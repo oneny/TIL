@@ -1,10 +1,8 @@
 # Today I Learned(TIL)
 
-## 목차
+## JavaScript
 
-### JavaScript
-
-#### Deep Dive
+### Deep Dive
 
 - [04.변수](https://github.com/oneny/TIL/blob/main/JavaScript/DeepDive/04.%EB%B3%80%EC%88%98.md)
 - [16.프로퍼티 어튜리뷰트](https://github.com/oneny/TIL/blob/main/JavaScript/DeepDive/16.%ED%94%84%EB%A1%9C%ED%8D%BC%ED%8B%B0_%EC%96%B4%ED%8A%B8%EB%A6%AC%EB%B7%B0%ED%8A%B8.md)
@@ -21,20 +19,20 @@
 - [3536.데이터 변환](https://github.com/oneny/TIL/blob/main/JavaScript/DeepDive/3536.%EB%8D%B0%EC%9D%B4%ED%84%B0_%EB%B3%80%ED%99%98.md)
 - [46.제너레이터와 async/await](https://github.com/oneny/TIL/blob/main/JavaScript/DeepDive/46.%EC%A0%9C%EB%84%88%EB%A0%88%EC%9D%B4%ED%84%B0%EC%99%80_asyn%26await.md)
 
-#### Vanilla JavaScript
+### Vanilla JavaScript
 
 - [상태에 반응하는 웹 컴포넌트 만들기](https://github.com/oneny/TIL/tree/main/JavaScript/VanillaJavaScript/%EC%9B%B9_%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8_%EB%A7%8C%EB%93%A4%EA%B8%B0)
 - [상태관리 시스템 만들기](https://github.com/oneny/TIL/tree/main/JavaScript/VanillaJavaScript/%EC%83%81%ED%83%9C%EA%B4%80%EB%A6%AC_%EC%8B%9C%EC%8A%A4%ED%85%9C_%EB%A7%8C%EB%93%A4%EA%B8%B0)
 - [라이브러리 도움 없이 SPA 만들기](https://github.com/oneny/TIL/blob/main/JavaScript/VanillaJavaScript/SPA_%EB%A7%8C%EB%93%A4%EA%B8%B0/%EB%A6%AC%EC%95%A1%ED%8A%B8%EC%97%86%EC%9D%B4SPA%EB%A7%8C%EB%93%A4%EA%B8%B0.md)
 - [함수형 프로그래밍 이해하기](https://github.com/oneny/TIL/tree/main/JavaScript/VanillaJavaScript/%ED%95%A8%EC%88%98%ED%98%95_%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8D_%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0)
 
-#### Design Pattern - 기초
+### Design Pattern - 기초
 
 - [자바스크립트 디자인 패턴 - 싱글톤, 팩토리, 옵저버](https://github.com/oneny/TIL/blob/main/JavaScript/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4_%EA%B8%B0%EC%B4%88/%EC%9E%90%EB%B0%94%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8_%EB%94%94%EC%9E%90%EC%9D%B8_%ED%8C%A8%ED%84%B4.md)
 
-### React
+## React
 
-#### 교안 만들기
+### 교안 만들기
 
 - [리액트 시작하는 분들을 위한 교안 만들기](https://github.com/oneny/TIL/tree/main/React/%EA%B5%90%EC%95%88%EB%A7%8C%EB%93%A4%EA%B8%B0)
   - React.createElement 사용하면서 jsx에서 babel이 해주는 컴파일 과정 이해하기
@@ -43,9 +41,17 @@
       - 이를 활용한 간단한 커스텀 훅 만들기
   - 자식의 프롭을 함수(이벤트 리스너)를 통해 자신의 부모에게 넘기기
   - 컴포넌트에 useState를 사용해 상태와 컴포넌트 엮어보기 등등..
-  
 
-#### Webpack 기초
+### [리액트 로그인 인증(with JWT)](https://github.com/oneny/react-practice)
+
+- 리액트 폼 유효성 검사
+- axios를 사용한 리액트 로그인 인증
+- Role 기반 리액트 라우트 보호
+- JWT(Access/Refresh Token) 방식을 이용한 인증 절차
+- [지속 가능한 JWT Tokens 인증](https://github.com/oneny/react-practice/tree/main/react-login/05react-persist-user-login)
+- [로그인 폼에 커스텀 훅 적용](https://github.com/oneny/react-practice/tree/main/react-login/06react-login-input-hooks)
+
+### Webpack 기초
 
 - [NPM](https://github.com/oneny/TIL/blob/main/React/%EC%9B%B9%ED%8C%A9.md#npm)
 - [Webpack 시작하기](https://github.com/oneny/TIL/blob/main/React/%EC%9B%B9%ED%8C%A9.md#webpack-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0)
@@ -54,7 +60,7 @@
 - [웹팩의 4가지 주요 속성](https://github.com/oneny/TIL/blob/main/React/%EC%9B%B9%ED%8C%A9.md#%EC%9B%B9%ED%8C%A9%EC%9D%98-4%EA%B0%80%EC%A7%80-%EC%A3%BC%EC%9A%94-%EC%86%8D%EC%84%B1)
 - [Devloper Tools](https://github.com/oneny/TIL/blob/main/React/%EC%9B%B9%ED%8C%A9.md#developer-tools)
 
-### Algorithms & Data Structures
+## Algorithms & Data Structures
 
 - [재귀(Recursion)](https://github.com/oneny/TIL/tree/main/Algorithms%26DataStructures#%EC%9E%AC%EA%B7%80recursion)
 - [검색 알고리즘(Search Algorithm)](https://github.com/oneny/TIL/tree/main/Algorithms&DataStructures#%EA%B2%80%EC%83%89-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98search-algorithm)
@@ -76,7 +82,7 @@
 - [다익스트라 알고리즘(Dijkstra's Algorithm)](https://github.com/oneny/TIL/tree/main/Algorithms&DataStructures#%EB%8B%A4%EC%9D%B5%EC%8A%A4%ED%8A%B8%EB%9D%BC-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98dijkstras-algorithm)
 - [동적 프로그래밍(Dynamic Programming)](https://github.com/oneny/TIL/tree/main/Algorithms&DataStructures#%EB%8F%99%EC%A0%81-%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%98%EB%B0%8Ddynamic-programming)
 
-### Git
+## Git
 
 - [Fast forward vs 3-way merge](https://github.com/oneny/TIL/tree/main/Git#fast-forward-vs-3-way-merge)
 - [과거로 돌아가는 두 가지 방법(reset, revert)](https://github.com/oneny/TIL/tree/main/Git#%EA%B3%BC%EA%B1%B0%EB%A1%9C-%EB%8F%8C%EC%95%84%EA%B0%80%EB%8A%94-%EB%91%90-%EA%B0%80%EC%A7%80-%EB%B0%A9%EB%B2%95reset-revert)
