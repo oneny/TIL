@@ -123,3 +123,170 @@ SELECT c1, c2 FROM table_2
   ```
 - Here we just focus on `LIKE` and `ILIKE` for now, but keep in mind PostgreSQL does support full regex capabilities:
   - https://www.postgresql.org/docs/12/functions-matching.html
+
+## GROUP BY와 집계 함수
+
+- `GROUP BY` will allow us to aggregate data and apply functions to better understand how data is distributed per category.
+
+### Aggregate Functions
+
+- SQL provides a variety of aggregate functions.
+- The main idea behind an aggregate function is to take multiple inputs and return a single output.
+- https://www.postgresql.org/docs/current/functions-aggregate.html
+- Most Common Aggregate Functions:
+  - `AVG()` - returns average value
+  - `COUNT()` - returns number of values
+  - `MAX()` - returns maximum value
+  - `MIN()` - returns minimum value
+  - `SUM()` - returns the sum of all values
+- Aggregate function calls happen only in the `SELECT` clause or the `HAVING` clause.
+  - 집계 함수는 SELECT 절이나 HAVING 절에서만 호출된다.
+- **Special Notes**
+  - `AVG()` returns a floating point value many decimal places (e.g. 2.342418)
+    - You can use `ROUND()` to specify precision after the decimal.
+  - `COUNT()` simply returns the number of rows, which means by convention we just use `COUNT(*)`
+
+### GROUP BY
+
+- `GROUP BY` allows us to aggregate columns per some category.
+- Syntax
+  ```sql
+  SELECT category_col, AGG(data_col) FROM table GROUP BY category_col
+  ```
+- The `GROUP BY` clause must appear right after a `FROM` or `WHERE` statement.
+  ```sql
+  SELECT category_col, AGG(data_col)
+  FROM table
+  WHERE category_col != 'A'
+  GROUP BY category_col
+  ```
+- In the `SELECT` statement, columns must either have an aggregate function or be in the `GROUP BY` call.
+  - 실제 SELECT 문에서 열에 집계 함수가 적용되어 있고 다른 열을 불러오려면 `GROUP BY`는 필수❗️❗️❗️
+  ```sql
+  SELECT company, division, SUM(sales)
+  FROM finance_table
+  GROUP BY company, division
+  ```
+  - 이 쿼리의 결과는 회사별 부서별 판매액의 총합이 된다.
+- `WHERE` statements should not refer to the aggregation result, later on we will learn to use `HAVING` to filter on those results.
+  - 주의할 것은 WHERE문에는 집계 함수를 입력해서는 안된다. 아래 경우는 `sales`가 해당한다.
+  - 추후에 `HAVING`문을 이용하여 결과를 필터링하는 방법이 나올 것이다.
+  ```sql
+  SELECT company, division, SUM(sales)
+  FROM finance_table
+  WHERE division IN ('marketing', 'transport')
+  GROUP BY company, division
+  ```
+- If you want to sort results based on the aggregate, make sure to reference the entire function
+  - 집계를 바탕으로 결과를 분류하려면 전체 함수를 참조해야 한다.
+  ```sql
+  SELECT company, SUM(sales)
+  FROM finance_table
+  GROUP BY company
+  ORDER BY SUM(sales)
+  ```
+
+```sql
+# 30. GROUP By - 2부
+SELECT DATE(payment_date), SUM(amount) FROM payment
+GROUP BY DATE(payment_date)
+ORDER BY SUM(amount) DESC
+```
+
+### GROUP BY Challenge
+
+#### Challenge 1
+
+- We have two staff members, with Staff IDs 1 and 2. We want to give a bonus to the staff member that handled the most payments. (Most in terms of number of payments processed, not total dollar amount).
+- How many payments did each staff member handle and who gets the bonus?
+
+```sql
+SELECT staff_id, COUNT(amount)
+FROM ayment
+GROUP BY staff_id
+ORDER BY COUNT(amount) DESC
+```
+
+#### Challenge 2
+
+- Corporate HQ is conducting a study on the relationship between replacement cost and a movie MPAA rating (e.g. G, PG, R, etc...).
+- What is the average replacement cost per MPAA rating?
+  - Note: You may need to expand the AVG column to view correct results.
+
+```sql
+SELECT rating, ROUND(AVG(replacement_cost), 2)
+FROM film
+GROUP BY rating
+```
+
+#### Challenge 3
+
+- We are running a promotion to reward our top 5 customers with coupons.
+- What are the customer ids of the top 5 customers by total spend?
+
+```sql
+SELECT customer_id, SUM(amount)
+FROM payment
+GROUP BY customer_id
+ORDER BY SUM(amount) DESC
+LIMIT 5
+```
+
+### HAVING
+
+- The `HAVING` clause allows us to filter `after` an aggregation has already taken place.
+  - HAVING절은 집계가 이미 수행된 **이후에** 자료를 필터링하기 때문에 GROUP BY 뒤에 있어야 한다.
+  ```sql
+  SELECT company, SUM(sales)
+  FROM finance_table
+  GROUP BY company
+  ```
+- We've already seen we can filter before executing the `GROUP BY`, but what if we want to filter based on `SUM(sales)`?
+  - We can not use `WHERE` to filter based off of aggregate results, because those happen **after** a `WHERE` is executed.
+  ```sql
+  SELECT company, SUM(sales)
+  FROM finance_table
+  WHERE company != 'Google'
+  GROUP BY company
+  ```
+  - SUM(sales)을 기준으로 필터링하고 싶다면?
+    - => 집계 함수는 `GROUP BY`문이 맨 밑에서 수행된 후에야 실행된다.
+    - 즉, `WHERE`를 사용해서는 집계된 결과를 바탕으로 필터링할 수 없다.(집계는 WHERE문 실행된 후에 실행되기 떄문에)
+  ```sql
+  # WHERE 필터리르 적용하고 나서 GROUP BY를 호출한 후에 HAVING에 판매액 총액이 1,000 달러보다 큰 값을 조건으로 다시 필터링
+  SELECT company, SUM(sales)
+  FROM finance_table
+  WHERE company != 'Google'
+  GROUP BY company
+  HAVING SUM(sales) > 1000  
+  ```
+    - 따라서 `GROUP BY`를 실행하고 회사별 판매액 총계를 계산한 후에 그 결과를 추가적으로 필터링하기 위해 `HAVING`절을 추가할 수 있다.
+    - `HAVING` allows us to use the aggregate result as a filter along with a `GROUP BY`z
+    - `GROUP BY`와 마찬가지로 `HAVING`은 집계 결과를 필터로 사용할 수 있다.
+      - `WHERE`문처럼 생각할 수 있지만 `GROUP BY`를 통해 집계된 것에만 적용할 수 있다.
+
+### HAVING Challenge
+
+#### Challenge 1
+
+- We are launching a platinum service for our most loyal customers. We will assign platinum status to customers that have had 40 or more transaction payments.
+- What customer _ids are eligible for platinum status?
+
+```sql
+SELECT customer_id, COUNT(amount)
+FROM payment
+GROUP BY customer_id
+HAVING COUNT(amount) >= 40
+```
+
+#### Challenge 2
+
+- What are the customer ids of customemrs who have spent more than $100 in payment transactions with our staff_id member 2?
+
+```sql
+SELECT customer_id, SUM(amount)
+FROM payment
+WHERE staff_id = 2
+GROUP BY customer_id
+HAVING SUM(amount) > 100
+```
