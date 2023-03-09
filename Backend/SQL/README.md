@@ -95,7 +95,7 @@ SELECT c1, c2 FROM table_2
 - The `LIKE` operator allows us to perform pattern matching against string data with the use of `wildcard` characters:
   - **Percent %**
     - Matches any sequence of characters
-  - **Underscore _**
+  - **Underscore \_**
     - Matches any single character
 - All names that begin with an `A`
   ```sql
@@ -258,19 +258,19 @@ LIMIT 5
   FROM finance_table
   WHERE company != 'Google'
   GROUP BY company
-  HAVING SUM(sales) > 1000  
+  HAVING SUM(sales) > 1000
   ```
-    - 따라서 `GROUP BY`를 실행하고 회사별 판매액 총계를 계산한 후에 그 결과를 추가적으로 필터링하기 위해 `HAVING`절을 추가할 수 있다.
-    - `HAVING` allows us to use the aggregate result as a filter along with a `GROUP BY`z
-    - `GROUP BY`와 마찬가지로 `HAVING`은 집계 결과를 필터로 사용할 수 있다.
-      - `WHERE`문처럼 생각할 수 있지만 `GROUP BY`를 통해 집계된 것에만 적용할 수 있다.
+  - 따라서 `GROUP BY`를 실행하고 회사별 판매액 총계를 계산한 후에 그 결과를 추가적으로 필터링하기 위해 `HAVING`절을 추가할 수 있다.
+  - `HAVING` allows us to use the aggregate result as a filter along with a `GROUP BY`z
+  - `GROUP BY`와 마찬가지로 `HAVING`은 집계 결과를 필터로 사용할 수 있다.
+    - `WHERE`문처럼 생각할 수 있지만 `GROUP BY`를 통해 집계된 것에만 적용할 수 있다.
 
 ### HAVING Challenge
 
 #### Challenge 1
 
 - We are launching a platinum service for our most loyal customers. We will assign platinum status to customers that have had 40 or more transaction payments.
-- What customer _ids are eligible for platinum status?
+- What customer \_ids are eligible for platinum status?
 
 ```sql
 SELECT customer_id, COUNT(amount)
@@ -289,4 +289,348 @@ FROM payment
 WHERE staff_id = 2
 GROUP BY customer_id
 HAVING SUM(amount) > 100
+```
+
+## JOINS
+
+### AS
+
+- Before we learn about JOINs, let's quickly cover the `AS` clause which allows us to create an "alias" for a column or result.
+- Syntax
+  ```sql
+  SELECT column AS new_name FROM table
+  ```
+  ```sql
+  SELECT SUM(column) AS new_name FROM table
+  ```
+- THe `AS` operator gets executed at the very end of a query, meaning that we can not use the `ALIAS` inside a `WHERE` operator.
+- Error
+  ```sql
+  # total_spent는 Data Output의 제일 마지막에 존재한다.
+  SELECT customer_id, SUM(amount) AS total_spent
+  FROM payment
+  GROUP BY customer_id
+  HAVING total_spent > 100
+  ```
+  ```sql
+  ### 아래 sql도 에러 발생
+  SELECT customer_id, amount AS new_name
+  FROM payment
+  WHERE new_name > 2
+  ```
+
+### JOIN operation?
+
+- `JOINs` allow us to combine multiple tables together.
+- The main reason for the different `JOIN` types is to decide how to deal with information only present in one of the joined tables.
+
+### INNER JOIN
+
+```
+  -----    -----
+/      / X \     \
+|  A   | X |  B   |
+\      \ X /     /
+  -----    -----
+```
+
+- `INNER JOIN`은 두 테이블을 모두 충족하는 레코드 세트를 결과로 출력한다.
+- Syntax
+
+  ```sql
+  # 같은 결과
+  SELECT * FROM Table_A
+  INNER JOIN Table_B
+  ON Table_A.col_match = Table_B.col_match
+
+  SELECT * FROM Table_B
+  INNER JOIN Table_A
+  ON Table_A.col_match = Table_B.col_match
+  ```
+
+- Remember that table order won't matter in an `INNER JOIN`
+- Also if you see just `JOIN` without the `INNER`, **PostgreSQL** will treat it as an `INNER JOIN`
+
+### OUTER JOIN
+
+- They will allow us to specify how to deal with values only present in one of the tables being joined.
+  - 결합되는 테이블 중 하나에만 표시되는 값을 처리하는 방식이다.
+  - OUTER JOIN은 단순한 INNER JOIN 보다 복잡항ㄴ JOIN이다.
+- These are the more complex `JOINs`, take your time whe trying to undestand them!
+- In these lectures we will explain:
+  - `FULL OUTER JOIN`
+    - Clarifying `WHERE` null
+  - `LEFT OUTER JOIN`
+    - Clarifying `WHERE` null
+  - `RIGHT OUTER JOIN`
+    - Clarifying `WHERE` null
+
+### FULL OUTER JOIN
+
+```
+  ------     ------
+/ X X X / X \ X X X \
+| X A X | X | X B X |
+\ X X X \ X / X X X /
+  ------     ------
+```
+
+- Syntax
+  ```sql
+  # 위 아래 같은 결과가 나옴
+  # 벤다이어그램이 대칭이기 때문에 테이블 순서를 서로 바꿀 수 있다.
+  SELECT * FROM Table_A
+  FULL OUTER JOIN Table_B
+  ON Table_A.col_match = Table_B.col_match
+  SELECT * FROM Table_B
+  FULL OUTER JOIN Table_A
+  ON Table_A.col_match = Table_B.col_match
+  ```
+
+#### FULL OUTER JOIN Example
+
+```sql
+SELECT * FROM Registrations FULL OUTER JOIN Logins
+ON Registartions.name = Logins.name
+```
+
+| REGISTRATIONS |         |
+| ------------- | ------- |
+| reg_id        | name    |
+| 1             | Andrew  |
+| 2             | Bob     |
+| 3             | Charlie |
+| 4             | Davie   |
+
+| LOGINS |         |
+| ------ | ------- |
+| 1      | Xavier  |
+| 2      | Andrew  |
+| 3      | Yolanda |
+| 4      | Bob     |
+
+| RESULTS |         |        |         |
+| ------- | ------- | ------ | ------- |
+| red_id  | name    | log_id | name    |
+| 1       | Andrew  | 2      | Andrew  |
+| 2       | Bob     | 4      | Bob     |
+| 3       | Charlie | null   | null    |
+| 4       | David   | null   | null    |
+| null    | null    | 1      | Xavier  |
+| null    | null    | 3      | Yolanda |
+
+#### FULL OUTER JOIN with WHERE
+
+```
+  ------     ------
+/ X X X /   \ X X X \
+| X A X |   | X B X |
+\ X X X \   / X X X /
+  ------     ------
+```
+
+- Get rows unique to either table(rows not found in both tables)
+  - 이것을 이용하여 둘 중 하나의 테이블에 고유한 행을 구할 수 있다.
+  - 두 테이블에 모두 나와있지 않은 행을 구하는 것
+  - 기본적으로 INNER JOIN과 정반대되는 개념이다.
+  ```sql
+  SELECT * FROM Table_A
+  FULL OUTER JOIN Table_B
+  ON Table_A.col_match = Table_B.col_match
+  WHERE Table_A.id IS null OR TableB.id IS null
+  ```
+- Example
+  ```sql
+  SELECT * FROM Registrations FULL OUTER JOIN Logins
+  ON Registartions.name = Logins.name
+  WHERE Registartions.reg_id IS null OR
+  Logins.log_id IS null
+  ```
+  | RESULTS |         |        |         |
+  | ------- | ------- | ------ | ------- |
+  | red_id  | name    | log_id | name    |
+  | 3       | Charlie | null   | null    |
+  | 4       | David   | null   | null    |
+  | null    | null    | 1      | Xavier  |
+  | null    | null    | 3      | Yolanda |
+
+#### FULL OUTER JOIN with WHERE Exampler
+
+- 우리 대여점에서 실제로 아무것도 구매하지 않은 사람의 고객 ID는 보유하지 않으려고 한다.
+- 새로운 개인정보 보호법이고, 아무것도 구매하지 않은 고객의 ID가 존재하거나 결제 정보에 고객 ID가 없으면 위반
+
+```sql
+SELECT * FROM customer
+FULL OUTER JOIN payment
+ON customer.customer_id = payment.customer_id
+WHERE customer.customer_id IS null OR
+payment.customer_id IS null
+```
+
+- 결과가 0이 나오면 성공
+
+### LEFT OUTER JOIN
+
+```
+  ------     ------
+/ X X X / X \       \
+| X A X | X |   B   |
+\ X X X \ X /       /
+  ------     ------
+```
+
+- A `LEFT OUTER JOIN` results in the set of records that are in the left table, if there is no match with the right table, if there is no match with the right table, the results are null.
+  ```sql
+  SELECT * FROM Table_A
+  LEFT OUTER JOIN Table_B
+  ON Table_A.col_match = Table_B.col_match
+  ```
+  - 테이블 A에서 정보를 가져올 것인데 이 정보 중에서 테이블 A에만 해당되는 것도 있고, 테이블 B에 있는 것 중 테이블 A와 겹치는 부분만 가져온다.
+
+#### LEFT OUTER JOIN Example
+
+```sql
+SELECT * FROM Registrations
+LEFT OUTER JOIN Logins
+ON Registrations.name = Logins.name
+```
+
+| RESULTS |         |        |        |
+| ------- | ------- | ------ | ------ |
+| red_id  | name    | log_id | name   |
+| 1       | Andrew  | 2      | Andrew |
+| 2       | Bob     | 4      | Bob    |
+| 3       | Charlie | null   | null   |
+| 4       | David   | null   | null   |
+
+#### LEFT OUTER JOIN With WHERE
+
+```
+  ------     ------
+/ X X X /   \       \
+| X A X |   |   B   |
+\ X X X \   /       /
+  ------     ------
+```
+```sql
+SELECT * FROM Table_A
+LEFT OUTER JOIN Table_B
+ON Table_A.col_match = Table_B.col_match
+WHERE Table_B.id Is null
+```
+
+- What if we only wanted entries unique to Table A? Those rows found in Table A and **not** found int Table B
+- Get rows unique to left table
+
+```sql
+SELECT * FROM Registrations
+LEFT OUTER JOIN Logins
+ON Registrations.name = Logins.name
+WHERE Logins.log_id IS null
+```
+
+| RESULTS |         |        |         |
+| ------- | ------- | ------ | ------- |
+| red_id  | name    | log_id | name    |
+| 3       | Charlie | null   | null    |
+| 4       | David   | null   | null    |
+  
+
+
+#### LEFT OUTER JOIN Example
+
+- film 테이블에만 있거나 film과 inventory 모두에 있는 행만 확인할 것
+
+```sql
+SELECT film.film_id, film.title, inventory_id
+FROM film
+LEFT OUTER JOIN inventory
+ON inventory.film_id = film.film_id
+```
+
+- inventory를 가지고 있지 않은 영화를 찾기 - 42개 나오면 성공 
+- Alice Fantasia는 어떤 매장에 있냐 물었을 때 아래 쿼리를 통해 없다는 것을 확인할 수 있다.
+
+```sql
+SELECT film.film_id, film.title, inventory_id
+FROM film
+LEFT OUTER JOIN inventory
+ON inventory.film_id = film.film_id
+WHERE inventory.film_id IS null
+```
+
+### RIGHT JOIN
+
+```
+  ------     ------
+/       / X \ X X X \
+|   A   | X | X B X |
+\       \ X / X X X /
+  ------     ------
+```
+
+- A `RIGHT JOIN` is essentially the same as a `LEFT JOIN`, except the tables are switched.
+- This would be the same as switching the table order in a `LEFT OUTER JOIN`.
+  ```sql
+  SELECT * FROM Table_A
+  RIGHT OUTER JOIN Table_B
+  ON Table_A.col_match = Table_B.col_match
+  ```
+
+#### RIGHT JOIN With WHERE
+
+```
+  ------     ------
+/       /   \ X X X \
+|   A   |   | X B X |
+\       \   / X X X /
+  ------     ------
+```
+
+```sql
+SELECT * FROM Table_A
+RIGHT OUTER JOIN Table_BQ
+ON Table_A.col_match = Table_B.col_match
+WHERE Table_A.id IS null
+```
+
+### UNIIONs
+
+- The `UNION` operator is used to combine the result-set of two or more `SELECT` statements.
+  - 2개 이상의 SELECT 문의 결과 세트를 결합할 수 있다.
+- It basically serves to directly concatenate two results together, essentially "pasting" them together.
+  - JOIN과 UNION의 기본적인 차이는 UNION은 두 결과를 직접 붙인다는 것이다.
+  - 두 SELECT 문의 결과를 서로의 바로 위에 붙여준다.
+- Syntax
+  ```sql
+  SELCT column_name(s) FROM table1
+  UNION
+  SELECT column_name(s) FROM table2
+  ```
+
+### JOINS Challenges
+
+#### JOINS Challenges 1
+
+- California sales tax laws have changed and we need to alert our customers to this through email.
+- What are the emails of the customers who live in California?
+
+```sql
+SELECT district, email FROM customer
+JOIN address
+ON customer.address_id = address.address_id
+WHERE address.district = 'California';
+```
+
+#### JOINS Challenge 2
+
+- A customer walks in and is a huge fan of the actor "Nick Wahlberg" and wants to know which movies he is in.
+- Get a list of all the movies "Nick Wahlberg" has been in.
+
+```sql
+SELECT title, first_name, last_name
+FROM film_actor
+JOIN film ON film.film_id = film_actor.film_id
+JOIN actor ON actor.actor_id = film_actor.actor_id
+WHERE first_name = 'Nick' AND last_name = 'Wahlberg'
 ```
