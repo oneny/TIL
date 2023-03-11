@@ -630,7 +630,185 @@ WHERE address.district = 'California';
 ```sql
 SELECT title, first_name, last_name
 FROM film_actor
-JOIN film ON film.film_id = film_actor.film_id
-JOIN actor ON actor.actor_id = film_actor.actor_id
+INNER JOIN film ON film.film_id = film_actor.film_id
+INNER JOIN actor ON actor.actor_id = film_actor.actor_id
 WHERE first_name = 'Nick' AND last_name = 'Wahlberg'
 ```
+
+## Advanced SQL Topics
+
+- Timestamps and EXTRACT
+- Math Functions
+- String Functions
+- Sub-query
+- Self-Join
+
+### Timestamps and Extract
+
+
+- We've already seen that **PostgreSQL** can hold date and time information:
+  - `TIME` - Contains only time
+  - `DATE` - Contains only date
+  - `TIMESTAMP` - Contains date and time
+  - `TIMESTAMPTZ` - Contains date, time, and timezone
+- Careful considerations should be made when designing a table and database and choosing a time data type.
+- Depending on the situation you may or may not need the full level of `TIMESTAMPTZ`
+- Remember you can always remove historial information, but you can't add it!
+- Let's explore functions and operations related to these specific data types:
+  - TIMEZONE
+  - NOW
+  - TIMEOFDAY
+  - CURRENT_TIME
+  - CURRENT_DATE
+- Extracting information from a time based data type using:
+  - EXTRACT()
+  - AGE()
+  - TO_CHAR()
+-  EXTRACT()
+  - Allows you to "extract" or obtain a sub-component of a data value
+    - YEAR
+    - MONTH
+    - DAY
+    - WEEK
+    - QUARTER
+- AGE()
+  - Calculates and returns the current age given a timestamp
+  - Usage:
+    - AGE(data_col)
+  - Returns
+    - 13 years 1 mon 5 days 01:34:13.003423
+- TO_CHAR()
+  - General function to convert data types to text
+  - Useful for timestamp for formatting
+  - Usage
+    - TO_CHAR(data_cool, 'mm-dd-yyyy')
+  - https://www.postgresql.org/docs/15/functions-formatting.html
+
+### Timestamps and Extract Challenge
+
+#### Timestamps and Extract Challenge 1
+
+- During which months did payments occur?
+- Format your answer to return back the full month name.
+
+```sql
+SELECT DISTINCT(TO_CHAR(payment_date, 'MONTH'))
+FROM payment;
+```
+
+#### Timestamps and Extract Challenge 2
+
+- How many payments occurred on a Monday?
+- NOTE: We didn't show you exactly how to do this, but use the documentation or Google to figure this out!
+
+```sql
+SELECT COUNT(*)
+FROM payment
+WHERE EXTRACT(dow FROM payment_date) = 1;
+```
+
+### Mathematical Functions
+
+- This is best shown through examples and the documentation.
+  - https://www.postgresql.org/docs/current/functions-math.html
+
+### String Functions and Operations
+
+- PostgreSQL also provides a variety of string functions and operators that allow us to edit, combine, and alter text data columns.
+  - https://www.postgresql.org/docs/current/functions-string.html
+
+```sql
+SELECT upper(first_name) || ' ' || upper(last_name) as name FROM customer;
+```
+
+### SubQuery
+
+- A subquery allows you to construct complex queries, essentially performing a query on the results of another query.
+- The syntax is straightforward and involves two `SELECT` statements.
+- Standard Query
+  ```sql
+  SELECT student, grade
+  FROm test_scores
+  ```
+- How can we get a list of students who scored better than the average grade?
+  - It looks like we need two steps, first get the average grade, then compare the rest of the table against it.
+  - This is where a subquery can helps us get the result in a "single" query request
+  ```sql
+  SELECT student, grade
+  FROM test_scores
+  WHERE grade > (SELECT AVG(grade) FROM test_scores)
+  ```
+- The subquery is performed first since it is inside the parenthesis.
+- We can also use the `IN` operator in confunction with a subquery to check againnst multiple results returned.
+- The `EXISTS` operator is used to test for existence of rows in a subquery.
+- Typically a subquery is passed in the `EXISTS()` funciton to check if any rows are returned with the subquery.
+- Typical Syntax
+  ```sql
+  SELECT column_name
+  FROM table_name
+  WHERE EXISTS
+  (SELECT column_name FROM table_name WHERE condition)' 
+  ```
+
+#### Subquery + IN Operator Example
+
+- rental이 2005-05-29일자인 영화 제목을 보여주세요.
+- 서브쿼리가 다양한 결과를 가져오면, IN 오퍼레이터를 사용해야 한다.
+
+```sql
+SELECT film_id, title
+FROM film
+WHERE film_id IN
+(SELECT inventory.film_id
+FROM rental
+INNER JOIN inventory ON inventory.inventory_id = rental.inventory_id 
+WHERE rental_date BETWEEN '2005-05-29' AND '2005-05-30')
+```
+
+#### Subquery + WHERE EXISTS Example
+
+- 11 달러 초과로 한 번 이상 지급한 고객의 이름과 성을 알고 싶어요.
+
+```sql
+SELECT first_name, last_name
+FROM customer AS c
+WHERE EXISTS(
+	SELECT * FROM payment as p
+	WHERE p.customer_id = c.customer_id
+	AND amount > 11
+)
+```
+  - 고객표의 각 고객에 대해 서브 쿼리가 지급표를 확인해 한 번 이상의 지급을 했는지 확인
+  - 이 기준에 맞게 한 번 이상의 지급을 한 특정 고객이 있고, 그 금액이 11달러를 초과했는지를 확인
+
+### Self-Join
+
+- A self-join is a query in which a table is joined to itself.
+- Self-joins are useful for comparing values in a column of rows within the same table.
+  - 평범한 INNER JOIN처럼 일반적이지 않다.
+- The self join can be viewed as a join of two copies of the same table.
+- The table is not actually copied, but SQL performs the command as though it were.
+- There is no special keyword for a self join, its simply standard `JOIN` syntax with the same table in both parts.
+- However, when using a self join it is necessary to use an alias for the table, otherwise the table names would be ambiguous.
+- Syntax
+  ```sql
+  SELECT table_A.col, table_B.col
+  FROM table AS table_A
+  JOIN table AS table_B
+  ON table_A.some_col = table_B.other_col
+  ```
+
+
+#### Example
+
+- 영화 길이는 같지만 다른 영화 제목을 가진 데이터를 주세요.
+
+```sql
+SELECT f1.title, f2.title, f1.length
+FROM film AS f1
+INNER JOIN film AS f2
+ON f1.film_id != f2.film_id
+AND f1.length = f2.length
+```
+
+
