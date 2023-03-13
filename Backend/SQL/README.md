@@ -512,6 +512,7 @@ ON Registrations.name = Logins.name
 \ X X X \   /       /
   ------     ------
 ```
+
 ```sql
 SELECT * FROM Table_A
 LEFT OUTER JOIN Table_B
@@ -529,13 +530,11 @@ ON Registrations.name = Logins.name
 WHERE Logins.log_id IS null
 ```
 
-| RESULTS |         |        |         |
-| ------- | ------- | ------ | ------- |
-| red_id  | name    | log_id | name    |
-| 3       | Charlie | null   | null    |
-| 4       | David   | null   | null    |
-  
-
+| RESULTS |         |        |      |
+| ------- | ------- | ------ | ---- |
+| red_id  | name    | log_id | name |
+| 3       | Charlie | null   | null |
+| 4       | David   | null   | null |
 
 #### LEFT OUTER JOIN Example
 
@@ -548,7 +547,7 @@ LEFT OUTER JOIN inventory
 ON inventory.film_id = film.film_id
 ```
 
-- inventory를 가지고 있지 않은 영화를 찾기 - 42개 나오면 성공 
+- inventory를 가지고 있지 않은 영화를 찾기 - 42개 나오면 성공
 - Alice Fantasia는 어떤 매장에 있냐 물었을 때 아래 쿼리를 통해 없다는 것을 확인할 수 있다.
 
 ```sql
@@ -645,7 +644,6 @@ WHERE first_name = 'Nick' AND last_name = 'Wahlberg'
 
 ### Timestamps and Extract
 
-
 - We've already seen that **PostgreSQL** can hold date and time information:
   - `TIME` - Contains only time
   - `DATE` - Contains only date
@@ -664,13 +662,13 @@ WHERE first_name = 'Nick' AND last_name = 'Wahlberg'
   - EXTRACT()
   - AGE()
   - TO_CHAR()
--  EXTRACT()
-  - Allows you to "extract" or obtain a sub-component of a data value
-    - YEAR
-    - MONTH
-    - DAY
-    - WEEK
-    - QUARTER
+- EXTRACT()
+- Allows you to "extract" or obtain a sub-component of a data value
+  - YEAR
+  - MONTH
+  - DAY
+  - WEEK
+  - QUARTER
 - AGE()
   - Calculates and returns the current age given a timestamp
   - Usage:
@@ -747,7 +745,7 @@ SELECT upper(first_name) || ' ' || upper(last_name) as name FROM customer;
   SELECT column_name
   FROM table_name
   WHERE EXISTS
-  (SELECT column_name FROM table_name WHERE condition)' 
+  (SELECT column_name FROM table_name WHERE condition)'
   ```
 
 #### Subquery + IN Operator Example
@@ -761,7 +759,7 @@ FROM film
 WHERE film_id IN
 (SELECT inventory.film_id
 FROM rental
-INNER JOIN inventory ON inventory.inventory_id = rental.inventory_id 
+INNER JOIN inventory ON inventory.inventory_id = rental.inventory_id
 WHERE rental_date BETWEEN '2005-05-29' AND '2005-05-30')
 ```
 
@@ -778,8 +776,9 @@ WHERE EXISTS(
 	AND amount > 11
 )
 ```
-  - 고객표의 각 고객에 대해 서브 쿼리가 지급표를 확인해 한 번 이상의 지급을 했는지 확인
-  - 이 기준에 맞게 한 번 이상의 지급을 한 특정 고객이 있고, 그 금액이 11달러를 초과했는지를 확인
+
+- 고객표의 각 고객에 대해 서브 쿼리가 지급표를 확인해 한 번 이상의 지급을 했는지 확인
+- 이 기준에 맞게 한 번 이상의 지급을 한 특정 고객이 있고, 그 금액이 11달러를 초과했는지를 확인
 
 ### Self-Join
 
@@ -798,7 +797,6 @@ WHERE EXISTS(
   ON table_A.some_col = table_B.other_col
   ```
 
-
 #### Example
 
 - 영화 길이는 같지만 다른 영화 제목을 가진 데이터를 주세요.
@@ -811,4 +809,293 @@ ON f1.film_id != f2.film_id
 AND f1.length = f2.length
 ```
 
+## Creating Databases and Tables
 
+### Data Types
+
+- Boolean
+  - True or False
+    \_ Character
+  - char, varchar, and text
+- Numeric
+  - integer and floating-point number
+- Temporal
+  - date, time, timestamp, and interval
+- UUID
+  - Universally Unique Identifiers
+  - 특정 열의 고유 식별자를 만들기 위한 본질적인 알고리즘 고유 코드인 UUID
+- Array
+  - Stores an array of stirngs, numbers, etc.
+- JSON
+- Hstore key-value pair
+- Special types such as network address and geometric data
+- When creating databases and tables, you should carefully consider which data types should be used for the data to be stored.
+- Review the documentation to see limitations of data types:
+  - https://www.postgresql.org/docs/current/datatype.html
+- Based on the limitations, you may think it makes sense to store it as a `BIGINT` data type, but we should really be thinking what is best for the situation.
+- Why bother with numerics at all?
+- We don't perform arithmetic with numbers, so it probably makes more sense as a `VARCHAR` data type instead.
+- In fact, searching for best practice online, you will discover its usually recommended to store as a text based data type due to a variety of issues
+  - No arithmetic performed
+  - Leading zeros could cause issues, 7 and 07 treated same numerically, but are not the same phone number
+
+### Primary and Foreign Keys
+
+- A primary key is a column or a group of columns used to identify a row uniquely in a table.
+- For example, in our dvdrental database we saw customers had a unique, non-null customer_id column as their primary key.
+- A foreign key is a field or group of fileds in a table that uniquely identifies a row in another table.
+- A foreign key is defined in a table taht references to the primary key of the other table.
+- The table that contains the foreign key is called referencing table or child table.
+- The table to which the foreign key references is called referenced table or parent table.
+- A table can have multiple foreign keys depending on its relationships with other tables.
+- You may begin to realize primary key and foreign key typically make good column choices for joining together two or more tables.
+- When creating tables and defining columns, we can use constraints to define columns as being a primary key, or attaching a foreign key relationship to another table.
+
+### Constraints
+
+- Constraints are the rules enforced on data columns on table.
+- There are used to prevent invalid data from being entered into the database.
+- This ensures the accuracy and reliability of the data in the database.
+- Constraints can be divided into two main categories:
+  - Column Constraints
+    - Constraints the data in a column to adhere to certain conditions.
+  - Table Constraints
+    - applied to the entire table rather than to an individual column.
+
+#### The most common constraints used:
+
+- **NOT NULL** Constraint
+  - Ensures that a column cannot have NULL value.
+- **UNIQUE** Constraint
+  - Ensures that all values in a column are different.
+- **PRIMARY Key**
+  - Uniquely identifies each row/record in a database table.
+- **FOREIGN Key**
+  - Constraints data based on columns in other tables.
+- **CHECK** Constraint
+  - Ensures that all values in a column satisfy certain conditions.
+  - 행의 모든 값이 특정한 조건읆 만족하도록 함
+- **EXCLUSION** Constraint
+  - Ensures that if any two rows are compared on the specified column or expression using the specified operator, not all of these comparisons will return **TRUE**.
+  - 특정 오퍼레이터를 사용한 특정 열이나 식에서 어떤 두 열이 비교될 떄 모든 비교 값이 참으로 판명되지 않아야 한다는 조건
+
+#### Table Constraints
+
+- **CHECK** (condition)
+  - to check a condition when inserting or updating data.
+  - 전체 표에 데이터를 삽입하거나 업데이트할 때 조건을 적용할 수 있다.
+- **REFERENCES**
+  - to constrain the value stored in the column that must exist in a column in another table.
+  - 세로단의 값에 제한을 거는 것으로 다른 표 세로단에 존재해야 한다는 조건
+- **UNIQUE** (column_list)
+  - forces the values stored in the columns listed inside the parentheses to be unique.
+- **PRIMARY KEY** (column_list)
+  - Allows you to define the primary key that consists of multiple columns.
+
+### CREATE
+
+#### Full General Syntax
+
+```sql
+CREATE TABLE table_name (
+  column_name TYPE column_constraint,
+  column_name TYPE column_constraint,
+  table_constraint table_constraint
+) INHERITS existing_table_name;
+```
+
+```sql
+CREATE TABLE account(
+	user_id SERIAL PRIMARY KEY,
+	username VARCHAR(50) UNIQUE NOT NULL,
+	password VARCHAR(50) NOT NULL,
+	email VARCHAR(250) UNIQUE NOT NULL,
+	created_on TIMESTAMP NOT NULL,
+	last_login TIMESTAMP
+)
+
+CREATE TABLE job(
+	job_id SERIAL PRIMARY KEY,
+	job_name VARCHAR(200) UNIQUE NOT NULL
+)
+
+CREATE TABLE account_job(
+	user_id INTEGER REFERENCES account(user_id),
+	job_id INTEGER REFERENCES job(job_id),
+	hire_date TIMESTAMP
+)
+```
+
+#### SERIAL
+
+- In PostgreSQL, a sequence is a special kind of database object that generates a sequence of integers.
+- A sequence is often used as the primary key column in a table.
+- It will create a sequence object and set the next value generated by the sequence as the default value for the column.
+- This is perfect for a primary key, because it logs unique integer entries for you automatically upon insertion.
+- If a row is later removed, the column with the **SERIAL** data type will **not** adjust,
+marking the fact that a row was removed from the sequence, for example
+  - 1, 2, 3, 5, 6, 7
+    - You know row 4 was removed at some point
+ 
+### INSERT
+
+- `INSERT` allows you to add in rows to a table.
+- General Syntax
+  - INSERT INTO table (column1, column2, ...) VALUES (value1, value2), (value1, value2), ...;
+- Keep in mind, the inserted row values must match up for the table, including constraints.
+- `SERIAL` columns do not need to be provided a value
+
+```sql
+INSERT INTO account(username, password, email, created_on)
+VALUES ('Jaewon', 'password', 'jaewon@mail.com', CURRENT_TIMESTAMP);
+
+INSERT INTO job(job_name) VALUES ('Web Programmer')
+
+INSERT INTO account_job(user_id, job_id, hire_date)
+VALUES (1, 1, CURRENT_TIMESTAMP)
+```
+
+### UPDATE
+
+- The `UPDATE` keyword allows for the changing of values of the columns in a table.
+- General Syntax
+  ```sql
+  UPDATE table
+  SET column1 = vbalue1, column2 = value2, ...
+  WHERE condition;
+  ```
+- Example
+  ```sql
+  UPDATE account
+  SET last_login = CURRENT_TIMESTAMP
+  WHERE last_login IS NULL:
+  ```
+- Using another table's values (UPDATE join)
+  ```sql
+  UPDATE Table_A
+  SET original_col = Table_B.new_col
+  FROM table_B
+  WHERE Table_A.id = Table_B.id
+
+  UPDATE account_job
+  SET hire_date = account.created_on
+  FROM account
+  WHERE account_job.user_id = account.user_id;
+  ```
+- Return affected rows
+  ```sql
+  UPDATE account
+  SET last_login = created_on
+  RETURNING account_id, last_login
+  ```
+  - 결과값에 영향이 있는 값을 불러올 수 있다.
+  - `UPDATE` 명령을 쓸 떄, 결과가 보여지지 않지만 영향을 받은 특정 세로단을 확인하고 싶은 경우 명령할 수 있다.
+
+### DELETE
+
+- We can use the `DELETE` clause to remove rows from a table.
+  ```sql
+  DELETE FROM table
+  WHERE row_id = 1
+  ```
+- We can delete rows based on their presence in toehr tables.
+  ```sql
+  DELETE FROM table_A
+  USING table_B
+  WHERE table_A.id = Table_B.id
+  ```
+- We can delete all rows from a table.
+  ```sql
+  DELETE FROM table
+  ```
+- Similar to `UPDATE` command, you can also add in a `RETURNING` call to return rows that were removed.
+
+### ALTER
+
+> https://www.postgresql.org/docs/current/sql-altertable.html
+
+- The `ALTER` clause allows for changes to an existing table structure, such as:
+  - Adding, dropping, or renaming columns
+  - Changing a column's data type
+  - Set `DEFAULT` values for a column
+  - Add `CHECK` constraints
+  - Rename table
+- General Syntax
+  ```sql
+  ALTER TABLE table_name action
+
+  # Example
+  ALTER TABLE information RENAME TO new_info
+  ```
+- Adding Columns
+  ```sql
+  ALTER TABLE table_name
+  ADD COLUMN new_col TYPE
+  ```
+- Removing Columns
+  ```sql
+  ALTER TABLE table_name
+  DROP COLUMN col_name
+  ```
+- Alter constraints
+  ```sql
+  ALTER TABLE table_name
+  ALTER COLUMN col_name
+  SET DEFAULT value # SET NO NULL # DROP DEFAULT # DROP NOT NULL # ADD CONSTRAINT constraint_name
+  ```
+
+### DROP TABLE
+
+- `DROP` allows for the complete removal of a column in a table.
+- In PostgreSQL, this will also automatically remove all of its indexes and constraints involving the column.
+- However, it will not remove columns used in views, triggers, or stored procedures without the additional `CASCADE` clause.
+- General Syntax
+  ```sql
+  ALTER TABLE table_name
+  DROP COLUMN col_name
+  ```
+- Remove all dependencies
+  ```sql
+  ALTER TABLE table_name
+  DROP COLUMN col_name CASCADE
+  ```
+-  Check for existence to avoid error
+  ```sql
+  ALTER TABLE table_name
+  DROP COLUMN IF EXISTS col_name
+  ```
+- Drop multiple columns
+  ```sql
+  ALTER TABLE table_name
+  DROP COLUMN col_one,
+  DROP COLUMN col_two
+  ```
+
+### CHECK Constraint
+
+- The `CHECK` constraint allows us to create more customized constraints that adhere to a certain condition.
+- Such as making sure all inserted integer values fall below a certain threshold.
+- General Syntax
+  ```sql
+  CREATE TABLE example(
+    ex_id SERIAL PRIMARY KEY,
+    age SMALLINT CHECK (age > 21),
+    parent_age SMALLINT CHECK (parent_age > age)
+  )
+  ```
+#### Example
+
+  ```sql
+  CREATE TABLE employees(
+	  emp_id SERIAL PRIMARY KEY,
+	  first_name VARCHAR(50) NOT NULL,
+	  last_name VARCHAR(50) NOT NULL,
+	  birthdate DATE CHECK (birthdate > '1900-01-01'),
+	  hire_date DATE CHECK (hire_date > birthdate),
+	  salary INTEGER CHECK (salary > 0)
+  );
+
+  # ERROR:  new row for relation "employees" violates check constraint "employees_birthdate_check"
+  INSERT INTO employees(first_name, last_name, birthdate, hire_date, salary)
+  VALUES ('Jose', 'Portilla', '1899-11-03', '2010-01-01', 100);
+  ```
