@@ -1,5 +1,46 @@
 # SQL(PostgreSQL)
 
+## 쿼리 실행 순서
+
+SQL 쿼리문을 실행하는데 순서가 존재❗️❗️
+
+```
+SQL Query Execution Order
+FROM and JOIN -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY -> LIMIT
+                                                  |
+                                                   ----- window functions execute here
+```
+
+### FROM (+ JOIN)
+
+- 쿼리의 첫 번째 실행 순서는 FROM절! FROM 절에서는 조회하는 **테이블 전체**를 가져온다.
+
+### WHERE 절
+
+- WHERE 절에서는 FROM 절에서 읽어온 테이블에서 **조건에 맞는 결과만 갖도록** 데이터를 필터링한다.
+
+### GROUP BY 절
+
+- GROUP BY 절에서는 **선택한 칼럼으로 그룹핑한다.**
+
+### HAVING 절
+
+- HAVING 절은 **그룹핑 후에 각 그룹에 사용되는 조건절**이다.
+- **HAVING 절은 각 그룹에 조건을 걸기 때문에 퍼포먼스가 떨어지게 된다.**
+  - GROUP BY로 그룹별 집계함수를 구하는 경우를 제외하고는 HAVING 보다는 WHERE절로 한 번에 거는 것이 좋다.(현재는 내부적으로 Optimize 해준다.)
+
+### SELECT 절
+
+- SELECT 절은 여러 조건들을 처리한 후 남은 데이터에서 **어떤 열을 출력해줄지 선택한다.**
+
+### ORDER BY 절
+
+- 어떤 열까지 출력할지 정했다면 행의 순서를 어떻게 보여줄지 **정렬**해주는 절이 ORDER BY이다.
+
+### LIMIT 절
+
+- LIMIT 절은 결과 중 몇 개의 행을 보여줄지 선택한다.
+
 ## SELECT
 
 - `SELECT` is the most common statement used, and it allows us to retrieve information from a table.
