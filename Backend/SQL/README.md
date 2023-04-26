@@ -7,8 +7,8 @@ SQL 쿼리문을 실행하는데 순서가 존재❗️❗️
 ```
 SQL Query Execution Order
 FROM and JOIN -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY -> LIMIT
-                                                  |
-                                                   ----- window functions execute here
+                              |
+                               ----- window functions execute here
 ```
 
 ### FROM (+ JOIN)
